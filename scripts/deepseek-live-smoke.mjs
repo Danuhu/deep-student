@@ -7,6 +7,7 @@ const officialBaseUrl = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.c
 const officialModel = process.env.DEEPSEEK_V4_MODEL || "deepseek-v4-flash";
 const siliconFlowBaseUrl = process.env.SILICONFLOW_BASE_URL || "https://api.siliconflow.cn/v1";
 const siliconFlowModel = process.env.SILICONFLOW_V32_MODEL || "deepseek-ai/DeepSeek-V3.2";
+const siliconFlowV4Model = process.env.SILICONFLOW_V4_MODEL || "deepseek-ai/DeepSeek-V4-Flash";
 
 const timeoutMs = Number(process.env.DEEPSEEK_SMOKE_TIMEOUT_MS || 90_000);
 
@@ -159,6 +160,22 @@ function siliconFlowV32Body() {
   };
 }
 
+function siliconFlowV4Body(effort) {
+  return {
+    model: siliconFlowV4Model,
+    messages: [
+      {
+        role: "user",
+        content: "Reply with exactly: SF_V4_OK",
+      },
+    ],
+    stream: false,
+    max_tokens: 128,
+    enable_thinking: true,
+    reasoning_effort: effort,
+  };
+}
+
 const cases = [
   {
     name: "official-v4-disabled",
@@ -187,6 +204,20 @@ const cases = [
     key: siliconFlowKey,
     baseUrl: siliconFlowBaseUrl,
     body: siliconFlowV32Body(),
+  },
+  {
+    name: "siliconflow-v4-high",
+    provider: "siliconflow",
+    key: siliconFlowKey,
+    baseUrl: siliconFlowBaseUrl,
+    body: siliconFlowV4Body("high"),
+  },
+  {
+    name: "siliconflow-v4-max",
+    provider: "siliconflow",
+    key: siliconFlowKey,
+    baseUrl: siliconFlowBaseUrl,
+    body: siliconFlowV4Body("max"),
   },
 ];
 
