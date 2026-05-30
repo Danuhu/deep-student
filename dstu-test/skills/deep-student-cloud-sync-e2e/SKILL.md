@@ -1,0 +1,188 @@
+---
+name: deep-student-cloud-sync-e2e
+description: Run real, UI-driven Deep Student cloud sync E2E tests. Use when Codex needs to validate WebDAV/cloud sync, backup, restore, credentials, conflict behavior, multi-device synchronization, or sync regressions through real Tauri UI operations followed by SQLite/WebDAV/log verification.
+---
+
+# Deep Student Cloud Sync E2E
+
+Use this skill for realistic cloud sync testing of Deep Student. The entry point must be real Tauri UI actions through Computer Use; shell, SQLite, and WebDAV checks are assertions after UI actions.
+
+## Required Shape
+
+1. Start or claim isolated Tauri instances with `tauri-lab`.
+2. Start a local Docker WebDAV fixture for cloud storage.
+3. Configure sync through the app UI.
+4. Trigger sync, backup, restore, and retry flows through UI buttons.
+5. Verify results with SQLite, WebDAV file trees, metrics, and logs.
+6. Record failures with exact UI steps and state evidence.
+
+## Parallel Agent Shape
+
+For high-throughput real testing, run five subagents over a shared `tauri-lab` pool and shared local WebDAV fixture:
+
+- Create 10-15 app instances. Prefer 15 when each agent needs a writer, reader, and recovery/restore target.
+- Give each subagent a distinct owner id and 2-3 leased instances.
+- Each subagent must use only its leased `target.app` paths with Computer Use.
+- Subagents must not call `computer-use list` to choose targets. They may inspect `lease list` for verification, but target selection comes only from the parent assignment.
+- Subagents should run `agent targets --owner ...` after receiving the assignment, then `agent verify <instance> --owner ... --app ... --require-running --json` before the first Computer Use action. A failed verify aborts that sub-run.
+- Partition WebDAV roots by scenario or device group so agents do not overwrite each other's remote state unless the scenario is explicitly a conflict test.
+- Subagents must not stop, restart, remove, or reconfigure a shared WebDAV fixture. Interruption tests must use a bad endpoint/credentials, or the parent must allocate an exclusive fixture for that agent.
+- Every subagent reports: leased instance ids, UI steps performed, assertions run, WebDAV tree deltas, evidence snapshot paths, failures, and cleanup status.
+
+Recommended five-way split:
+
+| Agent | Devices | Scenario |
+| --- | --- | --- |
+| A | 2 | fresh config, connection test, upload-only, missing password recovery |
+| B | 2 | download-only hydration from preseeded WebDAV state |
+| C | 3 | bidirectional sync, conflict count, concurrent edits |
+| D | 3 | cloud backup, backup history, restore pending slot, restart activation |
+| E | 2-3 | interruption/retry, stale config cleanup, post-restore sync sanity |
+
+The parent agent owns fixture startup, pool startup, lease assignment, final aggregation, and final cleanup.
+
+Anti-collision rule: app windows are never shared. Even conflict tests share cloud state only through WebDAV prefixes; each actor still uses its own leased Tauri instance.
+
+## Instance Setup
+
+Prefer a pool when simulating multiple devices:
+
+```sh
+cd <deep-student-repo>
+npm run tauri-lab -- service start --json
+npm run tauri-lab -- project register deep-student \
+  --cwd "$PWD" \
+  --source-app "src-tauri/target/debug/bundle/macos/Deep Student.app" \
+  --json
+npm run tauri-lab -- pool create deep-student sync-e2e --count 4 --json
+npm run tauri-lab -- pool start sync-e2e --concurrency 2 --wait --metrics --timeout 45 --json
+```
+
+For five subagents:
+
+```sh
+npm run tauri-lab -- pool create deep-student sync-e2e-15 --count 15 --json
+npm run tauri-lab -- pool start sync-e2e-15 --concurrency 4 --wait --metrics --timeout 90 --json
+```
+
+Start the WebDAV fixture:
+
+```sh
+npm run tauri-lab -- fixture webdav start sync-webdav \
+  --username ds-test \
+  --password ds-pass \
+  --root deep-student-e2e \
+  --json
+npm run tauri-lab -- fixture webdav credentials sync-webdav --json
+```
+
+Use the fixture `endpoint`, `username`, password, and `root` only by typing them through the real cloud settings UI.
+
+For repeated regression runs, prefer a `tauri-lab` data image after one real UI configuration pass:
+
+```sh
+npm run tauri-lab -- image create sync-webdav-configured \
+  --from-instance sync-e2e-01 \
+  --scope home \
+  --description "WebDAV configured through real UI" \
+  --json
+npm run tauri-lab -- pool create deep-student sync-e2e-15 \
+  --count 15 \
+  --image sync-webdav-configured \
+  --json
+```
+
+The image is allowed only after the original configuration was created through real UI operations. Subsequent tests may start from the image, then perform the scenario-specific sync/backup/restore actions through UI and verify with SQLite/WebDAV/logs.
+
+Claim an instance for each agent:
+
+```sh
+npm run tauri-lab -- agent checkout sync-e2e \
+  --owner codex-sync-agent-a \
+  --purpose "cloud sync upload/download" \
+  --ttl 7200 \
+  --json
+```
+
+Use the returned `target.app` path in Computer Use.
+
+When assigning multiple devices to one subagent, repeat checkout with the same owner and role-specific purpose. Keep leases active until that subagent has captured evidence, then release or let the parent clean all instances after aggregation.
+
+Subagent preflight:
+
+```sh
+npm run tauri-lab -- agent targets --owner codex-sync-agent-a --json
+npm run tauri-lab -- agent verify sync-e2e-01 \
+  --owner codex-sync-agent-a \
+  --app "<exact target.app path returned by tauri-lab>" \
+  --require-running \
+  --json
+```
+
+Parent final audit and cleanup:
+
+```sh
+npm run tauri-lab -- lease audit --json
+npm run tauri-lab -- lease clear --pool sync-e2e-15 --json
+```
+
+## What To Verify
+
+- Configured provider/root/username/password behavior.
+- Missing credential state: safe config present but secure credential absent must not look healthy.
+- Upload-only: remote change files and manifest appear; local pending changes clear.
+- Download-only: remote changes hydrate local DB; local-only pending changes remain pending.
+- Bidirectional sync: both upload and download effects occur.
+- Cloud backup: remote ZIP appears and UI history updates.
+- Cloud restore: inactive slot becomes pending, then restart switches active slot.
+- Post-restore sync: credentials and device identity remain correct.
+- Conflict reporting: UI conflict count must match actionable conflict rows.
+
+## Assertions
+
+Prefer `tauri-lab` assertions after UI actions:
+
+```sh
+npm run tauri-lab -- assert sqlite sync-e2e-01 \
+  --slot active \
+  --db chat_v2 \
+  --query "select count(*) from chat_v2_sessions;" \
+  --equals 6 \
+  --json
+npm run tauri-lab -- assert credential sync-e2e-01 --cloud-storage present --json
+npm run tauri-lab -- assert webdav-tree sync-webdav \
+  --contains "data_governance/manifests/e2e-device-a.json" \
+  --json
+```
+
+Capture evidence after each major cloud sync phase and before cleanup:
+
+```sh
+npm run tauri-lab -- evidence snapshot sync-e2e-01 --tail 300 --json
+npm run tauri-lab -- fixture webdav tree sync-webdav --json
+```
+
+Read logs when behavior is surprising:
+
+```sh
+npm run tauri-lab -- logs sync-e2e-01 --kind backend --tail 200
+npm run tauri-lab -- logs sync-e2e-01 --kind frontend --tail 200
+npm run tauri-lab -- logs sync-e2e-01 --kind stderr --tail 200
+```
+
+## Known Product/Test Lessons
+
+- Same bundle id can pollute same-machine WebKit state. Always use `tauri-lab` copied bundles.
+- `DEVICE_ID` and `DSTU_METRICS_ADDR` must be explicit per instance.
+- Opening the main screen can auto-create an empty chat session; record it as baseline.
+- Restore is restart-dependent: verify pending slot before restart and active slot after restart.
+- Safe cloud config without secure credentials can create a half-configured state; test it deliberately.
+- Docker Desktop must be running before `fixture webdav start`; if it is not, the command fails fast and should be retried after Docker starts.
+- Do not inspect SQLite/WebDAV before the UI action. Use database and cloud checks as assertions and diagnostics only.
+- Parent and subagents must avoid duplicate Computer Use targets. Lease first, then operate.
+- Use `agent targets` and `agent verify` instead of global target browsing when multiple Codex windows or subagents are active.
+- A 2026-05-30 local stress run proved 64 instances can be managed on this machine, but detailed cloud sync workflows should usually run at 10-15 active windows for clearer debugging and less UI latency.
+
+## References
+
+Read `references/checklist.md` before starting a full cloud sync run.
