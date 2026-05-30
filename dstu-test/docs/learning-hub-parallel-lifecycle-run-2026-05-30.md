@@ -160,3 +160,229 @@ The image was applied to `image-smoke-01` with `instance create ... --image lh-s
 Smoke evidence:
 
 - `~/Library/Application Support/tauri-lab/evidence/image-smoke-01/2026-05-30T04-56-22-441Z`
+
+## Second Parallel Run - 15 Learning Instances Plus Cloud Reserve
+
+Later on 2026-05-30, a second deeper run used the richer
+`model-rich-deepseek-v4pro-seed` image and the existing `dstu-stress` pool.
+The parent agent applied the image to `dstu-stress-01` through
+`dstu-stress-15`, started the pool, then assigned fixed leases to five
+subagents. A sixth cloud-sync subagent used `dstu-stress-16` as a reserve
+window.
+
+Coordination results:
+
+- `lease audit --json` showed 16 active leases and no failures during the run.
+- Each subagent received only exact `.app` paths and ran `agent targets` plus
+  `agent verify --require-running` before Computer Use.
+- Parent cleanup stopped all 16 `dstu-stress` instances, stopped the WebDAV
+  fixture used by the cloud-sync reserve, and cleared all active leases.
+- No code was edited, staged, committed, or reverted during this test pass.
+
+### Assignment
+
+| Agent | Owner | Instances | Focus |
+| --- | --- | --- | --- |
+| A | `codex-lr-agent-1` | `dstu-stress-01..03` | Question-set lifecycle, emphasized |
+| B | `codex-lr-agent-2` | `dstu-stress-04..06` | Documents, folders, notes, import, preview |
+| C | `codex-lr-agent-3` | `dstu-stress-07..09` | Translation, essay, mind map |
+| D | `codex-lr-agent-4` | `dstu-stress-10..12` | Search, filters, sorting, move/delete state |
+| E | `codex-lr-agent-5` | `dstu-stress-13..15` | Conversation linkage and resource references |
+
+### Question Sets - Deep Coverage
+
+Status: pass, with medium UX/data-quality findings.
+
+Covered:
+
+- Create a question set from Learning Hub.
+- Empty question-set state and disabled practice/analysis affordances.
+- Document recognition import and generated question list.
+- Question-set rename.
+- Manual question creation with options, answer, explanation, tags,
+  difficulty, and notes where visible.
+- Practice, answer submission, correct/wrong feedback, AI explanation,
+  wrong-question and pending-review status.
+- Search, delete confirmation cancel/confirm, management table entry.
+- Add question set to conversation context.
+- Restart persistence for question count, wrong count, pending-review state,
+  and answer records.
+
+SQLite checks:
+
+- `dstu-stress-01`: valid questions `3`, answer records `1`.
+- `dstu-stress-02`: valid questions `3`.
+- `dstu-stress-03`: valid questions `2`, answer records `1`.
+
+Findings:
+
+1. After renaming a question set, the list/toast shows the new name but the
+   detail tab/header can still show the old name `新题目集 2`.
+2. Re-importing the same document can create duplicate questions without a
+   warning or deduplication.
+3. The repeated-import toast said `成功导入 3 道题目` for a two-question file,
+   which looks like total question count rather than imported count.
+4. The edit affordance for existing questions is not visually stable. The
+   card accessibility name contained `edit`, but the visible row menu exposed
+   history, favorite, reset progress, and delete rather than a clear edit path.
+5. Empty question sets guide strongly toward file import; the manual first
+   question path is easy to miss.
+
+Evidence:
+
+- `~/Library/Application Support/tauri-lab/evidence/dstu-stress-01/2026-05-30T09-47-35-424Z`
+- `~/Library/Application Support/tauri-lab/evidence/dstu-stress-02/2026-05-30T09-56-44-587Z`
+- `~/Library/Application Support/tauri-lab/evidence/dstu-stress-03/2026-05-30T10-01-26-115Z`
+
+Not fully covered:
+
+- CSV question import.
+- Bulk edit.
+- Standalone review-plan details.
+- Deep edit of existing questions, because the visible edit entry was not
+  reliably discoverable in this UI pass.
+
+### Documents, Folders, Notes, Import, Preview
+
+Status: pass for import/preview/edit basics, with folder placement defects.
+
+Passed:
+
+- Folder creation and rename.
+- Note creation, title/body edit, tag, favorite.
+- Markdown import via real macOS file picker.
+- Markdown table rendering.
+- Delete to trash and restore.
+- `.txt` import with preview and extracted text.
+- `.csv` import with preview and extracted text.
+
+Findings:
+
+1. Folder context menu `在此新建笔记` created the note at root instead of in
+   the selected folder. SQLite `folder_items.folder_id` was `NULL`.
+2. Dragging a note to a folder showed a dropped message, but the note did not
+   move and SQLite still showed root placement.
+3. The default grid view can show a blank main area while the footer says
+   `9 个项目`; switching to list view makes items visible.
+
+Evidence:
+
+- `~/Library/Application Support/tauri-lab/evidence/dstu-stress-04/2026-05-30T09-45-49-609Z`
+- `~/Library/Application Support/tauri-lab/evidence/dstu-stress-05/2026-05-30T09-45-49-746Z`
+- `~/Library/Application Support/tauri-lab/evidence/dstu-stress-06/2026-05-30T09-45-49-679Z`
+
+### Translation, Essay, Mind Map
+
+Status: pass, with minor instability.
+
+Passed:
+
+- Translation empty input disables action.
+- Real translation generated Chinese output; edit, save, copy, and export
+  cancel path worked. SQLite `translations` contained two rows.
+- Essay empty input disables grading.
+- Real essay grading returned `95/100`; copy and export cancel path worked.
+  SQLite `essay_sessions` and `essays` each contained two rows.
+- Mind map create, add child node, inline rename, delete confirmation, and
+  persistence worked. SQLite `mindmaps` contained two rows and
+  `mindmap_versions` contained eight rows.
+
+Findings:
+
+- Mind map resource-list rename entered an unstable editable state.
+- A settings-page misclick produced a model-list `401 "Api key is invalid"`
+  log line, unrelated to the main learning-app flows.
+- Startup logs repeatedly included a path traversal warning for `.skills`;
+  no functional impact was observed in this run.
+
+Evidence:
+
+- `~/Library/Application Support/tauri-lab/evidence/dstu-stress-07/2026-05-30T09-26-39-683Z`
+- `~/Library/Application Support/tauri-lab/evidence/dstu-stress-08/2026-05-30T09-53-47-266Z`
+- `~/Library/Application Support/tauri-lab/evidence/dstu-stress-09/2026-05-30T09-53-47-330Z`
+
+### Search, Filters, Move, Delete, State Consistency
+
+Status: pass for main actions, with several list-state UX findings.
+
+Passed:
+
+- Title search, Chinese/English search, case variants, special-character no
+  result, and empty-search restore.
+- Type filters for notes, question sets, essays, translations, and mind maps.
+- Existing multi-level folder navigation.
+- Selection toolbar with move, delete, and add-to-conversation actions.
+- Move of an essay resource to `LR-folder-renamed`, verified in SQLite.
+- Delete, trash restore, restart persistence, verified in SQLite.
+
+Findings:
+
+1. Grid view can show blank content while item count says resources exist.
+2. Search/filter can show count `1` with an empty visual list, including
+   `题目集` and fast `Dee` input.
+3. Search no-result state says `此文件夹为空/新建文件`, which reads like a folder
+   empty state rather than a search no-result state.
+4. `最近` can be empty despite freshly created or modified resources.
+5. After rename, list can blank while the detail pane remains on the old
+   resource state; SQLite already has the new title.
+6. Delete has no second confirmation in this path.
+7. Drag/drop again showed dropped but did not actually move the resource.
+8. Chinese inline rename through Computer Use degraded to `LR-`; ASCII rename
+   worked. This needs human IME reproduction before classifying as product
+   versus automation input behavior.
+
+Evidence:
+
+- `~/Library/Application Support/tauri-lab/evidence/dstu-stress-10/2026-05-30T09-47-47-146Z`
+- `~/Library/Application Support/tauri-lab/evidence/dstu-stress-11/2026-05-30T09-47-47-284Z`
+- `~/Library/Application Support/tauri-lab/evidence/dstu-stress-12/2026-05-30T09-50-26-242Z`
+
+### Conversation Linkage And Resource References
+
+Status: pass for primary context-linking flows.
+
+Passed:
+
+- Import learning resource through Learning Hub, then attach it from the chat
+  input resource library.
+- Single-resource prompt produced a resource-specific model response and
+  `message_learning_resource_links` rows.
+- Multi-turn follow-up without reattaching still used prior resource context
+  through conversation history.
+- Multi-resource attach and comparison worked; references panel showed two
+  resources.
+- After deleting one resource, the resource library correctly excluded it.
+- From a resource detail pane, `提问`, `总结`, `生成测验`, and `学习笔记` opened
+  conversation flows with prefilled resource-specific prompts and model
+  responses. `思维导图` and `学习应用` buttons were visible but not completed.
+
+Findings:
+
+1. Removing a resource attachment affects the current turn, but prior
+   transcript context remains. The UI does not explain this distinction.
+2. Renaming or deleting a resource leaves old labels in existing message
+   reference panels. The historical links become orphaned after delete and
+   the UI still shows the stale old title without a renamed/deleted marker.
+
+Evidence:
+
+- `.tauri-lab/evidence/dstu-stress-13/codex-lr-agent-5/20260530-121341`
+- `.tauri-lab/evidence/dstu-stress-14/codex-lr-agent-5/20260530-121351`
+- `.tauri-lab/evidence/dstu-stress-15/codex-lr-agent-5/20260530-121358`
+
+## Second-Run Cross-Cutting Findings
+
+1. Grid/list rendering and selection-state refresh are the strongest
+   cross-cutting risk. Multiple agents reproduced blank lists, stale detail
+   panes, and count/list mismatches while SQLite had the correct data.
+2. Drag/drop currently gives positive UI feedback without the expected move.
+   Treat this as a functional defect until a product decision says drag/drop
+   is intentionally non-operational.
+3. Folder-scoped creation paths need focused tests: context-menu creation did
+   not preserve the folder target.
+4. Historical chat references need a state model for renamed/deleted resources.
+   Immutable history is acceptable, but the UI should mark stale/deleted
+   resources explicitly.
+5. Question-set import needs duplicate and count semantics clarified.
+6. Computer Use CJK text entry can be unreliable; keep ASCII control cases and
+   add manual IME confirmation before filing CJK-only bugs.

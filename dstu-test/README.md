@@ -128,3 +128,20 @@ npm run tauri-lab -- fixture webdav tree sync-webdav --json
 ```
 
 Use SQLite/WebDAV/log checks only as assertions after real UI operations. The test entry point remains the real Tauri UI through Computer Use.
+
+## Run Reports
+
+Current run reports:
+
+- `docs/cloud-sync-matrix-30-run-2026-05-30.md`: 30-instance cloud-sync matrix run with five subagents. This is the strongest current evidence for duplicate replay, re-upload amplification, conflict-count mismatch, global credential leakage, and WebDAV fixture robustness gaps.
+- `docs/learning-hub-parallel-lifecycle-run-2026-05-30.md`: Learning Hub multi-agent UI testing, including the later 15-instance seeded run with focused question-set coverage.
+- `docs/cloud-sync-parallel-e2e-run-2026-05-30.md`: parallel cloud-sync E2E lessons plus the reserve-instance sync regression run.
+- `docs/cloud-sync-real-e2e-lessons-2026-05-29.md`: original cloud-sync real-test lessons.
+- `docs/local-tauri-instance-manager-design-2026-05-29.md`: tauri-lab service and multi-instance manager design notes.
+
+Latest cloud-sync signal:
+
+- A 30-instance real UI matrix found P0 duplicate download replay and bidirectional re-upload amplification. Fresh seeded devices applied equivalent remote packages as new changes (`359 -> 718 -> 1077`) and then uploaded more packages, which matches the user-facing report that sync is almost unusable.
+- The focused `sync-fix-smoke` retest fixed the main cloud-sync regressions: duplicate remote packages are deduped, repeated downloads no longer grow `__change_log`, bidirectional sync after download no longer uploads another full package, backend conflicts match actionable SQLite/UI conflicts, empty WebDAV passwords are blocked, and new credentials are written under the instance app-data path.
+- Secure password fields should be driven by real click plus keyboard typing in Computer Use tests. Accessibility `set_value` can make the field look filled without reliably updating frontend state.
+- During the stress run, the shared WebDAV fixture stopped while app instances stayed healthy. Future matrix runs should capture fixture health logs and use explicit parent-owned restart policy only when restart is part of the test design.

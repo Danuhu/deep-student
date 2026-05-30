@@ -161,3 +161,69 @@ Observation: one early wrong-root upload created a stray path outside the intend
 - Make each subagent run `agent verify` before its first Computer Use call and include that result in its report.
 - Add an assertion for "no files outside assigned scenario prefix".
 - Add a focused backup/restore UI map before delegating restore tests again.
+
+## Reserve Single-Agent Cloud Sync During Learning Hub Run
+
+During the later Learning Hub 15-instance run on 2026-05-30, a sixth
+subagent ran a single-device cloud-sync regression on the reserve instance
+`dstu-stress-16`.
+
+Environment:
+
+- Instance: `dstu-stress-16`
+- Owner: `codex-cloud-sync-agent-1`
+- WebDAV fixture: `sync-webdav`
+- Endpoint: `http://127.0.0.1:18082/`
+- Root: `deep-student-e2e-lr-run`
+- Username: `ds-test`
+- Fixture server: `node-builtin`
+
+The parent first attempted the Docker `bytemark/webdav:latest` fixture, but
+the Docker Hub manifest request timed out. To keep the UI test moving, the
+run used the repo-supported `node-builtin` WebDAV fixture. This is a test
+environment deviation from the preferred Docker WebDAV shape and should be
+re-run with Docker when registry access is stable.
+
+Covered:
+
+- Verified exact app target with `agent targets` and
+  `agent verify --require-running`.
+- Opened Settings -> Data Governance -> Sync -> Cloud Storage.
+- Entered an intentionally wrong password and confirmed the UI reported
+  `401 Unauthorized`.
+- Re-entered correct WebDAV settings, tested connection successfully, and
+  saved the config.
+- Created a Learning Hub note through real UI.
+- Triggered upload; UI showed pending `0` and synced `8`.
+- Triggered cloud backup; UI showed one cloud version.
+
+Verification:
+
+- Credential assertion passed for cloud storage.
+- SQLite verified the note title/body in VFS.
+- VFS change log had seven rows and chat change log had one row written to
+  sync version `1780133983`.
+- WebDAV tree contained a backup ZIP, device change file, device manifest,
+  and root manifest.
+- Backend/stderr logs had no run-blocking `ERROR`, `panic`, or persistent
+  authorization error after recovery.
+
+Remote files observed:
+
+- `backups/20260530-094000-868-dstust-4b393331.zip`
+- `data_governance/changes/dstu-stress-16/1780133983-f4030fb8-ddcd-4059-ab60-00738272d463.json.zst`
+- `data_governance/manifests/dstu-stress-16.json`
+- `manifest.json`
+
+Evidence:
+
+- `~/Library/Application Support/tauri-lab/evidence/dstu-stress-16/2026-05-30T09-42-16-935Z`
+- `~/Library/Application Support/tauri-lab/evidence/dstu-stress-16/2026-05-30T09-42-16-935Z/webdav-tree.json`
+
+Tooling findings:
+
+1. The evidence snapshot's frontend log source was missing and produced an
+   empty `frontend.jsonl`.
+2. `assert credential` displayed a global-looking credential path, although
+   the instance HOME also contained the expected credential file. The output
+   wording can mislead parallel-instance debugging.

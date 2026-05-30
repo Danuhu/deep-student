@@ -182,6 +182,12 @@ npm run tauri-lab -- logs sync-e2e-01 --kind stderr --tail 200
 - Parent and subagents must avoid duplicate Computer Use targets. Lease first, then operate.
 - Use `agent targets` and `agent verify` instead of global target browsing when multiple Codex windows or subagents are active.
 - A 2026-05-30 local stress run proved 64 instances can be managed on this machine, but detailed cloud sync workflows should usually run at 10-15 active windows for clearer debugging and less UI latency.
+- A 2026-05-30 30-instance cloud-sync matrix found P0 duplicate replay and re-upload amplification. Always test fresh seeded devices against roots with 1, 2, and 3 equivalent remote packages, then assert that `__change_log` does not grow from `359 -> 718 -> 1077` and that bidirectional sync does not upload another full package.
+- The 2026-05-30 focused `sync-fix-smoke` retest verified the fix shape: first fresh download from a seeded root logged `deduped=134`, second fresh device with two remote packages logged `total=226, deduped=134`, repeated download logged `total=0`, and chat/vfs/llm `__change_log` stayed at `49/72/38` with zero actionable conflicts.
+- Treat backend `conflicts=N` as suspect until UI record-level conflicts and SQLite `__sync_conflicts` agree. Record all three values in every conflict/idempotency run.
+- Credential assertions are not enough by themselves: current evidence found cloud credentials under a global same-machine path. Verify the UI-saved provider/root and instance-scoped behavior, not just credential file presence.
+- For secure password inputs, prefer real click plus keyboard typing. Accessibility `set_value` can make the field appear filled while frontend state remains empty, which is useful as a negative test but not reliable for setup.
+- Shared WebDAV fixtures can stop during high-concurrency runs. Capture fixture `status`, Docker state, and tree size at start, mid-run, and final aggregation; do not restart a shared fixture mid-scenario unless the parent explicitly makes restart part of the test design.
 
 ## References
 

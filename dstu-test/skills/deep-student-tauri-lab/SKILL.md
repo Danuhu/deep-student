@@ -192,6 +192,19 @@ npm run tauri-lab -- assert webdav-tree sync-webdav --contains "data_governance/
 
 If Docker is not running, the fixture command fails fast with a Docker daemon error; start Docker before retrying.
 
+For high-concurrency cloud-sync matrices, snapshot fixture health at the start,
+mid-run, and final aggregation:
+
+```sh
+npm run tauri-lab -- fixture webdav status sync-webdav --json
+npm run tauri-lab -- fixture webdav tree sync-webdav --json
+du -sh "$HOME/Library/Application Support/tauri-lab/fixtures/sync-webdav/webdav-root"
+```
+
+Do not let subagents stop or restart a shared fixture. If a fixture is found
+stopped, record the status and evidence first; restart only when the parent has
+made fixture restart part of the test plan.
+
 ## Data Images
 
 Use data images to avoid rebuilding test state through the UI on every run. A `home` image copies the instance HOME, including app data, first-run state, local WebKit state, and test configuration. An `app-data` image copies only `Library/Application Support/com.deepstudent.app` and is smaller, but may not preserve first-run UI state.
