@@ -1567,7 +1567,7 @@ async function handleApi(req, res, token, server) {
           project_id: projectId,
           profile: instanceId,
           id: instanceId,
-          display_name: body.display_prefix ? `${body.display_prefix} ${label}` : `${project.name} ${poolId} ${label}`,
+          display_name: body.display_prefix ? `${body.display_prefix} ${label}` : undefined,
           bundle_id: body.bundle_prefix
             ? `${body.bundle_prefix}.${label}`
             : `com.tauri-lab.${sanitizeBundlePart(projectId)}.${sanitizeBundlePart(poolId)}.${label}`,

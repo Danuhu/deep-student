@@ -286,3 +286,154 @@ Remaining risk:
   before destructive clicks, and a hard fail if visible endpoint/root does not
   match the assigned fixture.
 - Keep the parent no-active-timeout policy in skills and README.
+
+## Focused Gap Retest - Credentials And Tombstone
+
+Status: completed for credential recovery and Todo delete/tombstone
+propagation as of 2026-05-31 17:01 Asia/Shanghai.
+
+This run exists because the previous six-agent matrix still did not fully cover
+real UI credential recovery and delete/tombstone propagation. Entry points were
+real Tauri UI actions through Computer Use; SQLite/WebDAV/logs were used only
+after UI actions as verification.
+
+Credential recovery:
+
+- Instance `sync-gap-clean-0531-01` was recovered from wrong WebDAV password
+  state by typing the correct password through the real password field.
+- UI showed `连接成功！` after `测试连接`.
+- UI showed `配置已保存` after `保存配置`.
+- Evidence: `/Users/heli/Library/Application Support/tauri-lab/evidence/sync-gap-clean-0531-01/2026-05-31T07-49-21-034Z`.
+- Risk still present: evidence shows both instance-scoped credential
+  `.secure/cloud_storage_credentials.enc` and an older global
+  `/Users/heli/Library/Application Support/deep-student/.secure/cloud_storage_credentials.enc`.
+  Credential isolation still needs a dedicated clean-machine/style run.
+
+Delete/tombstone propagation pre-delete phase:
+
+- Fixture `sync-gap-delete-0531` is running at `http://127.0.0.1:18120/`, root
+  `sync-gap-delete-0531`, username `ds-test`.
+- Writer `sync-gap2-05-0531-01` created Todo list
+  `sync tombstone list 0531` and Todo item
+  `sync tombstone todo item 0531` through the real Todo UI, then uploaded
+  through the real sync UI.
+- Writer upload produced WebDAV files:
+  `data_governance/changes/sync-gap2-05-0531-01/1780214224-9a409d67-722f-492f-a166-ee1b643a7bf5.json.zst`
+  and `data_governance/manifests/sync-gap2-05-0531-01.json`.
+- Writer local SQLite assertions passed for active list/item count `1`.
+- Writer evidence:
+  `/Users/heli/Library/Application Support/tauri-lab/evidence/sync-gap2-05-0531-01/2026-05-31T07-57-34-404Z`.
+
+Reader/verifier cold-download phase:
+
+- Reader `sync-gap2-05-0531-02` was configured through real WebDAV UI,
+  downloaded through the real sync UI, and SQLite confirmed active list/item
+  count `1`.
+- Reader first download log: `downloaded=229`, `skipped=225`, `conflicts=0`;
+  applied changes were `vfs=3`, `chat_v2=1`, `llm_usage=0`.
+- Reader repeated download did not duplicate the Todo data, but UI surfaced a
+  warning about `38` incomplete changes; backend showed a second download with
+  `downloaded=38`, `skipped=38`, all from `llm_usage`.
+- Reader evidence:
+  `/Users/heli/Library/Application Support/tauri-lab/evidence/sync-gap2-05-0531-02/2026-05-31T08-03-22-545Z`
+  and
+  `/Users/heli/Library/Application Support/tauri-lab/evidence/sync-gap2-05-0531-02/2026-05-31T08-03-56-219Z`.
+- Verifier `sync-gap2-05-0531-03` was also configured through real WebDAV UI,
+  downloaded through the real sync UI, and SQLite confirmed active list/item
+  count `1`.
+- Verifier first download log matched reader: `downloaded=229`, `skipped=225`,
+  `conflicts=0`, applied `vfs=3`, `chat_v2=1`, `llm_usage=0`.
+- Verifier evidence:
+  `/Users/heli/Library/Application Support/tauri-lab/evidence/sync-gap2-05-0531-03/2026-05-31T08-08-30-609Z`.
+
+Idempotent replay warning fix and retest:
+
+- Product issue found: repeated download on Reader replayed 38 `llm_usage`
+  changes that were already present/equivalent. Backend correctly skipped them,
+  but UI counted ordinary skipped rows as incomplete payload skips and surfaced
+  a misleading `38` incomplete changes warning.
+- Fix applied: `ApplyChangesResult` now tracks
+  `skipped_incomplete_count` separately from ordinary `skipped_count`.
+  UI-facing `skipped_changes` and warning messages use only true incomplete
+  `INSERT`/`UPDATE` changes with missing `data` payload.
+- Guardrail test added:
+  `test_apply_semantically_equal_skip_is_not_incomplete`.
+- Verification:
+  `cargo test --manifest-path src-tauri/Cargo.toml test_apply_ -- --nocapture`
+  passed, 20 tests.
+- Verification:
+  `cargo check --manifest-path src-tauri/Cargo.toml` passed with only existing
+  project warnings.
+- Real UI retest used the Reader exact app path:
+  `/Users/heli/Library/Application Support/tauri-lab/apps/ds-sync-gap2-05-0531-02.app`.
+- The Reader app bundle had to be rebuilt as a complete Tauri debug bundle.
+  Replacing only `Contents/MacOS/deep-student` caused a blank window because the
+  binary and bundled frontend/CSP assets were mismatched. The correct procedure
+  was `npm run tauri -- build --debug`, then stop the instance, remove only the
+  instance `.app` bundle, and let `tauri-lab` copy and patch the rebuilt source
+  bundle while preserving the instance home.
+- `npm run tauri -- build --debug` produced the required `.app` bundle, but
+  exited nonzero after bundling because updater signing private key was absent.
+  The usable app bundle still existed at
+  `src-tauri/target/debug/bundle/macos/Deep Student.app`.
+- Real UI retest result: clicking `下载` through Computer Use completed without
+  the previous incomplete-data warning.
+- Backend retest log:
+  `downloaded=38`, database `llm_usage success=0 failed=0 skipped=38`, final
+  sync summary `uploaded=0, downloaded=38, conflicts=0, skipped=0`.
+- SQLite assertions after the UI retest still passed: active Todo list count
+  `1`, active Todo item count `1`.
+- Evidence:
+  `/Users/heli/Library/Application Support/tauri-lab/evidence/sync-gap2-05-0531-02/2026-05-31T08-45-44-808Z`.
+
+Delete/tombstone propagation completion:
+
+- Writer `sync-gap2-05-0531-01` was restarted from the rebuilt debug bundle
+  while preserving its home, then controlled through the exact app path
+  `/Users/heli/Library/Application Support/tauri-lab/apps/ds-sync-gap2-05-0531-01.app`.
+- Through the real Todo UI, Writer deleted only
+  `sync tombstone todo item 0531` from `sync tombstone list 0531`.
+- Writer SQLite assertions immediately after the UI delete passed:
+  active item count `0`, tombstoned item count `1`.
+- Through the real sync UI, Writer clicked `上传`; the sync screen moved pending
+  changes from `2` to `0`.
+- Writer backend log showed the tombstone upload:
+  `uploaded=2, downloaded=0, conflicts=0, skipped=0`.
+- WebDAV gained the second Writer package
+  `data_governance/changes/sync-gap2-05-0531-01/1780217833-ac99b2d5-3886-47b3-ae71-dd31a063de85.json.zst`
+  of size 486 bytes, plus the updated writer manifest.
+- Writer evidence:
+  `/Users/heli/Library/Application Support/tauri-lab/evidence/sync-gap2-05-0531-01/2026-05-31T08-57-27-609Z`.
+- Reader `sync-gap2-05-0531-02` clicked `下载` through the real sync UI.
+  SQLite assertions passed: active item count `0`, tombstoned item count `1`.
+- Reader backend log showed `downloaded=40`, `conflicts=0`, `skipped=0`;
+  database application details were `vfs success=1 failed=0 skipped=1` and
+  `llm_usage success=0 failed=0 skipped=38`.
+- Reader evidence:
+  `/Users/heli/Library/Application Support/tauri-lab/evidence/sync-gap2-05-0531-02/2026-05-31T08-59-08-601Z`.
+- Verifier `sync-gap2-05-0531-03` clicked `下载` through the real sync UI.
+  SQLite assertions passed: active item count `0`, tombstoned item count `1`.
+- Verifier backend log matched Reader: `downloaded=40`, `conflicts=0`,
+  `skipped=0`, with `vfs success=1 failed=0 skipped=1` and
+  `llm_usage success=0 failed=0 skipped=38`.
+- Verifier evidence:
+  `/Users/heli/Library/Application Support/tauri-lab/evidence/sync-gap2-05-0531-03/2026-05-31T09-00-40-545Z`.
+- Verifier repeated `下载` through the real sync UI as an idempotency check.
+  The Todo tombstone remained stable (`deleted_at is not null` count `1`), and
+  no incomplete-data warning appeared after the earlier fix.
+- Remaining optimization: repeated download still fetches 38 equivalent
+  `llm_usage` changes and skips them idempotently. This is no longer surfaced
+  as a false incomplete-data warning, but it is still an efficiency/convergence
+  issue to investigate in a later sync-filtering pass.
+
+Coverage is still not sufficient overall. Remaining untested or only partially
+tested real scenarios include:
+
+- Historical schema/data migration versions syncing into current version.
+- Large attachments/blobs and blob deletion queues.
+- Mid-sync WebDAV interruption/restart and retry recovery.
+- Batch delete and delete/edit conflicts across devices.
+- More VFS domains beyond Todo/chat, especially questions, resources, notes,
+  folders, essays, mindmaps, pomodoro/review data, and files.
+- S3/MinIO-compatible provider path.
+- Credential isolation on a clean profile without global credential fallback.
