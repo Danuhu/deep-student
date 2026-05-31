@@ -30,6 +30,17 @@ npm run tauri-lab -- project register deep-student \
   --json
 ```
 
+If `dstu-test/scripts/tauri-lab.mjs` changes while the daemon is already
+running, restart the service before creating new instances:
+
+```sh
+npm run tauri-lab -- service restart --json
+```
+
+Managed Deep Student instances default to short display names such as
+`ds-smoke-01` so macOS window metadata stays readable by Computer Use. Use an
+explicit `--display-name` only when a scenario needs a custom visible name.
+
 Create and start a small pool:
 
 ```sh
@@ -151,5 +162,7 @@ Latest cloud-sync signal:
 
 - A 30-instance real UI matrix found P0 duplicate download replay and bidirectional re-upload amplification. Fresh seeded devices applied equivalent remote packages as new changes (`359 -> 718 -> 1077`) and then uploaded more packages, which matches the user-facing report that sync is almost unusable.
 - The focused `sync-fix-smoke` retest fixed the main cloud-sync regressions: duplicate remote packages are deduped, repeated downloads no longer grow `__change_log`, bidirectional sync after download no longer uploads another full package, backend conflicts match actionable SQLite/UI conflicts, empty WebDAV passwords are blocked, and new credentials are written under the instance app-data path.
+- The 2026-05-31 focused conflict retest fixed and verified the conflict UI path: after real UI sync, conflict badges/panels refresh automatically, and one local conflict with multiple cloud candidates shows every candidate with the newest cloud candidate clearly marked.
+- Long Tauri display names can make Computer Use fail with `cgWindowNotFound` because macOS truncates owner names. Restart `tauri-lab` after script updates and prefer the default short instance names.
 - Secure password fields should be driven by real click plus keyboard typing in Computer Use tests. Accessibility `set_value` can make the field look filled without reliably updating frontend state.
 - During the stress run, the shared WebDAV fixture stopped while app instances stayed healthy. Future matrix runs should capture fixture health logs and use explicit parent-owned restart policy only when restart is part of the test design.

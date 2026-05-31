@@ -213,6 +213,67 @@ Evidence:
 5. The parent sleep/no-timeout policy is necessary. Useful reports arrived well
    after short timeout windows.
 
+## Focused Conflict Retest
+
+Status: fixed and verified for the targeted conflict UI path.
+
+Follow-up single-agent UI testing reproduced the Agent C conflict shape with a
+local WebDAV fixture `sync-conflict-visible-0531`, then verified two fixes:
+
+- After a real UI rename and a real UI bidirectional sync, the sync tab now
+  refreshes the conflict badge and record-level conflict panel automatically.
+  The tester did not click the conflict panel refresh button after sync.
+- When one local version conflicts with multiple cloud candidates, the conflict
+  panel now shows every cloud candidate instead of hiding all but one. The
+  verified UI state showed local `conflict-title-C-0531`, cloud `1/2`
+  `conflict-title-A-0531`, cloud `2/2` `conflict-title-B-0531`, and the action
+  label `采用云端（最新/2）`.
+
+Assertions after the UI action matched the screen:
+
+```sql
+select table_name, record_id, count(*) as rows,
+       group_concat(side || ':' || json_extract(data_json, '$.title'), ' | ') as variants
+from __sync_conflicts
+where resolved_at is null
+group by table_name, record_id;
+```
+
+Result:
+
+```text
+chat_v2_sessions|sess_59f36c72-8535-41f0-8994-efe7d2b0c891|3|cloud:conflict-title-A-0531 | local:conflict-title-C-0531 | cloud:conflict-title-B-0531
+```
+
+Evidence:
+
+- `/Users/heli/Library/Application Support/tauri-lab/evidence/deep-student-sync-refresh-ui-01/2026-05-31T06-09-22-114Z`
+- `/Users/heli/Library/Application Support/tauri-lab/evidence/deep-student-cand-ui-01/2026-05-31T06-53-26-963Z`
+- `/Users/heli/Library/Application Support/tauri-lab/evidence/deep-student-final-cand-ui-02/2026-05-31T07-01-36-405Z`
+
+Tooling fix discovered during the retest:
+
+- Long Tauri display names can be truncated by macOS window owner metadata,
+  causing Computer Use `cgWindowNotFound` even when the CGWindow exists.
+- `tauri-lab` now defaults managed instance display names to short stable
+  values such as `ds-cand-01` and injects `DSTU_E2E_STANDARD_WINDOW=1`, while
+  preserving explicit `--display-name` values.
+- Because `tauri-lab` runs as a detached daemon, script changes require
+  `npm run tauri-lab -- service restart --json` before new create/start behavior
+  is available. This was verified by creating `ds-final-cand-ui-02` after a
+  daemon restart and controlling it through Computer Use.
+
+Remaining risk:
+
+- The focused run found a seed/download convergence warning where an equivalent
+  seeded root reported many skipped downloads while pending counts remained
+  nonzero. Keep root-equivalence and pending-convergence cases in the next
+  cloud sync matrix.
+- A home image can carry credential files, but a new short-name bundle may still
+  require re-saving cloud storage config through UI before sync controls become
+  configured. Treat image-based credential/config migration as a separate
+  compatibility scenario.
+
 ## Recommended Follow-Ups
 
 - Fix and retest record-level conflict materialization for concurrent edits.
