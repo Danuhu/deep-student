@@ -15,6 +15,7 @@ Use this skill to operate the repo-local `tauri-lab` manager in the current Deep
 - For multi-agent cloud sync testing, create 10-15 instances for normal work and lease 2-3 instances per subagent. The local stress run on 2026-05-30 reached 64 simultaneous instances with metrics ready and Computer Use control still working, so 10-15 is a safe default on the current machine.
 - The parent agent assigns leases. Subagents must not browse the global app list and pick windows themselves; they may only operate instance ids and exact `.app` paths explicitly assigned to their owner.
 - Before a subagent uses Computer Use, run `agent targets --owner ...` or `agent verify ...`; if verification fails, do not touch the window.
+- For long-running subagent tests, the parent must not impose an active timeout just because a subagent is quiet. Cloud sync and real UI flows can legitimately run for about an hour. The parent should sleep or poll passively, give subagents enough time to finish, and only investigate when the user asks, the subagent reports failure, the process exits, or objective evidence shows the assigned app/fixture is gone.
 - Use `--wait --metrics` before driving UI so the app has finished Tauri/backend startup.
 - Stop test instances before finishing unless the user asks to keep them running.
 - Read backend, stderr, frontend, and daemon logs before guessing why an instance failed.
@@ -102,6 +103,13 @@ npm run tauri-lab -- agent verify codex-sync-01 \
 ```
 
 Use `agent targets` instead of `computer-use list` when a subagent needs to rediscover its own windows after context compaction.
+
+Long-running parent coordination rule:
+
+- Spawn subagents with exact assignments and enough detail to operate independently.
+- After spawning, the parent may run lightweight passive checks such as `lease audit`, `pool status`, and fixture `status`, but must not kill or close subagents for slow progress.
+- A quiet subagent is not a stuck subagent. Treat long cloud-sync scenarios as normal until completion, explicit failure, user interruption, or hard external evidence such as a missing process, stopped fixture, or failed lease verification.
+- If status is needed, ask the subagent for a progress update or inspect evidence/logs without touching its assigned windows.
 
 For daemon persistence across future logins, install the macOS LaunchAgent when needed:
 

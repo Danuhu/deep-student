@@ -28,6 +28,7 @@ For high-throughput real testing, run five subagents over a shared `tauri-lab` p
 - Partition WebDAV roots by scenario or device group so agents do not overwrite each other's remote state unless the scenario is explicitly a conflict test.
 - Subagents must not stop, restart, remove, or reconfigure a shared WebDAV fixture. Interruption tests must use a bad endpoint/credentials, or the parent must allocate an exclusive fixture for that agent.
 - Every subagent reports: leased instance ids, UI steps performed, assertions run, WebDAV tree deltas, evidence snapshot paths, failures, and cleanup status.
+- The parent must not use a short active timeout for full cloud-sync runs. Real UI setup, multi-device sync, backup/restore, and diagnostics can take about an hour. After spawning subagents, the parent should sleep or passively poll, wait for final reports, and avoid closing agents unless they explicitly fail, complete, or the user asks to stop.
 
 Recommended five-way split:
 
@@ -40,6 +41,14 @@ Recommended five-way split:
 | E | 2-3 | interruption/retry, stale config cleanup, post-restore sync sanity |
 
 The parent agent owns fixture startup, pool startup, lease assignment, final aggregation, and final cleanup.
+
+Parent waiting policy:
+
+- Give long-running subagents enough time to finish their assigned real UI workflows.
+- Do not interpret no report within 30/60/180 seconds as a hang.
+- Passive checks are allowed: pool status, lease audit, WebDAV status/tree snapshots, and logs/evidence reads.
+- Active intervention is allowed only after an explicit subagent failure/completion, user instruction, or hard evidence that infrastructure is gone, such as a stopped app process or stopped fixture.
+- Do not operate a subagent's assigned app window from the parent while the subagent is still running.
 
 Anti-collision rule: app windows are never shared. Even conflict tests share cloud state only through WebDAV prefixes; each actor still uses its own leased Tauri instance.
 

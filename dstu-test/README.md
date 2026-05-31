@@ -108,6 +108,13 @@ npm run tauri-lab -- agent verify <instance-id> \
   --json
 ```
 
+Parent waiting policy for long cloud-sync runs:
+
+- Do not impose a short active timeout on subagents. Full real UI cloud-sync testing can legitimately take about an hour.
+- After spawning agents, the parent should sleep or perform passive polling only: `lease audit`, `pool status`, WebDAV `status/tree`, and log/evidence reads.
+- Lack of a quick report is not a failure. Intervene only when a subagent reports failure/completion, the user asks to stop, or objective infrastructure evidence shows the assigned app/fixture is no longer running.
+- The parent must not operate a subagent's assigned app window while that subagent is still running.
+
 Cleanup:
 
 ```sh
@@ -133,6 +140,7 @@ Use SQLite/WebDAV/log checks only as assertions after real UI operations. The te
 
 Current run reports:
 
+- `docs/cloud-sync-six-agent-run-2026-05-31.md`: six-agent, 18-instance long cloud-sync run with the parent no-timeout policy. Baseline, bidirectional, and backup/restore passed; conflict testing found a record-level conflict漏报/静默覆盖 bug; delete and credential stress scenarios exposed multi-window Computer Use targeting/input reliability limits.
 - `docs/cloud-sync-matrix-30-run-2026-05-30.md`: 30-instance cloud-sync matrix run with five subagents. This is the strongest current evidence for duplicate replay, re-upload amplification, conflict-count mismatch, global credential leakage, and WebDAV fixture robustness gaps.
 - `docs/learning-hub-parallel-lifecycle-run-2026-05-30.md`: Learning Hub multi-agent UI testing, including the later 15-instance seeded run with focused question-set coverage.
 - `docs/cloud-sync-parallel-e2e-run-2026-05-30.md`: parallel cloud-sync E2E lessons plus the reserve-instance sync regression run.
