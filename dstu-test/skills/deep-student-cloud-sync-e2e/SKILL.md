@@ -103,6 +103,57 @@ npm run tauri-lab -- pool create deep-student sync-e2e-15 \
 
 The image is allowed only after the original configuration was created through real UI operations. Subsequent tests may start from the image, then perform the scenario-specific sync/backup/restore actions through UI and verify with SQLite/WebDAV/logs.
 
+For a fast, broad cloud-sync smoke, prefer the newest wide coverage image when
+it is available locally. The current strongest image is
+`sync-wide-chaos-deep-coverage-seed-0531`:
+
+```sh
+npm run tauri-lab -- image inspect sync-wide-chaos-deep-coverage-seed-0531 --json
+npm run dstu-test:inspect-wide-sync -- \
+  --image sync-wide-chaos-deep-coverage-seed-0531 \
+  --mode seed
+npm run tauri-lab -- instance create deep-student sync-wide-writer \
+  --image sync-wide-chaos-deep-coverage-seed-0531 \
+  --device-id sync-wide-writer \
+  --json
+```
+
+The inspect command must pass before using the image as the canonical broad
+regression seed. It checks foreign keys, blob files, blob references,
+question-set breadth, todo parent links, tombstones, same-record multi-change
+chains, composite replay paths, business unique-key reuse after delete, JSON
+update chains, chat attachments/resources, mistakes review data, and LLM status
+variety.
+
+The previous stable image `sync-wide-stable-coverage-seed-0531` is still useful
+for comparing historical 441-change runs. Use the deep image first when the
+goal is maximum schema coverage in one pass.
+
+Drive this scenario through real UI:
+
+1. Configure WebDAV on the seeded writer, then click Upload.
+2. Verify the remote package contains broad VFS/chat/mistakes/LLM rows and at
+   least one `blobs` row.
+3. Create a clean reader with no image, configure the same WebDAV root through
+   UI, then click Download.
+4. Assert no `files -> blobs` orphan rows, no `foreign_key_check` rows, and no
+   unresolved `__sync_conflicts`.
+5. Click Download again on the same reader and verify backend logs show
+   `total=0`.
+6. Upload the reader's small local delta, then download from a second clean
+   reader to cover two-package hydration without replay amplification.
+7. Run hydrated audit on downloaded readers:
+
+```sh
+npm run dstu-test:inspect-wide-sync -- \
+  --instance <reader-instance-id> \
+  --mode hydrated
+```
+
+For the deep image, the 2026-05-31 baseline was writer upload `569`, first
+reader download `total=435, deduped=134, conflicts=0`, repeated download
+`total=0`, 4 blobs hydrated, 2 workspace DBs hydrated, and hydrated audit PASS.
+
 Claim an instance for each agent:
 
 ```sh
@@ -197,6 +248,20 @@ npm run tauri-lab -- logs sync-e2e-01 --kind stderr --tail 200
 - Credential assertions are not enough by themselves: current evidence found cloud credentials under a global same-machine path. Verify the UI-saved provider/root and instance-scoped behavior, not just credential file presence.
 - For secure password inputs, prefer real click plus keyboard typing. Accessibility `set_value` can make the field appear filled while frontend state remains empty, which is useful as a negative test but not reliable for setup.
 - Shared WebDAV fixtures can stop during high-concurrency runs. Capture fixture `status`, Docker state, and tree size at start, mid-run, and final aggregation; do not restart a shared fixture mid-scenario unless the parent explicitly makes restart part of the test design.
+- The 2026-05-31 wide-image regression found real todo ordering and
+  `files -> blobs` foreign-key bugs, then verified the fixes with a 441-change
+  writer package, a clean reader download, repeated download `total=0`, and a
+  second clean reader downloading from two remote packages.
+- The 2026-05-31 deep wide-image regression verified the stronger
+  `sync-wide-chaos-deep-coverage-seed-0531` image: 569 uploaded changes,
+  reader download `total=435, deduped=134`, 4 blobs, 2 workspace DBs, no open
+  conflicts, hydrated audit PASS, and repeated UI Download `total=0`.
+- If Computer Use returns `remoteConnection` followed by `cgWindowNotFound`
+  during a post-sync UI probe, first capture `evidence snapshot`, frontend
+  logs, backend logs, and `instance status`. Then verify whether System Events
+  sees any windows for the app process. Do not reinterpret a successful prior
+  UI-triggered sync as shell-triggered just because the later window
+  enumeration layer failed.
 
 ## References
 

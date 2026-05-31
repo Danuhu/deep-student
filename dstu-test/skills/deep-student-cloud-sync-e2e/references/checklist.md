@@ -25,6 +25,53 @@ Subagents must not stop or restart the shared WebDAV fixture. To test network in
 
 If a data image is used, record the image id and whether it was created from a prior real UI configuration pass. Do not use images as a substitute for testing the original setup flow; use them to speed up repeated scenario runs after the setup flow has already been covered.
 
+For single-agent high-signal cloud sync smoke, use the broad image flow. Prefer
+the current deep seed when available:
+
+- writer from `sync-wide-chaos-deep-coverage-seed-0531`;
+- clean reader 1 with no image;
+- optional clean reader 2 with no image after reader 1 uploads its small local
+  delta;
+- one WebDAV root shared by those devices.
+
+The older stable flow is still useful for historical comparison:
+
+- writer from `sync-wide-stable-coverage-seed-0531`;
+- clean reader 1 with no image;
+- clean reader 2 with no image after reader 1 uploads its small local delta;
+- one WebDAV root shared by those three devices.
+
+Before using either image, run:
+
+```sh
+npm run dstu-test:inspect-wide-sync -- \
+  --image sync-wide-chaos-deep-coverage-seed-0531 \
+  --mode seed
+```
+
+The audit must pass or the run is not a canonical wide-image regression.
+
+Required assertions for that flow:
+
+- writer upload creates a large remote package and the package includes
+  `table_name=="blobs"`;
+- reader 1 download has zero unresolved `__sync_conflicts`, zero orphan
+  `files.blob_hash`, and empty `pragma foreign_key_check`;
+- reader 1 repeated download logs `total=0`;
+- reader 2 download from two remote device packages does not grow
+  `__change_log` beyond the expected deduped counts.
+- downloaded readers pass:
+
+```sh
+npm run dstu-test:inspect-wide-sync -- \
+  --instance <reader-instance-id> \
+  --mode hydrated
+```
+
+For the 2026-05-31 deep baseline, expect writer upload `569`, first reader
+download `total=435, deduped=134, conflicts=0`, 4 blobs downloaded, 2 workspace
+DBs downloaded, and repeated reader download `total=0`.
+
 Suggested owner names:
 
 - `codex-sync-agent-a-upload`
@@ -141,3 +188,15 @@ npm run tauri-lab -- lease audit --json
 - Same-machine localStorage pollution when bundle id is not unique.
 - Main screen can create an empty session on a fresh device.
 - Manifest-level conflict counts can differ from actionable row conflicts.
+- Parent/child rows, file/blob rows, same-record mutation chains, and
+  multi-package roots are mandatory in cloud-sync regression data. They catch
+  ordering and replay bugs that simple one-row smoke tests miss.
+- The deep wide image additionally includes composite-key replay probes,
+  business unique-key reuse after delete, JSON update chains, parent tombstones
+  with children, explicit boundary/local tables, multiple workspace DBs, and
+  richer question-set coverage.
+- If Computer Use loses Tauri windows after a successful UI sync, capture
+  evidence and logs before restarting. Verify with `instance status` and
+  System Events whether the app process still exists but has no visible
+  windows; this is a test-control/window-enumeration failure unless backend or
+  frontend logs show an application crash.
