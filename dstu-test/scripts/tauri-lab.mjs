@@ -26,7 +26,7 @@ const FIXTURES_DIR = path.join(ROOT, 'fixtures');
 const IMAGES_DIR = path.join(ROOT, 'images');
 const DEFAULT_METRICS_HOST = '127.0.0.1';
 const DEFAULT_METRICS_PORT_START = 59331;
-const DEFAULT_METRICS_PORT_END = 59430;
+const DEFAULT_METRICS_PORT_END = Number(process.env.TAURI_LAB_METRICS_PORT_END || 59680);
 const DEFAULT_WEBDAV_PORT_START = 18080;
 const DEFAULT_WEBDAV_PORT_END = 18179;
 const LAUNCH_AGENT_LABEL = 'com.deepstudent.tauri-lab';
@@ -386,6 +386,16 @@ function poolIndexLabel(index, count) {
   return String(index).padStart(Math.max(2, String(count).length), '0');
 }
 
+function defaultDisplayName(projectId, profile) {
+  const projectPrefix = projectId === 'deep-student' ? 'ds' : slug(projectId).slice(0, 8);
+  const full = `${projectPrefix}-${profile}`;
+  if (full.length <= 30) return full;
+
+  const hash = crypto.createHash('sha1').update(full).digest('hex').slice(0, 6);
+  const prefix = full.slice(0, 23).replace(/[-_.]+$/, '');
+  return `${prefix}-${hash}`;
+}
+
 async function createInstanceRecord(registry, body) {
   const projectId = slug(requireArg(body.project_id, 'project_id is required'));
   const profile = slug(requireArg(body.profile, 'profile is required'));
@@ -394,7 +404,7 @@ async function createInstanceRecord(registry, body) {
 
   const id = slug(body.id || `${projectId}-${profile}`);
   const existing = registry.instances[id];
-  const displayName = body.display_name || existing?.display_name || `${project.name} ${profile}`;
+  const displayName = body.display_name || existing?.display_name || defaultDisplayName(projectId, profile);
   const appPath = existing?.app_path || path.join(APPS_DIR, `${displayName}.app`);
   const binaryPath = existing?.binary_path || path.join(appPath, body.binary_relative_path || project.binary_relative_path);
   const bundleId =
@@ -1376,6 +1386,7 @@ async function startInstance(registry, id) {
     HOME: instance.home,
     DEVICE_ID: instance.device_id,
     DSTU_METRICS_ADDR: instance.metrics_addr,
+    DSTU_E2E_STANDARD_WINDOW: '1',
     TAURI_LAB_INSTANCE_ID: instance.id,
     TAURI_LAB_LOG_DIR: LOGS_DIR,
     TAURI_LAB_FRONTEND_LOG: instance.log_frontend,
@@ -1556,7 +1567,7 @@ async function handleApi(req, res, token, server) {
           project_id: projectId,
           profile: instanceId,
           id: instanceId,
-          display_name: body.display_prefix ? `${body.display_prefix} ${label}` : `${project.name} ${poolId} ${label}`,
+          display_name: body.display_prefix ? `${body.display_prefix} ${label}` : undefined,
           bundle_id: body.bundle_prefix
             ? `${body.bundle_prefix}.${label}`
             : `com.tauri-lab.${sanitizeBundlePart(projectId)}.${sanitizeBundlePart(poolId)}.${label}`,
