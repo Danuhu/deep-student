@@ -4,15 +4,15 @@ This document summarizes the current product token system so the same visual lan
 
 ## Source Files
 
-The runtime token chain is loaded from [src/App.tsx](/Users/ba7mlv/Documents/Coding/deep-student/.worktrees/study-ui-migration/src/App.tsx:48):
+The runtime token chain is loaded from [src/App.tsx](../src/App.tsx):
 
-1. [src/styles/tailwind.css](/Users/ba7mlv/Documents/Coding/deep-student/.worktrees/study-ui-migration/src/styles/tailwind.css:1) - Tailwind base/utilities plus native-feel interaction imports.
-2. [src/styles/shadcn-variables.css](/Users/ba7mlv/Documents/Coding/deep-student/.worktrees/study-ui-migration/src/styles/shadcn-variables.css:1) - base design tokens, neutral HSL primitives, theme palettes.
-3. [src/styles/theme-colors.css](/Users/ba7mlv/Documents/Coding/deep-student/.worktrees/study-ui-migration/src/styles/theme-colors.css:1) - semantic surface/text/brand/component tokens derived from base tokens.
-4. [src/shared/styles/index.css](/Users/ba7mlv/Documents/Coding/deep-student/.worktrees/study-ui-migration/src/shared/styles/index.css:1) - app shell consumption layer.
-5. [src/styles/typography.css](/Users/ba7mlv/Documents/Coding/deep-student/.worktrees/study-ui-migration/src/styles/typography.css:1) - global typography rules.
+1. [src/styles/tailwind.css](../src/styles/tailwind.css) - Tailwind base/utilities plus native-feel interaction imports.
+2. [src/styles/shadcn-variables.css](../src/styles/shadcn-variables.css) - base design tokens, neutral HSL primitives, theme palettes.
+3. [src/styles/theme-colors.css](../src/styles/theme-colors.css) - semantic surface/text/brand/component tokens derived from base tokens.
+4. [src/shared/styles/index.css](../src/shared/styles/index.css) - app shell consumption layer.
+5. [src/styles/typography.css](../src/styles/typography.css) - global typography rules.
 
-The interactive in-app inventory is [src/components/style-lab/TokenInspectorTab.tsx](/Users/ba7mlv/Documents/Coding/deep-student/.worktrees/study-ui-migration/src/components/style-lab/TokenInspectorTab.tsx:1). Contract tests worth keeping in sync include [tests/vitest/themePaletteContract.test.ts](/Users/ba7mlv/Documents/Coding/deep-student/.worktrees/study-ui-migration/tests/vitest/themePaletteContract.test.ts:1), [tests/vitest/modernSidebarColorContract.test.ts](/Users/ba7mlv/Documents/Coding/deep-student/.worktrees/study-ui-migration/tests/vitest/modernSidebarColorContract.test.ts:1), and [tests/vitest/semanticTokenContract.test.ts](/Users/ba7mlv/Documents/Coding/deep-student/.worktrees/study-ui-migration/tests/vitest/semanticTokenContract.test.ts:1).
+The interactive in-app inventory is [src/components/style-lab/TokenInspectorTab.tsx](../src/components/style-lab/TokenInspectorTab.tsx). Contract tests worth keeping in sync include [tests/vitest/themePaletteContract.test.ts](../tests/vitest/themePaletteContract.test.ts), [tests/vitest/modernSidebarColorContract.test.ts](../tests/vitest/modernSidebarColorContract.test.ts), and [tests/vitest/semanticTokenContract.test.ts](../tests/vitest/semanticTokenContract.test.ts).
 
 ## Design Direction
 
@@ -72,7 +72,7 @@ Accent palettes override only `--primary`, `--primary-foreground`, `--ring`, `--
 | `muted` | 石墨 | Graphite | `220 30% 38%` | `220 24% 70%` | Low-saturation enterprise/press pages |
 | `paper` | 陶棕 | Clay Brown | `24 35% 32%` | `36 40% 70%` | Editorial/document-oriented pages |
 
-The settings UI also supports `custom`; runtime code generates a safe accent-only override from the chosen hex in [src/hooks/useTheme.ts](/Users/ba7mlv/Documents/Coding/deep-student/.worktrees/study-ui-migration/src/hooks/useTheme.ts:82).
+The settings UI also supports `custom`; runtime code generates a safe accent-only override from the chosen hex in [src/hooks/useTheme.ts](../src/hooks/useTheme.ts).
 
 Recommended website default:
 
@@ -253,7 +253,7 @@ Typography rules:
 
 ## Motion and Native Feel
 
-Interaction rules are defined in [src/styles/native-feel/interaction.css](/Users/ba7mlv/Documents/Coding/deep-student/.worktrees/study-ui-migration/src/styles/native-feel/interaction.css:1):
+Interaction rules are defined in [src/styles/native-feel/interaction.css](../src/styles/native-feel/interaction.css):
 
 - Focus rings use `2px solid hsl(var(--ring))`.
 - Buttons do not scale on hover by default.
@@ -261,7 +261,7 @@ Interaction rules are defined in [src/styles/native-feel/interaction.css](/Users
 - Common interaction transitions animate background, color, border, opacity, and shadow at `150ms ease`.
 - Reduced motion disables these transitions.
 
-Scrollbars are defined in [src/styles/native-feel/scrollbars.css](/Users/ba7mlv/Documents/Coding/deep-student/.worktrees/study-ui-migration/src/styles/native-feel/scrollbars.css:1):
+Scrollbars are defined in [src/styles/native-feel/scrollbars.css](../src/styles/native-feel/scrollbars.css):
 
 - Scrollbars are overlay-style and hidden until hover/focus.
 - Thumb colors come from `--scrollbar-thumb` and `--scrollbar-thumb-hover`.
