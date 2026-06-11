@@ -154,16 +154,16 @@
 
 重构提交：
 
-- `53a40c13c` refactor(chat): migrate `src/chat-v2/` → `src/features/chat/`
+- `53a40c13c` refactor(chat): migrate `src/features/chat/` → `src/features/chat/`
 - `419aa6af8` refactor(learning-hub): migrate → `src/features/learning-hub/`（2026-05-13）
 
 受影响文档（仍引用旧路径，一处未改）：
 
 | 文档 | 引用旧路径 | 公开性 |
 |---|---|---|
-| `docs/design/learning-hub-core-contracts.md` | `src/components/learning-hub/learningHubContracts.ts` 等（实际已在 `src/features/learning-hub/`），全文 0 处新路径 | 内部 |
-| `ACCESSIBILITY-REVIEW.md` | src/chat-v2 + src/components/learning-hub | **公开** |
-| `docs/chat-v2-critical-review.md`、`docs/chatanki-debug.md`、`docs/chatanki-multi-template-audit.md`、`docs/DATA-MAPPING-REPORT.md` | src/chat-v2 | 内部（忽略） |
+| `docs/design/learning-hub-core-contracts.md` | `src/features/learning-hub/learningHubContracts.ts` 等（实际已在 `src/features/learning-hub/`），全文 0 处新路径 | 内部 |
+| `ACCESSIBILITY-REVIEW.md` | src/features/chat + src/features/learning-hub | **公开** |
+| `docs/chat-v2-critical-review.md`、`docs/chatanki-debug.md`、`docs/chatanki-multi-template-audit.md`、`docs/DATA-MAPPING-REPORT.md` | src/features/chat | 内部（忽略） |
 | `PLAN.md`、`CRITICAL_CODE_REVIEW_REPORT.md`、`LEARNING_RESOURCE_CRITICAL_REVIEW_FIXES.md` | 两者 | 内部（忽略） |
 | `docs/design/`（code-review-zones、skill-system-audit-report、移动端侧栏UI优化、FE-01/FE-02 prompts） | 两者 | 内部 |
 
@@ -203,7 +203,7 @@
 **2. 从 git 移除（历史可恢复）**
 
 - `git rm AUDIT_REPORT_v0.9.35.md`（审计对象 0.9.35 已过期 3 个版本）
-- `git rm ACCESSIBILITY-REVIEW.md`（引用已不存在的 src/chat-v2 路径，内容失效）
+- `git rm ACCESSIBILITY-REVIEW.md`（引用已不存在的 src/features/chat 路径，内容失效）
 - `git rm docs/翻译键缺失详细报告.md`（确认为 `scripts/check-missing-translations.mjs` 自动产物，0 缺失的快照无保留价值，且已加入 gitignore 防再次提交）
 - `git mv PR-REVIEW-2026-06-11.md docs/reviews/`（活文档，但根目录不是它的家）
 
@@ -237,7 +237,7 @@
 | P1-6 design-tokens 14 处本机绝对路径 | 全部改为仓库相对路径（`../src/...`），13 个目标文件逐一验证存在；行号后缀移除 | ✅ |
 | P1-6 cloud-sync-compat 6 处本机路径 | 改为 GitHub 官方仓库链接（CherryHQ/cherry-studio、siyuan-note/siyuan、vrtmrz/obsidian-livesync），注明行号随版本漂移 | ✅ |
 | P1-7 chat README 9 个死链 | 文档索引区重写：指向真实存在的 BLOCK_RENDERING_GUIDE、core/types、plugins/（均已验证），注明历史设计文档已移除 | ✅ |
-| P1-8 learning-hub-core-contracts 旧路径 | `src/components/learning-hub/` → `src/features/learning-hub/`；其余引用（openResource.ts、vfs/mod.rs、chatApi.ts）验证全部有效 | ✅ |
+| P1-8 learning-hub-core-contracts 旧路径 | `src/features/learning-hub/` → `src/features/learning-hub/`；其余引用（openResource.ts、vfs/mod.rs、chatApi.ts）验证全部有效 | ✅ |
 | P2-5 README-BUILD 3 个幽灵链接 | 改为指向真实的 BUILD-CONFIG.md | ✅ |
 | P2-6 migrations README 死链 | 移除不存在的"数据治理系统重构方案"引用 | ✅ |
 | P2-7 BLOCK_RENDERING_GUIDE BlockType 落后 | 清单从 13 → 22 类型与 `core/types/common.ts` 完全同步（含分组注释），头部版本标注更新为 2026-06-11，加"两处同步更新"提醒 | ✅ |
@@ -356,7 +356,7 @@
 | 过期项 | 实际情况（已核实） | 修复 |
 |---|---|---|
 | 技术栈表"Lucide Icons" + 致谢"Lucide" | package.json 已无 lucide-react 直接依赖，全面迁移 @phosphor-icons/react（残留 3 个文件是防回归测试守卫）；5 月有"migrate all 93 chat files to Phosphor"提交 | → Phosphor Icons（2 处 ×2 语言）|
-| 代码结构图 `src/chat-v2/` | 实际为 `src/features/` 14 模块架构；`src/chat-v2` 是 17:53 刚出现的兼容 symlink → `features/chat` | 结构图重写为 features/ 布局 |
+| 代码结构图 `src/features/chat/` | 实际为 `src/features/` 14 模块架构；`src/features/chat` 是 17:53 刚出现的兼容 symlink → `features/chat` | 结构图重写为 features/ 布局 |
 | "内置 12 项技能" | 实测 `builtinSkills` 6 个场景技能 + `builtinToolSkills` 20 个工具组 = 26 项；新增画布笔记/图片生成/网页抓取/子代理工作区等未反映 | → "26 项技能（6+20）"并补列新技能 |
 | 模型适配列表无 DeepSeek V4 | `docs/DEEPSEEK-V4-V32-RELEASE-NOTES.md`（04-26）+ `deepseek.rs` 已实现 V4 reasoning_effort 双方言 | 列表加入 DeepSeek V4 |
 | 项目历程止于 2026.03 / v0.9.33 | 实际 0.9.34-35（3月，番茄钟+待办）、0.9.36-38（5月）、0.9.39-40（main 已发） | 03 行修正至 v0.9.35 并补番茄钟；新增 2026.04–06 行（DeepSeek 适配/features 重构/Phosphor 迁移/E2E 测试体系/云同步整治/v0.9.36–v0.9.40）|
