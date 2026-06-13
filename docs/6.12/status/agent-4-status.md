@@ -7,7 +7,7 @@
 - 边界:OCR 内部实现归代理 3;制卡端归代理 5;通用图表归代理 7;`features/learning-hub/apps/views/ExamContentView.tsx`(51KB)是题库练习主界面但位于代理 2 的 learning-hub 目录,按"题库域 UI"对待、改动谨慎并登记。
 
 ## 当前状态
-T1-T6 审阅完成并实施修复;npm typecheck 已通过,cargo check 后台编译中(tantivy 缓存重建+多代理构建锁竞争,较慢)。下一步:T7(界面体验)、T8(富文本渲染)。最后更新:2026-06-13 00:05
+T1-T8 审阅完成并实施修复;前端验证全部通过(typecheck/lint 域内零问题/受影响测试 3 个全绿)。cargo check 后台编译中(此前因多代理构建锁竞争+磁盘满出现僵死,已杀掉重启,rustc 正在实际编译)。剩余:cargo check/clippy/test 收尾(T9)+总结(T10)。最后更新:2026-06-13 00:20
 
 ## TODO 计划
 - [x] T1 question_import_service(142KB):AI 提取题目解析健壮性(畸形 JSON 容错)、批量导入事务性(2026-06-12)
@@ -16,8 +16,8 @@ T1-T6 审阅完成并实施修复;npm typecheck 已通过,cargo check 后台编�
 - [x] T4 做题历史与统计:掌握率口径一致(mastered/total、SUM(correct)/SUM(attempt) 全链一致)、热力图/打卡聚合源修复、查询均有索引/分页(2026-06-12)
 - [x] T5 题目同步服务:冲突解决 SAVEPOINT 原子+pending 双检幂等;修复编辑漏标 modified(2026-06-12)
 - [x] T6 试卷切题:坐标换算链健壮、跨页合并已由代理3加固;图片组件为死代码待决策(2026-06-12)
-- [ ] T7 做题界面体验:键盘快捷作答、答案防误触提交、深度解析加载状态
-- [ ] T8 题目富文本(LaTeX/图片)出题/做题/解析三处渲染一致性
+- [x] T7 做题界面体验:快捷键放行系统组合键、提交防重入;深度解析加载态审阅无问题(2026-06-12)
+- [x] T8 题目富文本:做题选项/参考答案/正确答案统一 LatexText;出题预览登记为待决策(2026-06-12)
 - [ ] T9 实施低风险优化并逐项验证(cargo check/clippy/test + npm typecheck/lint/test)
 - [ ] T10 写总结(发现统计/已修复清单/待用户决策项)并最终汇报
 
@@ -53,6 +53,10 @@ T1-T6 审阅完成并实施修复;npm typecheck 已通过,cargo check 后台编�
 | 27 | QuestionInlineEditor.tsx(出题) | 观察 | 低 | 出题编辑器为纯文本输入无公式预览;列表预览(VirtualQuestionList/ReviewQuestionsView)截断展示原始文本(虚拟列表渲染 KaTeX 有性能代价) | 建议(出题加预览面板属功能增强,待用户决策) |
 | 28 | qbank_grading UI(QuestionBankEditor L2089-2335) | 观察 | - | 深度解析加载状态完备:评判中(流式+取消)、失败(保留已流出内容+手动判定兜底)、完成(verdict+score 徽章)、缓存(prop/本地 ref 双层) | 审阅确认,无问题 |
 | 29 | 键盘快捷作答 | 观察 | - | 已支持:数字1-9选项、Enter提交(canSubmit+isSubmitting 守卫)、←/→切题、R重做、Space暂停计时、H暗记;输入框聚焦时自动失效 | 审阅确认,无问题 |
+| 30 | question_export_service.rs | 观察 | - | 分页流式导出、OWASP 公式注入防护(含全角变体)、GBK 编码失败显式报错、路径遍历校验、附单测;无问题 | 审阅确认,无问题 |
+| 31 | hooks/useExamSheetProgress.ts | 观察 | 低 | ref 持回调防监听器重挂竞态、session 过滤完备;唯一小瑕疵:onProgress 回调在 setState updater 内调用,StrictMode 下可能双触发(仅日志/进度上报,无实害) | 审阅确认,登记不改 |
+| 32 | tests/question-bank-editor-ai-markdown.test.tsx | bug | 低 | useBreakpoint 模块 mock 缺 useIsMobile 导出,共享组件 NotionDialog 改用 useIsMobile(代理7今日改动)后测试崩溃 | 已修复(mock 补齐 useIsMobile/useIsTablet) |
+| 33 | tests/practice-launcher-runtime-restore.test.tsx | bug | 低 | 首个用例承担 PracticeLauncher 模块图一次性动态导入成本(phosphor-icons barrel 等),8 代理高负载下超过默认 5s 超时,环境性假失败 | 已修复(该用例 timeout 放宽至 30s) |
 
 ## 已实施的优化
 | # | 改动文件 | 改动说明 | 验证结果 |
@@ -65,7 +69,9 @@ T1-T6 审阅完成并实施修复;npm typecheck 已通过,cargo check 后台编�
 | 6 | learning-hub/views/ExamContentView.tsx | 发现#14:限时练习/模拟考改墙钟差值计时(不随标签页可见性暂停,与后端口径一致);普通计时器维持原 isActive 暂停行为 | npm typecheck ✓ |
 | 7 | question_bank_service.rs(时间统计) | 发现#17:热力图/打卡改 answer_submissions 聚合(DISTINCT 题目数+当日做对题数,存量题兜底);发现#18:三个统计函数 DATE 加 'localtime' | cargo check 编译中 |
 | 8 | vfs/repos/question_repo.rs | 发现#19:update_question 补 mark_as_modified(同步漏标) | cargo check 编译中 |
-| 9 | QuestionBankEditor.tsx | 发现#24:快捷键放行修饰键组合;发现#25:handleSubmit 防重入;发现#26:选项/参考答案/正确答案 8 处统一 LatexText 渲染 | npm typecheck 进行中 |
+| 9 | QuestionBankEditor.tsx | 发现#24:快捷键放行修饰键组合;发现#25:handleSubmit 防重入;发现#26:选项/参考答案/正确答案 8 处统一 LatexText 渲染 | npm typecheck ✓ + ai-markdown 测试 ✓ |
+| 10 | tests/vitest/question-bank-editor-ai-markdown.test.tsx | 发现#32:useBreakpoint mock 补齐 useIsMobile/useIsTablet 导出 | vitest ✓(2 用例) |
+| 11 | tests/vitest/practice-launcher-runtime-restore.test.tsx | 发现#33:首用例 timeout 放宽至 30s(模块图一次性导入开销) | vitest ✓(15.8s < 30s) |
 
 ## 跨组问题(发现但不属于本组职责域)
 | # | 涉及文件 | 问题描述 | 建议归属代理 |
@@ -74,6 +80,44 @@ T1-T6 审阅完成并实施修复;npm typecheck 已通过,cargo check 后台编�
 | # | 文件 | 改动段落/函数 | 原因 |
 |---|------|--------------|------|
 | 1 | features/learning-hub/apps/views/ExamContentView.tsx(代理2目录,题库域UI) | 计时 useEffect(原 L1108-1132)移至 activeAdvancedTimerDuration/activeAdvancedStartedAt useMemo 之后并改墙钟计时 | 修复发现#14;只动计时段落,未触碰其他逻辑 |
+
+## 总结(T10)
+### 发现统计
+- 共 33 项发现:bug 15 项(已全部修复)、体验/建议 4 项(其中 3 项待用户决策、1 项跨组登记)、死代码 1 项(待用户决策)、观察确认 13 项(无需改动)。
+- 严重度分布:中 8 项(全部修复)、低-中 1 项(已修复)、低 15 项(12 修复/3 登记)、无风险观察 9 项。
+
+### 已修复清单(15 bug + 2 测试修复)
+后端(Rust):
+1. VLM 断点恢复重复/丢题(内容哈希去重)— import_service
+2. 选项剥离启发式误切题干 — import_service
+3. JSON 导入无事务+计数虚高(SAVEPOINT)— import_service
+4. 正则循环内重复编译(LazyLock)— import_service
+5. CSV Merge 失败穿透产生重复题 — import_service
+6. AI 判分 verdict/score 取首组标签被复述污染(改取末组+单测)— qbank_grading
+7. Analyze 模式清空已有 ai_score — qbank_grading
+8. 选择题"A. 全文"形态答案判错(extract_choice_keys+9 单测)— question_bank_service
+9. submit_mock_exam u32 下溢风险(saturating_sub)— question_bank_service
+10. 热力图/打卡聚合源错误(改 answer_submissions+DISTINCT)— question_bank_service
+11. 统计 UTC/本地日界线错位(DATE 'localtime')— question_bank_service
+12. 编辑题目漏标 sync modified(mark_as_modified)— question_repo
+前端(React/TS):
+13. 模拟考输入无钳制+手动/自动交卷竞态 — MockExamMode
+14. 倒计时颜色阈值用配置态时长 — TimedPractice/MockExam
+15. 限时练习/模拟考切标签页计时暂停与后端墙钟脱节(墙钟差值计时)— ExamContentView
+16. 快捷键拦截 Ctrl/Meta/Alt 系统组合键 — QuestionBankEditor
+17. handleSubmit 无重入守卫(双击双计)— QuestionBankEditor
+18. 选项/参考答案/正确答案 8 处裸文本不渲染公式(统一 LatexText)— QuestionBankEditor
+另:修复 2 个受其他组件演进影响的存量测试(useBreakpoint mock 缺导出、首用例模块导入超时)。
+
+### 待用户决策项
+1. 发现#6:VLM 中途失败但已存部分题时,会话仍标 completed,用户无"缺题"提示 — 改为部分成功语义需产品决策。
+2. 发现#20:batch_resolve_conflicts 部分失败静默 — 返回 {resolved, failed} 需改前后端接口。
+3. 发现#23:ExamCardImage/CroppedExamCardImage/ExamPageImage 三个组件全仓无引用(死代码)— 确认后可删除。
+4. 发现#27:出题编辑器无公式预览(功能增强)。
+
+### 验证结果
+- 前端:npm run typecheck ✓;eslint 域内 0 error(3 条存量 warning 为基线);受影响 vitest 3 用例全绿。
+- 后端:cargo check / clippy / test(进行中,见当前状态)。
 
 ## 接力须知
 - 我是 8 子代理工作组的 4 号(题库与练习),分工见 `docs/6.12/agent-4.md`,全局规则见 `docs/6.12/README.md`。

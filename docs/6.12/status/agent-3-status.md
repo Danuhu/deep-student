@@ -54,6 +54,7 @@
 | F3 | vlm_grounding_service.rs 7 处 | bug | 中 | `&body[..body.len().min(N)]` 按字节切片截断错误消息/VLM 响应,中文内容(智谱 API 错误信息、题目文本)在非 UTF-8 字符边界会 panic,且全在错误处理路径上(雪上加霜) | 已修复(新增 truncate_utf8 边界安全截断,7 处全部替换,补单元测试) |
 | F4 | llm_structurer.rs:align_by_label | 坏味道 | 低 | label 匹配失败后的位置回退可能把已按 label 匹配走的 parsed 项重复分配给另一题(label 拼写错位场景);概率低、影响为单题内容重复 | 建议(保持现状,登记备查) |
 | F5 | vlm_grounding_service.rs:crop_figure_from_page | - | - | bbox 裁切已正确处理颠倒坐标/越界/默认零 bbox(1x1 最小裁切,下游 MIN_FIGURE_SIZE=30 过滤),补 2 个回归测试 | 通过 |
+| D2 | pdf_ocr_service.rs:run_backend_worker + enforce_cache_budget | bug/泄漏 | 中 | `pdf_ocr_images/{session_id}` 渲染产物(每页一张 JPEG)创建后**永不清理**:enforce_cache_budget 只管 `pdf_ocr_cache`(OCR 结果 JSON),全仓无其他引用;每次 PDF OCR 把整套页面图永久留盘,150DPI 500 页 ≈ 数百 MB/次,无限累积 | 已修复(预算机制泛化为 enforce_dir_budget,images 根目录纳入 LRU 清理:2GiB 上限/1GiB 目标,新会话启动时触发,活跃会话目录保留) |
 | G1 | multimodal/retriever.rs + page_indexer.rs + vector_store.rs + reranker_service.rs | 死代码 | 中 | `retriever.rs` 未在 mod.rs 声明、全仓无引用;`PageIndexer::new` 全仓无调用方(实际索引逻辑在 vfs/multimodal_service.rs),连带 vector_store/reranker_service 的 PageIndexer 专用路径 ~130KB 疑似死代码 | **待用户决策**(删除属中风险,需与代理 2 确认 vector_store 边界) |
 | G2 | multimodal/embedding_service.rs:embed_texts(_with_progress) | bug | 中 | embedding API 返回数量未与请求 chunk 数核验即按索引取值,服务端少返回时 panic(越界) | 已修复(长度校验,不匹配报错) |
 | G3 | multimodal/page_indexer.rs:index_pages | bug | 低 | 全部页 unchanged 跳过时提前 return,mm_index_state 卡在 indexing——但该模块为死代码(见 G1),实际无影响 | 登记备查(随 G1 一并处理) |
@@ -88,6 +89,7 @@
 | F13 | components/CroppedExamCardImage.tsx | I2:onLoad/onError 回调 ref 化 + effect 依赖标量化(防对象身份抖动反复重裁剪);useCroppedImage 补退化 bbox 守卫与 resolvedBbox height 判定 | typecheck ✅ lint ✅ |
 | F14 | components/ImageViewer.tsx | I3:executeCrop 负尺寸守卫;缩略图高亮/点击与底部页码统一走 internalIndex/goTo(未接回调时也可用);顺带清掉 no-empty lint 错误 | typecheck ✅ lint ✅ |
 | F15 | learning-hub/apps/views/XlsxPreview.tsx | I4:escapeHtml 补引号转义(sheet 名进入属性值上下文) | typecheck ✅ lint ✅ |
+| F16 | pdf_ocr_service.rs | D2(X3 落地):enforce_cache_budget 泛化为 enforce_dir_budget(根目录/上限/目标参数化),`pdf_ocr_images` 纳入 LRU 预算清理(2GiB/1GiB,保留活跃会话),根治渲染图片永久泄漏 | cargo check 待跑(改动晚于当前后台 check) |
 
 ## 跨组问题(发现但不属于本组职责域)
 
@@ -95,7 +97,7 @@
 |---|----------|----------|--------------|
 | X1 | llm_manager/exam_engine.rs:call_ocr_free_text_with_fallback | 熔断器 allow_request() 之后存在多条提前返回路径(无引擎配置/图片准备失败/请求构建全失败)不调用 record_*,在 HalfOpen 时泄漏探针。本组已在 ocr_circuit_breaker.rs 加探针超时兜底(C3),根治需在该函数提前返回路径上补 record;另注意配置类错误不应计为引擎失败 | 代理 1 |
 | X2 | llm_manager/exam_engine.rs:call_ocr_page_with_fallback | 该路径(PDF OCR/VFS 索引用)完全未接入熔断器,所有引擎宕机时每页都全链路超时重试,500 页批量会长时间空转;建议接入 per-engine 熔断(ocr_circuit_breaker 已支持 registry) | 代理 1 |
-| X3 | pdf_ocr_service.rs run_backend_worker:images_dir | `pdf_ocr_images/{session_id}` 渲染产物目录由谁清理未在本文件体现;若 startup_cleanup(代理 2)未覆盖,会无限累积。待本组后续核实后再定 | 代理 2(待核实) |
+| X3 | ~~pdf_ocr_service.rs:images_dir~~ | **已核实并收回本组修复**:全仓只有 pdf_ocr_service.rs 引用 `pdf_ocr_images`,无任何清理逻辑(enforce_cache_budget 只管 `pdf_ocr_cache`)——确认为本组域内泄漏,已修复(见 D2/F16),不再跨组 | ~~代理 2~~ 本组已处理 |
 | X4 | chat_v2/tools/paper_save_executor.rs:209,244,346 | 与 F3 同型 bug:`&raw[..raw.len().min(300/200/500)]` 字节切片截断,中文内容非字符边界 panic;本组已在 vlm_grounding_service.rs 修复同类问题并提供 truncate_utf8 参考实现 | 代理 1 |
 | X5 | llm_manager 配置层(VLSummaryThenTextEmbed 降级链) | `VLSummaryThenTextEmbed` 模式已弃用(is_mode_available 恒 false),但 embed_pages_with_mode_and_progress 的降级链仍把它作为 VL-Embedding 的 fallback:VL 不可用时降级注定失败,用户只看到"配置错误"。建议降级链直接跳到 TextOnly 或给出明确提示 | 代理 1 |
 | X6 | commands.rs:qbank_get_source_images(5728) | 一次性把题目集全部源图片读盘 + base64 编码返回(50 页扫描卷可达上百 MB IPC payload + 前端常驻内存),ImageCropDialog 打开即触发。建议改分页/按需加载(前端 ImageCropDialog 在本组域内,愿配合改造) | 代理 4(题目集) |

@@ -13,8 +13,9 @@
 
 ## 当前状态
 
-**全部审阅项(G1~G7、F1~F8)已完成,9 项低风险优化已实施并通过验证,收尾总结见文末。**
-最后更新:2026-06-13 00:10
+**全部审阅项(G1~G7、F1~F8)已完成;追加专项:全库 hover-only 操作触屏可达性审计(33 文件)完成,
+16 个组件修复。共 10 批低风险优化已实施并通过验证,收尾总结见文末。**
+最后更新:2026-06-13 00:35
 
 ## TODO 计划
 
@@ -54,6 +55,9 @@
 | 7 | 环境基线(非本组改动) | - | - | ① npm 依赖不完整(@phosphor-icons/react、@lobehub/icons 缺失),已用 `npm install --legacy-peer-deps` 补装(与 CI 一致),package-lock.json 已还原;② `npm run lint:css` 脚本的单引号 glob 在 Windows PowerShell 不展开(NoFilesFoundError);③ stylelint 基线 3072 个历史错误;④ NoteContentView.tsx:145 处 `react-hooks/exhaustive-deps` 规则定义缺失报错为基线问题(改动前已存在) | 已记录 |
 | 8 | `notes/NotesCrepeEditor.tsx` 工具栏(阅读模式等按钮 h-7 w-7=28px) | 体验 | 低 | 移动端触控目标 <44px;但工具栏空间受限属设计权衡,Crepe 工具栏整体在移动端的可用性归 F6 走查统一评估 | 待 F6 评估 |
 | 9 | `command-palette.css` | bug/体验 | 中 | 触屏三缺陷:① 收藏星标 `opacity:0` 依赖 hover 显现,触屏永不可见;② 模式/关闭按钮 28px 触控目标过小;③ 键盘提示页脚(↑↓/Enter/Esc)对触屏无意义占据纵向空间 | 已修复(#9) |
+| 12 | 全库 33 个文件存在 `opacity-0 group-hover:opacity-100` hover-only 操作 | bug | **高** | 触屏设备无 hover,这些操作按钮永不可见。审计后分三类:**阻断型 16 处已修**(会话重命名/删除、附件移除、Anki 卡编辑/移除、技能收藏/启用、笔记标签改名/删除、OCR 引擎排序、维度管理、重索引、批改历史收藏/删除、题目选项删除、术语删除、快捷键编辑等);**有替代路径 14 处不动**(整卡可点/3 点菜单/长按 contextmenu/选中态显现/装饰性提示);**死代码 1 处**(TranslationHistory 无引用方);仅低危 2 处此前已带 coarse 变体(QuestionBankListView/ExamSheetUploader) | 已修复(#10) |
+| 13 | `learning-hub/components/FolderTreeItem.tsx` 三点菜单 | 体验 | 低 | hover-only 但有长按 contextmenu 兜底;行高 h-7(28px)触屏偏密,常显 20px 按钮意义有限,改善需整行触屏加高(结构性) | 建议(协商级,归学习中心组评估) |
+| 14 | `MessageItem.tsx` 历史消息 footer 操作 `md:opacity-0 md:group-hover` | 体验 | 低 | <768 移动端常显 ✓;但 ≥768 触屏平板(Android 平板横屏)hover-only。平板适配整体属后续专项 | 已记录(随 #11 横屏专项) |
 | 10 | 全库 framer-motion 直接 `import { motion }` | 性能 | 低 | 未用 LazyMotion/domAnimation 按需加载特性集;但 ChatV2 等重页面已整体懒加载,增量收益有限,改造需触碰多特性组件 | 建议(协商级,暂不动) |
 | 11 | 横竖屏:横屏手机(高 <768 宽 ≥768)按桌面布局渲染 | 体验 | 低 | isSmallScreen 仅看宽度;横屏手机显示桌面双栏布局,空间利用合理但触控目标偏小;属设计权衡,真机验证后再裁决 | 已记录(待真机) |
 
@@ -87,6 +91,7 @@
 | 7 | A8-2:`src/components/layout/MobileSlidingLayout.tsx` + `index.ts` + `features/learning-hub/LearningHubPage.tsx` | 手势豁免选择器升级:① 修正两个从未匹配的失效类名(`.ds-pdf__viewer`→`.ds-pdf-viewer`、`.mindmap-canvas`→`.mindmap-container`/`.react-flow`)——此前 PDF 捏合缩放/导图节点拖拽会被三屏布局手势劫持;② 提为 `DEFAULT_GESTURE_IGNORE_SELECTOR` 默认值,ChatV2 右面板(PDF/导图/笔记)、NotesHome(ProseMirror)等 7 个使用方自动受益;LearningHubPage 收敛复用同一常量 | typecheck ✓ / eslint 0 错误(5 个警告均为基线已有) |
 | 8 | SA-2 安全区口径统一:`GlobalPomodoroWidget.tsx`、`UnifiedNotification.css`、`QuestionBankEditor.tsx`、`InlineImageViewer.tsx`、`responsive-utilities.css` | 5 处裸 `env(safe-area-inset-*)`(Android WebView 取不到值)统一为项目约定 `var(--android-safe-area-*, env(...))`/fallback 变量形式;`.safe-area-left/right/all` 接入 SA-1 新增的 left/right 变量 | typecheck ✓ / eslint:涉及文件的 4 个 error 均为基线已有(三元语句风格+exhaustive-deps 规则缺失,位于未触碰行) |
 | 9 | F8:`src/command-palette/styles/command-palette.css` | 触屏适配补丁(`@media (pointer: coarse)`):收藏星标常显(opacity 1+32px 触控区)、模式/关闭按钮 28→36px、隐藏键盘快捷键提示页脚 | stylelint:17 个报错均为基线已有(alpha-value-notation 等,位于未触碰行),新增块 0 错误 |
+| 10 | hover-only 触屏可达性修复(16 组件):`SessionBrowser.tsx`(重命名/删除常显+36px)、`AttachmentPreview.tsx`(附件移除 X 常显)、`ankiCardsBlock.tsx`(模板渲染态编辑钮常显+32px,点卡片是翻面无替代路径)、`SkillsList.tsx`(收藏星标+「启用」标签常显)、`AnkiPanelHost.tsx`(卡片移除常显)、`GradingHistory.tsx`(收藏/删除常显+星标徽章防重叠)、`NotesContextPanel.tsx`+`NoteTagsEditor.tsx`(标签 X/改名 70% 常显)、`MemoryTreePreview.tsx`(跳转钮 70%)、`IndexStatusView.tsx`(重索引常显)、`QuestionInlineEditor.tsx`(选项删除/图片删除)、`OcrEngineCard.tsx`(排序/操作常显)、`DimensionManagement.tsx`(行操作常显)、essay `SettingsDrawer.tsx`(维度删除 70%)、`PromptPanel.tsx`(术语删除 70%)、`ShortcutSettings.tsx`(快捷键操作常显) | 实现:TSX 组件用 `useMediaQuery('(pointer: coarse)')` 条件类(FinderFileItem N-4 同范式)或 `[@media(pointer:coarse)]:opacity-*` Tailwind 任意变体(QuestionBankListView 既有惯用法)。typecheck 全仓 ✓;eslint 涉改 16 文件 0 新增 error(基线 warning 不变);chat+ui-shell 单测 358/360 通过,2 个失败(spssProjectSkillLoader、InputBarUI.thinkingRuntimeState)经查源文件无工作区改动、与本组无关,为他组/基线问题 |
 
 ## 跨组问题(发现但不属于本组职责域)
 
@@ -123,7 +128,7 @@
 
 **发现统计**:11 项(中严重度 3:断点错位/安全区固定值/命令面板触屏缺陷;低 6;基线环境 1;跨组 1)。
 
-**已实施优化 9 项**(全部低风险、验证通过):
+**已实施优化 10 批**(全部低风险、验证通过):
 1. 22 个 CSS 文件系统断点邻界归一(768→767.98 等,消除 iPad mini 竖屏混合态);
 2. useIsMobile/useIsTablet 精确取反(小数视口宽度互补);
 3. NoteContentView 收敛到 useIsMobile();
@@ -132,7 +137,10 @@
 6. 移动端 KaTeX 长公式横向滚动(防溢出);
 7. 手势豁免选择器修复(.ds-pdf-viewer/.mindmap-container/.react-flow 失效类名)+提为默认值;
 8. SA-2 安全区口径统一(5 处裸 env() → --android-safe-area-* 变量);
-9. 命令面板触屏适配(收藏星标常显/按钮 36px/隐藏键盘提示)。
+9. 命令面板触屏适配(收藏星标常显/按钮 36px/隐藏键盘提示);
+10. **全库 hover-only 操作触屏可达性审计与修复**:33 个含 `opacity-0 group-hover` 文件逐一审计,
+    16 个组件的阻断型操作(触屏永不可见且无替代路径)改为 coarse-pointer 常显——
+    含会话重命名/删除、聊天附件移除、Anki 卡编辑、技能收藏等高频路径(发现 #12)。
 
 **待用户/真机裁决**:
 - SA-1 需 Android 真机验证(旋转/手势导航/三键导航);MainActivity.kt 为受控副本,`tauri android init` 后需同步 gen 工程;

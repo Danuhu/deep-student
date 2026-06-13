@@ -14,13 +14,13 @@ T1/T2/T3 已审完,发现 F1-F10。用户已授权全部修复("同意所有修�
 - [x] T2 工具执行器与审批机制(2026-06-12):approval_manager/approval_scope/approval_handlers 全读;敏感度默认 fail-closed(None≠Low 需审批)、scope 键 v2 按 server 隔离、防通配桶污染,设计良好,无新发现
 - [x] T3 多模型并行(变体对比)与多 Tab 并发(2026-06-12):variant_context.rs/multi_variant.rs/approval链路/事件通道/前端 queue 全读;发现 F6(计费重复)、F8(变体审批失效)、F9(session_id 污染)、F10(队列引用丢失);事件通道按 session 隔离设计良好,变体取消级联(child_token)正确
 - [x] T4 9 家供应商适配一致性(2026-06-13):13 个 RequestAdapter 全读(注册表/聚合平台跳过/scope优先设计良好,各家参数差异处理到位且有单测);providers/mod.rs 4 个 ProviderAdapter 流式解析全读(per-request 实例化无跨流污染);model2_pipeline HTTP 重试(429 Retry-After/5xx 退避/401403 直返)设计良好;发现 F11-F16,修复 F11-F14
-- [ ] T5 技能三级加载(内置→全局→项目)覆盖规则与 Token 节省(chat_v2/skills.rs、前端 features/chat/skills、features/skills-management)
-- [ ] T6 MCP 连接生命周期:断连重连、工具 schema 校验、错误透传(src-tauri/src/mcp/、src/mcp/、src/mcp-debug/)
-- [ ] T7 7 搜索引擎适配降级与配额;深度调研长链路中断恢复(tools/web_search.rs 等)
-- [ ] T8 记忆系统:提取→比对→决策→写入幂等性,隐私模式阻断外呼(memory/)
-- [ ] T9 API Key 等敏感信息日志/事件/错误泄漏排查(全域 grep + 审计)
-- [ ] T10 前端 chat store 状态膨胀与内存泄漏(长会话、多 Tab 切换)(features/chat/core、stores)
-- [ ] T11 流式渲染性能:大消息/长会话渲染抖动、不必要全量重渲染(features/chat/components、plugins)
+- [x] T5 技能三级加载与 Token 节省(2026-06-13):chat_v2/skills.rs(路径验证 canonicalize+逻辑规范化双层防遍历,设计良好)、前端 loader/registry/progressiveDisclosure 全读(三级覆盖=Map 后写胜出,project>global>builtin 顺序正确;load_skills 依赖递归含环检测;XML 注入有 escape+CDATA);后端 build_transient_skill_messages 预算裁剪带审计;skills_executor 变体分支用 branch_local_skills 隔离(与 F9 修复配合正确)。无新发现,仅注:progressiveDisclosure LRU 仅按创建序淘汰(后端为权威源,影响极小)
+- [x] T6 MCP 连接生命周期(2026-06-13):活跃链路=前端 McpService(SDK)+ 后端经 mcp-bridge-request 事件桥接(tools/mod.rs call_frontend_mcp_tool);前端重连机制完善(keepalive ping 失败阈值触发重连/被动断连最多5次退避/ensureConnected 调用前快速重连/连接错误自动重试一次);后端 src-tauri/src/mcp/ 全局客户端为遗留路径(stdio 优雅关闭/分帧自动回退设计尚可)。发现 F17(桥接超时不匹配+监听器泄漏),已修复 O15
+- [x] T7 搜索引擎与深度调研(2026-06-13):web_search.rs 7 引擎适配(google_cse/serpapi/tavily/brave/searxng/zhipu/bocha)全读;上层 WebSearchTool 有 key 预过滤+单/多引擎聚合(do_aggregated_search 并发+去重+融合,全失败才报错)+force_engine 优先级;per-provider 策略(超时/重试/并发/限速/缓存)设计良好;ChatV2 builtin_retrieval 路径带取消 select(口径:单引擎,无聚合,合理)。深度调研=内置技能(todo-tools+web_search+笔记),中断恢复靠 todo 持久化(F4 修复已加固)。发现 F18(熔断器死配置,登记)、修复 F19→O16(无差别重试)
+- [x] T8 记忆系统(2026-06-13):write_smart 链路(幂等键 reserve/cache/finalize+相似搜索降级+LLM决策降级ADD+低置信度降级NONE+fact硬拒绝+审计日志)设计完整;隐私模式阻断验证:search/search_with_embedding/search_with_rerank 直接返回空、auto-extract 单变体(persistence.rs:982)+多变体(multi_variant.rs:586)双路径 gate 一致、write_smart 本地标题去重+安全降级新增、category refresh gate、evolution 纯本地 SQLite 无外呼;敏感信息过滤三处入口(auto_extractor/memory_executor 工具/write_smart)一致。发现并修复 F20(幂等预留泄漏)→O17
+- [x] T9 敏感信息泄漏排查(2026-06-13):发现高危泄漏链 F21——Gemini/google_cse/serpapi/searxng 把 key 放 URL query,而①LLM_AUDIT 审计日志+调试落盘+前端 chat_v2_llm_request_body 事件裸打 url;②test_connection 的 debug 日志+用户可见错误消息带完整 URL;③reqwest::Error Display 自带完整 URL,8 处 send().map_err 直接格式化;④web_search ToolError::Http 同因。已全部修复(O18)。其余检查:MCP env 日志已 [REDACTED]、test_connection 仅打 key 长度、data_governance 同步无凭证日志、前端 console 无 key 打印、embedding/reranker 测试 key 在 header 无虞
+- [x] T10 前端 store 内存审阅(2026-06-13):sessionManager LRU(上限10,淘汰前保存,streaming/in-flight 块不淘汰,pendingEvictions 防双清),destroy 全套清理(adapter/eventBridge/chunkBuffer/autoSave/skills/订阅/变体防抖计时器);附件 Blob URL revoke + pdfProcessingStore 清理到位;chunkBuffer 有 max size+flush。发现并修复 F22(淘汰路径 blockingInteractionUnsubscribers Map 条目泄漏)→O19
+- [x] T11 流式渲染性能(2026-06-13):渲染层已系统性优化——MessageList 虚拟化(tanstack-virtual)/直接渲染双模式、MessageItem React.memo 自定义比较屏障、hasActiveBlock 布尔选择器防 Set 引用击穿、useBlocksByIds ref 稳定化、chunkBuffer 写入节流(WINDOW_MS+MAX_SIZE)、MarkdownRenderer memo+useMemo(remark/katex 配置)+流式平滑(streamingSmoothing)。无新发现,不需改动
 - [ ] T12 语音输入输出(voice_input.rs、tts.rs、features/voice-input)
 - [ ] T13 推理与注入策略(reasoning_policy.rs、injection_budget.rs)、用量追踪(llm_usage/)
 - [ ] T14 会话基础(session_manager.rs、persistent_message_queue.rs)
@@ -46,6 +46,12 @@ T1/T2/T3 已审完,发现 F1-F10。用户已授权全部修复("同意所有修�
 | F14 | providers/mod.rs OpenAIResponsesAdapter::parse_stream | bug | 中 | response.failed / error 事件被吞掉只发 Done:供应商返回的失败原因(配额不足/参数错误)完全丢失,前端只看到空响应,无日志可查 | 已修复(见 O14) |
 | F15 | model2_pipeline.rs:2293-2299 流读取 Err 分支 | 体验 | 低 | 流中途读错误且已有部分内容时 break 并按"部分成功"返回 Ok——内容被静默截断,用户无感知(无截断标记事件);F13 修复后触发概率大幅下降。建议:发截断警示事件供前端标记,需前端配合,登记待后续 | 登记(改动涉及前后端协作,暂不动) |
 | F16 | model2_pipeline.rs:2693 call_unified_model_stream_with_config | 坏味道 | 低 | 全仓无调用方的死代码(~1000 行,含完整流式循环副本),与主路径双份维护易漂移(本次 SafetyBlocked 修复就要同步改两处) | 登记(删除属大改动,待用户确认) |
+| F17 | tools/mod.rs call_frontend_mcp_tool | bug | 中 | ①桥接默认超时 60s 与 executor_registry 给 MCP 工具的 180s 不匹配,慢工具(60-180s)在桥接层被提前掐断误报超时;②外层超时 drop 本 future 时手动 unlisten 不执行,每次外层超时在 window 残留一个事件监听器(长会话+不稳定 MCP 服务器会累积泄漏) | 已修复(见 O15) |
+| F18 | tools/web_search.rs ProviderStrategy | 坏味道 | 低 | circuit_breaker_enabled/failure_threshold/recovery_timeout_ms 三个熔断器配置字段全仓无读取方——声明了熔断能力但从未实现,SerpAPI 默认 enabled=true 也是空话 | 登记(实现熔断器属新功能,待用户确认) |
+| F19 | tools/web_search.rs do_search retry | 坏味道 | 低 | backon retry 无 .when() 条件——ConfigMissing/400/401/403/404 等不可恢复错误也会按 max_attempts 重试,浪费时延且可能重复打 4xx 接口 | 已修复(见 O16) |
+| F20 | memory/service.rs write_smart_with_source | bug | 中 | 幂等键 reserve 成功后,decision 主路径之前的 Err 早退点(Note/Study 分支 write_explicit_memory?、is_privacy_mode?、隐私分支 4 个?)不清理 in_progress 预留——一次 DB 偶发错误会把该幂等键卡死到 TTL(数小时),期间同 key 请求全部 Conflict | 已修复(见 O17) |
+| F21 | model2_pipeline.rs + tools/web_search.rs | 安全 | 高 | API Key 经 URL query 的供应商(Gemini ?key=、google_cse、serpapi、searxng)密钥泄漏:LLM_AUDIT 日志/调试落盘/前端调试事件裸打 url;test_connection 错误消息含完整 URL 上抛到 UI;reqwest::Error Display 自带 URL,所有 send() 错误格式化点(8处)+流读取错误事件都会带出;web_search ToolError::Http 同因进 ToolResult.error | 已修复(见 O18) |
+| F22 | core/session/sessionManager.ts finalizeEviction | bug | 低 | LRU 淘汰路径只清 streamingUnsubscribers,blockingInteractionUnsubscribers 的 Map 条目永久残留(与 destroy 路径不一致);长期使用+频繁切换会话缓慢累积 | 已修复(见 O19) |
 
 ## 已实施的优化
 | # | 改动文件 | 改动说明 | 验证结果 |
@@ -64,6 +70,11 @@ T1/T2/T3 已审完,发现 F1-F10。用户已授权全部修复("同意所有修�
 | O12 | providers/mod.rs + utils/sse_buffer.rs | OpenAIAdapter::parse_stream 改用 strip_prefix("data:") + 可选空格,兼容无空格 SSE;check_done_marker 同步兼容 "data:[DONE]";新增单测 openai_adapter_parse_stream_accepts_data_prefix_without_space(修复F12) | cargo check 验证中 |
 | O13 | llm_manager/model2_pipeline.rs | 新增 STREAMING_REQUEST_TIMEOUT_SECS=7200,call_unified_model_2_stream 的请求 builder 按请求覆盖 .timeout(2h),解除 reqwest 客户端 300s 总超时对流式响应的截杀;挂起防护由 Pipeline 层空闲超时(O7)负责;非流式调用不受影响(修复F13,与O7配套) | cargo check 验证中 |
 | O14 | providers/mod.rs + llm_manager/model2_pipeline.rs | Responses 解析器 response.failed/error 事件:记录错误日志 + 以 SafetyBlocked(type=provider_error) 上抛;model2 SafetyBlocked 分支区分 provider_error 与安全阻断,错误事件不再误标为"安全策略阻断"(修复F14) | cargo check 验证中 |
+| O15 | tools/mod.rs call_frontend_mcp_tool | 桥接默认超时 60s→180s(对齐 executor_registry 的 MCP 工具超时);监听器注销改为 RAII guard(Drop 时 unlisten),外层超时 drop future 也不再泄漏监听器(修复F17) | cargo check 验证中 |
+| O16 | tools/web_search.rs | do_search 重试加 .when(is_retryable):Config/4xx(400/401/403/404)不重试,网络错误/429/5xx 才重试(修复F19) | cargo check 验证中 |
+| O17 | memory/service.rs | write_smart_with_source 新增 cleanup_on_err 闭包,预留后主路径前的全部 Err 早退点(Note/Study/隐私分支共 7 处?)套 .map_err 清理幂等预留(修复F20) | cargo check 验证中 |
+| O18 | llm_manager/model2_pipeline.rs + tools/web_search.rs | 密钥泄漏修复:①新增 sanitize_url_for_log(query 中 key/api_key/apikey/token/access_token/secret → [REDACTED]),log_llm_request_audit/log_and_emit_llm_request 统一脱敏后再日志/落盘/发前端;②test_connection 6 处 URL 输出改用脱敏值;③8 处 send() map_err + 流读取错误分支改用 e.without_url();④web_search 新增 redact_url_secrets 正则,err_from_tool_error 入口统一脱敏;新增 2 个单测(修复F21) | cargo check 验证中 |
+| O19 | core/session/sessionManager.ts | finalizeEviction 补齐 blockingInteractionUnsubscribers 清理,与 destroy 路径对齐(修复F22) | tsc 待验证 |
 
 ## 跨组问题(发现但不属于本组职责域)
 | # | 涉及文件 | 问题描述 | 建议归属代理 |

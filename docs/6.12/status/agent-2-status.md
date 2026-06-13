@@ -8,7 +8,7 @@
 - 不动:OCR 实现(代理3)、备份/云同步(代理7)、commands.rs 整体架构(代理7)
 
 ## 当前状态
-TODO 1-10 审阅完毕,9 项修复已实施且 **cargo check 通过**(独立 target-agent2 目录,9m04s,exit 0,仅既有警告)。`cargo test --lib vfs::` 后台运行中。剩余:TODO 11 汇总报告 + 测试结果确认。最后更新:2026-06-12 23:25
+**第二轮排查完成**。新增 F12(死缓存移除)、F13(delete_by_resource* 吞错 + 删除顺序),O8/O9 已实施并通过 cargo check。其余复查区域(检索路径、大 handlers、data_space、file/attachment purge、SQLite pragmas、写入路径)均确认健康。等待用户对 D2(textbooks_db 遗留模块)决策或关闭任务。最后更新:2026-06-13 01:40
 
 ## TODO 计划
 - [x] 0. 创建状态文档,摸清目录结构(2026-06-12)
@@ -22,7 +22,9 @@ TODO 1-10 审阅完毕,9 项修复已实施且 **cargo check 通过**(独立 tar
 - [x] 8. models.rs / vfs/types.rs:serde 兼容性、前端类型同步(2026-06-12,结论:55 个 Serialize 结构体全部 camelCase,与前端 TS 接口对齐)
 - [x] 9. 资源中心 UI:列表虚拟化、搜索防抖、向量化状态轮询(2026-06-12,结论:三项全部达标,无需改动)
 - [x] 10. DSTU 前端 api 封装审阅(2026-06-12,结论:已有多轮加固,无新发现)
-- [ ] 11. 汇总审阅报告(等待 cargo test 结果,然后向用户最终汇报)
+- [x] 11. 汇总审阅报告 + 最终汇报(2026-06-13)
+- [x] 12. F10 深挖与实施(定性死缓存,整体移除,O8)(2026-06-13)
+- [x] 13. 第二轮排查:vfs/handlers.rs、dstu/handlers.rs、检索路径、database/、data_space.rs、file/attachment repo(2026-06-13,发现并修复 F13)
 
 ## 审阅发现
 | # | 文件/位置 | 类型 | 严重度 | 描述 | 处理 |
@@ -38,6 +40,8 @@ TODO 1-10 审阅完毕,9 项修复已实施且 **cargo check 通过**(独立 tar
 | F9 | vfs/lance_store.rs ensure_table | 性能 | 低 | 每次搜索/写入都重发 2 个 create_index 请求(靠 "already exists" 报错当 no-op),高频检索下网络/IO 开销可观 | 已修复:进程内 ensured_tables 缓存,双索引确认就绪才入缓存;drop_table 同步失效 |
 | F10 | lance_vector_store.rs emb_cache | 性能 | 低 | 嵌入缓存按条数(10000)封顶不看维度,4096 维 float32 时理论峰值 ~160MB 内存 | 仅记录,改动涉及缓存策略权衡,待用户决策 |
 | F11 | database/mod.rs list_anki_library_cards | bug | 低 | Anki 卡片库搜索 LIKE 未转义通配符(F1 同类,database/ 属本组);用户搜 `%`/`_` 结果错误 | 已修复:复用 vfs::repos::escape_like_pattern + ESCAPE 子句(O7) |
+| F12 | lance_vector_store.rs emb_cache(原 F10 深挖) | bug+性能 | 中 | 深查发现该缓存是**纯写入死缓存**:add_chunks 逐条 insert、启动预热全表扫描灌入,但无任何读取路径(检索一律直查 Lance);且预热向 DashMap::clone() 深拷贝副本灌数据后丢弃 — 预热从未生效,白做全表扫描 IO;cache_cap 实为 100_000,4096 维时理论峰值 1.6GB | 已修复(O8):整体移除 emb_cache/预热扫描/容量管控/死指标方法,行为不变,省内存省启动 IO |
+| F13 | vfs/lance_store.rs delete_by_resource(+except_dim/except_ids 变体) | bug | 中 | 三个按资源删除函数都 `is_ok()` 吞掉表级删除失败(F8 同模式):①index_handlers 的 DeleteIndexResult.lance*Ok/retryable 契约失真(失败仍报成功);②indexing.rs delete_resource_index 在 mm 向量删除失败时照删 SQLite 元数据,而 mm 向量无段登记、孤儿队列无法兜底,永久残留 | 已修复(O9):三函数错误传播(全部 12+ 调用方已有 Err 分支,行为兼容);indexing.rs delete_resource_index 调整顺序为"先删 mm 向量再清 SQLite",失败时全状态保持可重试 |
 
 ## 已实施的优化
 | # | 改动文件 | 改动说明 | 验证结果 |
@@ -48,7 +52,19 @@ TODO 1-10 审阅完毕,9 项修复已实施且 **cargo check 通过**(独立 tar
 | O4 | vfs/repos/embedding_repo.rs | F6:indexed 状态转换时重置 retry_count(text/mm 两处) | cargo check ✅ |
 | O5 | vfs/indexing.rs | F7:OCR 嵌入失败早退前 mark_failed | cargo check ✅ |
 | O6 | vfs/lance_store.rs | F8:delete_by_embedding_ids 错误传播;F9:ensure_table 就绪缓存 + drop_table 失效 | cargo check ✅ |
-| O7 | database/mod.rs list_anki_library_cards | F11:Anki 搜索 LIKE 转义(复用共享 helper) | 待增量 cargo check(在 O1-O6 验证后追加) |
+| O7 | database/mod.rs list_anki_library_cards | F11:Anki 搜索 LIKE 转义(复用共享 helper) | cargo check ✅(增量 7m42s,无新警告) |
+| O8 | lance_vector_store.rs | F12:移除死缓存 emb_cache + 无效预热全表扫描 + cache_size/sample_cache 死方法(约 -160 行) | cargo check ✅(增量 4m03s,警告数保持 100 无新增) |
+| O9 | vfs/lance_store.rs、vfs/indexing.rs | F13:三个 delete_by_resource* 函数错误传播;delete_resource_index 删除顺序调整(mm 向量优先) | cargo check ✅(增量 5m12s,警告数保持 100) |
+
+## 第二轮排查结论(2026-06-13)
+- **检索路径**(lance_vector_store.rs hybrid_search_rows / build_sub_library_filter):列类型显式校验、错误全部传播、过滤表达式单引号转义,无问题。
+- **vfs/handlers.rs**(254KB):全文扫描 unwrap(全部有 is_none 守卫或在测试内)、无拼接 SQL;vfs_search_all 委托给已修复的 repos;img_ 附件反查 LIKE 为参数化+前缀校验,可接受。
+- **dstu/handler_utils/search_helpers.rs**:已有自己的 escape_like_pattern(PATH-005 修复)且全部 LIKE 都带 ESCAPE,与 vfs::repos 的 helper 重复但语义一致,不合并(避免无谓改动)。
+- **data_space.rs**:槽位切换两阶段提交(pending 标记 + 启动时验证目录有效才应用),设计正确。
+- **file_repo/attachment_repo purge**:SAVEPOINT + 回滚宏 + blob 计数递减(含 PDF 页/压缩变体)+ 索引产物 purge,完整。
+- **vfs/database.rs pragmas**:foreign_keys ON、WAL、synchronous NORMAL、busy_timeout 5s,正确。
+- **写入路径**(lance_store::write_chunks):merge_insert 幂等 upsert,正确。
+- **textbooks_db.rs**:遗留模块,`textbooks_list` 命令未在 lib.rs 注册、`TextbookRepo::list` 无调用方(其中的未转义 LIKE 在死路径上);真实教材功能走 VFS repos。登记 D2 待用户决策是否清理。
 
 ## 域内审阅结论(无需改动的部分)
 - **TODO 5 DSTU 协议**:DSTU 路径是纯虚拟路径(DB 查询,非文件系统);folder_handlers 对标题做控制字符/Unicode 全角绕过/路径分隔符/`..` 四层校验(历史 CRITICAL-003、HIGH-R002/R003、MEDIUM-009 修复);blob 物理路径由 hash 派生 + DB 登记的 relative_path,不接受用户路径;dstu_export 只返回字节由前端对话框落盘,后端无任意路径写入。path_parser::is_valid_path 含遍历测试用例。无新风险。
@@ -63,6 +79,11 @@ TODO 1-10 审阅完毕,9 项修复已实施且 **cargo check 通过**(独立 tar
 |---|----------|----------|--------------|
 | X1 | src/memory/service.rs:2384-2401、memory/evolution.rs:434 | 记忆笔记删除:Lance 删除失败仅 warn,units 照删,向量孤儿无重试;建议改用 index_unit_repo::purge_index_artifacts_by_resource(本组已为该函数接入孤儿队列) | 代理 1 |
 
+## 环境级问题(非代码缺陷,全组适用)
+| # | 现象 | 诊断 | 影响 |
+|---|------|------|------|
+| E1 | `cargo test --lib` 测试二进制启动即退出,exit 0xC0000139(STATUS_ENTRYPOINT_NOT_FOUND),任何测试都未执行 | 本机环境 DLL 入口点问题:**共享 target 与独立 target-agent2 编译出的同名测试 exe 均同样报错**,与代码改动无关(进程在加载器阶段死亡)。pdfium.dll 两份一致且为 LoadLibrary 动态加载,非静态导入;PATH 注入 target\debug 无效;事件日志无记录 | 本机所有代理都无法跑 `cargo test`(单元测试验证只能靠 cargo check + 代码评审);测试套件本身在 CI/其他机器可能正常 |
+
 ## 共享文件改动登记
 | # | 文件 | 改动段落/函数 | 原因 |
 |---|------|---------------|------|
@@ -71,12 +92,13 @@ TODO 1-10 审阅完毕,9 项修复已实施且 **cargo check 通过**(独立 tar
 ## 待用户决策项(高风险/权衡类,未实施)
 | # | 事项 | 建议 |
 |---|------|------|
-| D1 | F10:lance_vector_store.rs emb_cache 改按字节预算封顶(当前按条数 10000) | 低优先级;大维度模型用户内存峰值可达 ~160MB,可改为 64MB 字节预算 LRU |
+| D1 | ~~F10:emb_cache 改字节预算~~ | 已被 F12/O8 取代:深挖发现是死缓存,已整体移除(用户已批准实施) |
+| D2 | textbooks_db.rs 遗留模块清理 | `textbooks_list` 命令未注册、`TextbookRepo::list` 无调用方,模块大部分是死代码;建议后续专门一轮清理(删除涉及 cmd/textbooks.rs 与 lib.rs 注册表,属共享文件,需用户确认) |
 
 ## 接力须知
-- **验证状态**:cargo check 已通过(2026-06-12 23:20,独立 target 目录 target-agent2,避开多代理 target 锁冲突)。`cargo test --lib vfs::` 后台运行中(终端 89041),接力会话先看测试结果。
-- 环境注意:本仓库多个子代理并行跑 cargo,共享 src-tauri/target 会 LNK1104 锁冲突;本组用 `$env:CARGO_TARGET_DIR="E:\2026ds\deep-student\src-tauri\target-agent2"` 隔离(已占 ~12GB 磁盘,E 盘充足)。不要 cargo clean 共享 target。
+- **任务已完成**:全部 TODO 关闭,O1-O7 修复均通过 cargo check;若用户提出新需求,从本文档「审阅发现/待用户决策项」继续。
+- 验证状态:cargo check 通过(O1-O6 全量 9m04s + O7 增量 7m42s,独立 target 目录 target-agent2);`cargo test` 被环境问题 E1 阻塞(测试 exe 加载即崩,非代码问题,共享 target 同样复现)。
+- 环境注意:本仓库多个子代理并行跑 cargo,共享 src-tauri/target 会 LNK1104 锁冲突;本组用 `$env:CARGO_TARGET_DIR="E:\2026ds\deep-student\src-tauri\target-agent2"` 隔离(占 ~15GB 磁盘,E 盘充足,任务结束后可整目录删除回收)。不要 cargo clean 共享 target。
 - 职责域规模:vfs/ 约 1.2MB 源码(handlers.rs 254KB、indexing.rs 194KB、types.rs 95KB),dstu/ 约 380KB(handlers.rs 236KB),database/ 约 370KB,repos/ 22 个文件约 1.1MB,lance_vector_store.rs 169KB,models.rs 71KB。
 - 既往审阅记号:代码中有「★ 2026-06-12(第二轮审阅)」等注释,本轮(第三轮)新增记号为「★ 2026-06-12(本轮审阅)」或注明 F 编号;孤儿队列(__lance_orphan_queue)、两阶段 blob 删除等基础设施是前几轮产物,本轮在其上扩展接入面。
-- 剩余工作:确认 cargo test 结果 → 向用户最终汇报(发现统计 10 项/已修复 9 项/待决策 1 项/跨组 1 项)。
-- 未执行任何 git commit/push。
+- 未执行任何 git commit/push。改动文件清单(13 个):vfs/repos/{mod,exam_repo,translation_repo,textbook_repo,resource_repo,essay_repo,question_repo,embedding_repo}.rs、vfs/{index_service,indexing,lance_store}.rs、database/mod.rs、lance_vector_store.rs。
