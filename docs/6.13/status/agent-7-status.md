@@ -16,7 +16,7 @@
 
 | # | 类型 | 改动文件 | 说明 | 验证 |
 |---|------|----------|------|------|
-| R2-O1 | F15 死代码 | 删 `src/components/Dashboard.tsx`；`src/lazyComponents.tsx` 移除 `LazyDashboard` 导出 | 旧仪表盘组件已被 `components/dashboard/*` 取代，`LazyDashboard` 全仓零引用，内部 `get_statistics` 命令 Rust 侧亦不存在 | typecheck（见下） |
+| R2-O1 | F15 死代码 | 删 `src/components/Dashboard.tsx`；`src/lazyComponents.tsx` 移除 `LazyDashboard` 导出 | 旧仪表盘已被 `SOTADashboardLite` 取代，`LazyDashboard` 全仓零引用；后端 `get_statistics` 命令不存在（`settingsApi.getStatistics` 已于审查后删除，统计走 `get_enhanced_statistics`） | typecheck（见下） |
 | R2-O2 | F12 僵尸命令(data_space) | `src-tauri/src/data_space.rs` 删 4 个未注册 `#[tauri::command]`：`get_slot_size` / `verify_slot_integrity`(命令) / `verify_all_slots_integrity` / `check_switch_disk_space`，并删其专用 DTO `SlotSizeInfo` | 4 命令在 `generate_handler!` 未注册、前端零 invoke；**保留** `SlotManager::verify_slot_integrity` / `slot_size` / `check_space_for_switch` 方法（测试与潜在内部调用仍用，且为 pub 不产生 dead_code 警告） | cargo check（见下） |
 | R2-O3 | F12 僵尸命令(debug) | `src-tauri/src/debug_commands.rs` 删 3 个未注册命令 `debug_get_raw_mistake` / `debug_get_raw_mistakes_batch` / `debug_verify_mistake_integrity` 及其专用类型 `DebugRawMistakeRecord` / `DebugIntegrityReport` | 三命令操作已废弃的「错题」表、未注册、前端包装器（见 R2-O4）亦无 UI 调用；**保留** `DebugRawChatMessage`（仍被已注册的 `debug_get_database_stats` 使用）及 `log_debug_message` / `tauri_lab_frontend_log` / `debug_vfs_*` 等已注册命令 | cargo check（见下） |
 | R2-O4 | F12 死前端包装 | 删整文件 `src/api/debugDatabase.ts` | 全仓无任何 import 该模块（函数与类型均无外部引用）；`debugGetRawMistake/Batch/VerifyMistakeIntegrity` 指向未注册命令，`debugGetDatabaseStats` 指向已注册命令但同样无 UI 调用 | typecheck（见下） |
@@ -121,3 +121,15 @@
 - feed_id=F-HKY76。P1 本域清理已落地，等 typecheck/cargo 复检结果 + 用户对 P2/P3 与跨域上报项的指示。
 - 严禁回退收尾会话已完成项（F7/F9/F13/F16/F26）。
 - 未经用户明确要求不得 git commit/push；不使用子代理。
+
+## 审查后补丁（2026-06-13，feed F-XNMJT 三轮审查）
+
+| # | 说明 |
+|---|------|
+| AR-1 | `settingsApi.getStatistics` 删除；`getEnhancedStatistics` 失败不再 fallback 到死命令 |
+| AR-2 | sync.json `notifications.*` 三键补全 + 删除已废弃 `resource_sync_*` 错误文案键 |
+| AR-3 | 错题 save stub（`updateMistake`/`runtimeAutosaveCommit`）从 `chatApi.ts` 迁至 `testApi.ts`（dev 专用） |
+| AR-4 | `EssayGradingWorkbench` Ctrl+Enter / `LEARNING_GRADE_ESSAY` 改 `useEventRegistry` |
+| AR-5 | `style-lab/scan-data.json` 移除已删 `saveRequestHandler`/`DocumentViewer` 引用 |
+| AR-6 | 注：`templateService.getStatistics()` 为**本地模板统计**，不 invoke 后端（docs/6.12 X5 误报） |
+| AR-7 | 建议 amend 未 push 的 `d0c27d1` commit message 为 `refactor(round2): dead-code cleanup, security fixes, agent docs` |
