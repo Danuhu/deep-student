@@ -150,10 +150,10 @@ FSRS 已是 Anki 默认调度器（23.10+），`ts-fsrs`/`fsrs-rs` 库成熟；2
 
 | # | 短板 | 证据 | 判断 |
 |---|---|---|---|
-| 1 | **CI 不跑自己已有的 1,777 个前端测试**，也不跑 eslint/clippy；E2E workflow 被禁用 | ci.yml 仅 tsc + cargo check + sync 矩阵 | **P0**。launch 后 issue 流量上来，没有测试门禁的仓库会在外部 PR 下迅速劣化。这是所有工程债里 ROI 最高的一项 |
-| 2 | 上帝文件：`sync/mod.rs` 12,262 行、`vfs/handlers.rs` 7,440、`commands.rs` 5,817、`TauriAdapter.ts` 4,137 | 子代理 A1.4 | P1。不影响用户但决定"外部贡献者敢不敢碰"。拆分应与 good-first-issue 计划联动 |
-| 3 | 热路径 `.unwrap()` 密度：全库 1,779 处，`chat_v2/repo.rs` 224 处、sync 173 处 | 子代理 A5 | P1。聊天与同步是最高频路径，任何 panic = 用户眼中的闪退 |
-| 4 | 启动串行初始化：迁移+全量 DB+LLM+Lance 全部在 setup 同步完成 | lib.rs L285-691 | P1。数据量大的老用户首窗延迟线性涨，损害"轻快"卖点 |
+| 1 | **CI 不跑自己已有的 1,777 个前端测试**，也不跑 eslint/clippy；E2E workflow 被禁用 | ci.yml 仅 tsc + cargo check + sync 矩阵 | **P0** → ✅ **已落地 2026-07-04**：eslint（203 错误清零后设门禁）+ vitest 4 分片已入 ci.yml 并改为 push/PR 触发。clippy 尚未设门禁（见下方 07-05 补充：全仓约 600+ 告警，建议按模块 `--fix` 清理后再收紧；已拆成 good-first-issue #7-9）。E2E smoke 待恢复。**07-05 关键修复**：原 vitest 配置 `forks.singleFork: true`（单进程串行）在大批量运行时因 jsdom 内存跨文件累积触发 V8 GC 抖动近似死锁——本地与 HEAD 干净代码均复现"跑到 ~38 文件后永久挂起"，上 CI 会直接卡满 45 分钟超时。已改为多进程 forks 池 + `--max-old-space-size=4096`，全量 ~1.7k 用例从"跑不完"降到 **~40 秒**；同时暴露并修复了一批被单进程模块缓存掩盖的测试缺陷（react-i18next mock 缺 `initReactI18next` 导出、i18n 命名空间时序依赖、camelCase 合同过时等） |
+| 2 | 上帝文件：`sync/mod.rs` 12,262 行、`vfs/handlers.rs` 7,440、`commands.rs` 5,817、`TauriAdapter.ts` 4,137 | 子代理 A1.4 | P1。不影响用户但决定"外部贡献者敢不敢碰"。拆分应与 good-first-issue 计划联动（候选清单已备好：`docs/community/good-first-issues.md` #10） |
+| 3 | 热路径 `.unwrap()` 密度：全库 1,779 处，`chat_v2/repo.rs` 224 处、sync 173 处 | 子代理 A5 | ~~P1~~ → ✅ **复核后降级（07-04 实测）**：repo.rs 224 处与 sync 173 处**全部位于 `#[cfg(test)]` 测试代码**；生产路径仅 `vfs/handlers.rs` 5 处（逻辑上不可 panic），已重构为 `is_none_or`/`if let`。原判断基于子代理裸 grep 计数，未区分测试代码，属误报 |
+| 4 | 启动串行初始化：迁移+全量 DB+LLM+Lance 全部在 setup 同步完成 | lib.rs L285-691 | ~~P1~~ → **P2 降级（07-05 复核）**：MCP 初始化、Lance 优化（延迟 6s）、导入恢复、自动备份调度**已经是 async spawn**；同步部分主要是各 DB open + 迁移，属于"命令服务前必须完成"的硬依赖，惰性化需要命令级 readiness 门控，收益需先用大库实测启动耗时再决定 |
 | 5 | 722 个 Tauri command 无域分层 | 子代理 A4 | P2。配合 #2 一起治理 |
 | 6 | 死依赖/死目录：`@tabler/icons-react` 0 引用、`features/practice`=`export {}`、`deep-agent-ref/` 整个子项目、BottomTabBar 布局变量残留 | 子代理 A2/C8 | P2。launch 前清一轮，公开仓库的整洁度就是可信度 |
 | 7 | feature 边界规则形同虚设（65 文件跨界 import，规则仅 warn） | eslint boundaries | P2 |
@@ -179,15 +179,16 @@ FSRS 已是 Anki 默认调度器（23.10+），`ts-fsrs`/`fsrs-rs` 库成熟；2
 | 4 | 产物落点不统一：调研报告→笔记 ✓、翻译/作文→VFS ✓，但制卡/批改/调研过程散落在聊天流，无统一任务中心 | 团队自己的 benchmark P1#6 | P1。对标 WorkBuddy 任务范式 |
 | 5 | 错题系统废弃但 README 心智仍在（"错题归档"）；qbank 双轨写入（preview_json vs questions 表）历史问题 | prompt_builder.rs 注释、vfs review D12 | P1。功能宣称与实现要对齐 |
 | 6 | 引用不回源：RAG 回答无法点击跳回 PDF 页码/笔记段落 | benchmark P1#10 | P1。学习场景的"可核查"是信任刚需 |
+| 7 | （07-05 补充）制卡 prompt 全中文且**无输出语言约束**：英文材料可能产出中文/混语卡片，英文用户核心路径质量问题 | cardforge prompts / streaming_anki_service / model2_pipeline 实测 | ✅ **已缓解 2026-07-05**：三条制卡链路（cardforge 前端引擎、流式制卡默认 prompt、model2 文档制卡）+ ChatAnki 文档转写 prompt 均已加"卡片/输出语言跟随学习材料语言，不要翻译"规则。彻底解法（prompt 模板整体 per-locale）留待后续 |
 
 ### 5.4 UI/UX 与首次体验
 
 | # | 短板 | 证据 | 判断 |
 |---|---|---|---|
-| 1 | **无 onboarding**：首启只有用户协议弹窗；不配 API key 发消息才收到一条 warning toast | 子代理 D5（`onboarding_completed_flows` key 存在但无 UI 引用） | **P0（launch-blocker）**。QClaw 的 3 分钟标准是 2026 消费级底线；DS 有 SiliconFlow 一键分配的底子，缺的是把它编排成首启向导 |
-| 2 | 硬编码中文 2,471 处（仅 src/components 范围）混进英文界面 | check-i18n 输出 | P0（英文 launch 前必须清核心路径）。i18n key 本身是齐的，问题是没用上 |
-| 3 | 设置搜索索引建好了但 UI 没接线（props 改名 `_settingsSearchIndex` 弃用） | 子代理 D6.4 | P1。11 个 tab、1,800 个设置 key 没有搜索，新用户会迷路 |
-| 4 | 空状态用 ⚠️ emoji 兜底、错误页无插画/无行动指引 | 子代理 D3 | P2 |
+| 1 | **无 onboarding**：首启只有用户协议弹窗；不配 API key 发消息才收到一条 warning toast | 子代理 D5（`onboarding_completed_flows` key 存在但无 UI 引用） | **P0** → ✅ **第一步已落地 2026-07-05**：新增 `WelcomeOnboardingDialog`（协议同意后首启弹出：语言切换 + 三能力速览 + 「去配置 AI 服务」直达设置 apis 标签；已配置模型的老用户静默跳过）。剩余增强（示例资料包、引导发首条消息）仍在 v0.10 范围 |
+| 2 | 硬编码中文 2,471 处（仅 src/components 范围）混进英文界面 | check-i18n 输出 | ~~P0~~ → ✅ **复核后大幅降级（07-05 实测）**：`check:i18n:missing` 输出**中英缺失键均为 0**；2,501 计数绝大多数是 `t('key', '中文兜底')` 的 fallback 参数（正确用法）与 debugLog/开发工具字符串，**英文界面不受影响**。真实残留：cardforge 引擎 toast（~170 处，已拆 good-first-issue #1）+ LLM prompt 语言（已加"跟随材料语言"规则，见 5.3 补充） |
+| 3 | 设置搜索索引建好了但 UI 没接线（props 改名 `_settingsSearchIndex` 弃用） | 子代理 D6.4 | ~~P1~~ → ✅ **已落地 2026-07-04**：SettingsSidebar 搜索框 + 48 条索引过滤 + 移动端选中即关抽屉 |
+| 4 | 空状态用 ⚠️ emoji 兜底、错误页无插画/无行动指引 | 子代理 D3 | ~~P2~~ → ✅ **核心错误页已落地 2026-07-05**：ErrorBoundary / ViewErrorFallback / FinderFileList 错误态换 Phosphor `WarningCircle`，main.tsx 致命错误页换零依赖内联 SVG；诊断面板残留拆 good-first-issue #2 |
 | 5 | 设计系统双轨：NotionButton(824 处) vs shad Button(85 处)、NotionDialog vs Sheet 并存 | 子代理 D1 | P2。收敛方向已对（eslint 规则在），继续执行即可 |
 | 6 | 图标已基本统一 Phosphor（449 文件），@tabler 是死依赖 | 子代理 D3 | 好消息，删依赖即可 |
 
@@ -238,16 +239,20 @@ FSRS 已是 Anki 默认调度器（23.10+），`ts-fsrs`/`fsrs-rs` 库成熟；2
 
 产品：
 - 首启向导：选语言 → 检测 Ollama / SiliconFlow 一键分配（已有）/ 粘贴任意 OpenAI 兼容 key → 内置示例资料包 → 引导发出第一条带引用的消息。目标 3 分钟。
+  ✅ 第一步已落地 2026-07-05：`WelcomeOnboardingDialog`（语言切换 + 能力速览 + 直达模型服务设置；老用户静默跳过）。剩余：示例资料包 + 首条消息引导。
 - 修 Linux 窗口装饰（#65/66）、移动端 4 个 P0、验证并修复 release APK 的 MainActivity 同步。
+  ✅ 已落地 2026-07-04：Linux 装饰修复已在 nightly；release/rebuild workflow 已统一注入 MainActivity 同步 + 权限 + softInput；移动端 4×P0 + 大部分 P1 经逐项核对已修（详见 mobile review §7 状态标注）。
 - 清核心路径硬编码中文；英文界面截图重制（59 张 → 精选 10 张 EN + 4-5 个 GIF）。
+  ✅/△ 07-05 复核：翻译键中英缺失均为 0，"硬编码中文"主要是 t() 兜底参数（英文界面不受影响），核心路径无需清理；真实残留（cardforge toast、制卡 prompt 语言）已分别拆 issue / 加语言规则。**截图/GIF 重制仍未做（需真机跑英文界面，外部工作）**。
 
 工程：
-- CI 门禁：vitest + eslint + clippy 入 ci.yml；恢复 smoke E2E（启动+发消息）。
-- 清死依赖/死目录（@tabler、deep-agent-ref、note/、docs/6.12-13 移出或 ignore）。✅ 已落地 2026-07-04：@tabler 已卸载；docs/6.12、6.13 已迁入 gitignore 的 docs/archive/；deep-agent-ref/、note/ 此前已 ignore。
-- chat_v2/repo.rs 与 sync 热路径 unwrap 清理。
+- CI 门禁：vitest + eslint + clippy 入 ci.yml；恢复 smoke E2E（启动+发消息）。✅ vitest+eslint 已入（07-04）；clippy 全仓 600+ 告警，先按模块清（good-first-issue #7-9）再收紧；E2E smoke 待恢复。
+- 清死依赖/死目录（@tabler、deep-agent-ref、note/、docs/6.12-13 移出或 ignore）。✅ 已落地 2026-07-04：@tabler 已卸载；docs/6.12、6.13 已迁入 gitignore 的 docs/archive/；deep-agent-ref/、note/ 此前已 ignore。07-05 增量：删除死组件 NoteEditorPortal / DataCenter / ApiConfigRecovery，清理 responsive-utilities 死类。
+- chat_v2/repo.rs 与 sync 热路径 unwrap 清理。✅ 07-04 复核为误报（全部在测试代码），生产仅 vfs/handlers.rs 5 处已重构，无剩余工作。
 
 门面：
 - README 重写（EN 主 + CN 链接）、topics 填满、Discussions 分区（Announcements/Q&A/Ideas）、开 Discord + QQ 群、good-first-issue 挂 10 个（从上帝文件拆分任务里出）。
+  △ 07-05 进度：README 英文主文案已达标（过时宣称已清）；good-first-issue 候选池 13 项已备好（`docs/community/good-first-issues.md`，含验收标准，可直接发）。**topics / Discussions 分区 / Discord 需仓库管理员在 GitHub 网页操作**。
 - 官网英文版 + deepstudent.app 或 .ai 域名评估。
 
 **v1.0 — "The Launch"（点火周）**

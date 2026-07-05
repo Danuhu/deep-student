@@ -4,6 +4,17 @@
 > 方法：逐文件代码审阅 + 用户路径模拟推演。边审阅边记录，持续更新。
 > 状态：五轮深审完成（架构 → 页面/组件 → 输入与全局行为 → 手势/性能/查看器 → 拖拽/编辑器/扫尾），共 65 项问题（4×P0 / 18×P1 / 27×P2 / 16×P3）。§7 修复路线图、§8 P0 详细设计、§9 真机验证清单。
 
+## 2026-07-05 状态复核（逐项代码核对）
+
+**P0（4/4 已修）**：A-2/A-7（导航入口与对称性）、A-5（Android 返回键接管，MainActivity + `__DEEP_STUDENT_HANDLE_BACK__` + BACK_PRIORITY 栈）、P-3（随 A-2 连带解决）。
+
+**P1（18 项：13 已修 / 5 遗留为架构级重构）**：
+
+- ✅ 已修：A-1（BottomTabBar 已删，仅 CSS 注释残留）、C-2（发送禁用原因移动端可点击提示气泡→通知）、C-7（会话项常显 … 菜单按钮）、C-8（划词改 `selectionchange` 防抖 + 触屏下方定位）、C-9（内层横滑手势隔离）、C-10（幽灵"对话控制"按钮已移除）、S-1（设置 Sheet 硬编码亮色已换主题变量）、TM-1（TemplateManager 死代码已删）、D-1（dashboard/data-management/pdf-reader/sandbox 已注册 useMobileHeader，07-04）、P-1（番茄钟药丸安全区+输入栏避让，07-04）、N-3（文件列表触屏单击打开，07-04）、N-4（"更多"按钮触屏常显，07-04）、A11Y-1（viewport 允许缩放 maximum-scale=5 + PDF pinch 缩放）。
+- ⏳ 遗留（多日架构工作，见 §7）：A-3（导航顺序统一）、A-6（断点判定 4 套并存，已拆 good-first-issue）、A-8（LearningHub 三屏实现去重）、S-2（设置双形态收敛）、I-1（输入栏面板改 bottom sheet 范式，MobileBottomSheet 死代码已删但未采纳该范式）。
+
+**P2/P3**：T-2（任务表状态列对齐）、TM-2（面包屑触屏可供性）、NT-1（NoteEditorPortal 死链）、CSS-1（responsive-utilities 死类）、M-1（Token 用量进移动"更多"菜单）已修（07-04）；其余未逐项复核，发版前按 §9 真机清单过一遍。
+
 ---
 
 ## 0. 移动端架构概览（审阅基础）
