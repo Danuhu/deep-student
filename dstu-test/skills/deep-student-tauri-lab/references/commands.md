@@ -58,6 +58,8 @@ Important returned fields:
 - `target.logs.stderr`: process stderr.
 - `target.logs.frontend`: WebView console/error JSONL when the app bridge is active.
 
+`instance start` and `instance restart` compare the registered source app binary with the instance copy. A newer source app is copied and re-signed before launch, so run a complete Tauri app bundle build when frontend assets must be embedded.
+
 ## Logs
 
 ```sh

@@ -17,6 +17,7 @@ Use this skill to operate the repo-local `tauri-lab` manager in the current Deep
 - Before a subagent uses Computer Use, run `agent targets --owner ...` or `agent verify ...`; if verification fails, do not touch the window.
 - For long-running subagent tests, the parent must not impose an active timeout just because a subagent is quiet. Cloud sync and real UI flows can legitimately run for about an hour. The parent should sleep or poll passively, give subagents enough time to finish, and only investigate when the user asks, the subagent reports failure, the process exits, or objective evidence shows the assigned app/fixture is gone.
 - Use `--wait --metrics` before driving UI so the app has finished Tauri/backend startup.
+- Starting or restarting a stopped instance refreshes its app bundle when the registered source app binary is newer. Build the complete source `.app`, not only a bare `--no-bundle` binary, before expecting a restart to pick up frontend changes.
 - Stop test instances before finishing unless the user asks to keep them running.
 - Read backend, stderr, frontend, and daemon logs before guessing why an instance failed.
 - Use `evidence snapshot` after meaningful UI actions or failures so another Codex window can resume with logs, slot state, SQLite summaries, metrics, and credential presence.

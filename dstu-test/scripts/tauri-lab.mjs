@@ -1311,17 +1311,51 @@ async function patchMacBundle(appPath, instance) {
   } catch {
     // Best effort only; local debug bundles usually do not need this.
   }
+  await execFile('codesign', ['--force', '--deep', '--sign', '-', appPath]);
+}
+
+async function appBundleNeedsRefresh(project, instance) {
+  if (!fs.existsSync(instance.app_path) || !fs.existsSync(instance.binary_path)) return true;
+
+  const sourceBinary = path.join(project.source_app, project.binary_relative_path);
+  if (!fs.existsSync(sourceBinary)) {
+    throw new Error(`Source app binary does not exist: ${sourceBinary}`);
+  }
+
+  const [sourceStat, instanceStat] = await Promise.all([
+    fsp.stat(sourceBinary),
+    fsp.stat(instance.binary_path),
+  ]);
+  return sourceStat.mtimeMs > instanceStat.mtimeMs;
 }
 
 async function prepareAppBundle(project, instance) {
-  if (fs.existsSync(instance.app_path)) return;
+  if (!(await appBundleNeedsRefresh(project, instance))) return;
+
   await fsp.mkdir(path.dirname(instance.app_path), { recursive: true });
-  await fsp.cp(project.source_app, instance.app_path, {
+  const stagingPath = `${instance.app_path}.refresh-${process.pid}-${Date.now()}`;
+  const previousPath = `${stagingPath}.previous`;
+
+  await fsp.cp(project.source_app, stagingPath, {
     recursive: true,
     force: true,
     preserveTimestamps: true,
   });
-  await patchMacBundle(instance.app_path, instance);
+  await patchMacBundle(stagingPath, instance);
+
+  try {
+    if (fs.existsSync(instance.app_path)) {
+      await fsp.rename(instance.app_path, previousPath);
+    }
+    await fsp.rename(stagingPath, instance.app_path);
+    await fsp.rm(previousPath, { recursive: true, force: true });
+  } catch (error) {
+    if (!fs.existsSync(instance.app_path) && fs.existsSync(previousPath)) {
+      await fsp.rename(previousPath, instance.app_path);
+    }
+    await fsp.rm(stagingPath, { recursive: true, force: true });
+    throw error;
+  }
 }
 
 async function waitForExit(pid, timeoutMs = 5000) {
