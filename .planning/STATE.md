@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: milestone_complete
 stopped_at: Completed Phase 04
-last_updated: "2026-07-01T16:51:00+08:00"
-last_activity: 2026-07-01 -- Completed quick task 260701-m63: Android microphone permission
+last_updated: "2026-07-13T21:03:30+08:00"
+last_activity: 2026-07-13 -- Completed quick task 260713-syv: Improve Study Desktop window button hover targets
 progress:
   total_phases: 4
   completed_phases: 4
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-26)
 Phase: 04
 Plan: Completed
 Status: Milestone complete
-Last activity: 2026-07-01 -- Completed quick task 260701-m63: Android microphone permission
+Last activity: 2026-07-13 -- Completed quick task 260713-syv: Improve Study Desktop window button hover targets
 
 Progress: [##########] 100%
 
@@ -90,6 +90,7 @@ None.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260701-m63 | Android microphone permission declaration | 2026-07-01 | cc452c98 | [260701-m63-android-microphone-permission](./quick/260701-m63-android-microphone-permission/) |
+| 260713-syv | Improve Study Desktop window button hover targets | 2026-07-13 | 5b7aad4c | [260713-syv-study-desktop-window-button-hover](./quick/260713-syv-study-desktop-window-button-hover/) |
 
 ## Deferred Items
 
