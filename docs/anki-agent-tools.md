@@ -1,0 +1,965 @@
+# Anki Agent 工具面说明
+
+本文档说明 ChatV2 中对 Agent 开放的 26 个 `builtin-chatanki_*` 工具。内容以当前工具 Schema、Rust 执行器和服务实现为准，供技能编排、联调和故障排查使用。
+
+实现入口：
+
+- 工具 Schema 与技能工作流：[src/features/chat/skills/builtin/index.ts](../src/features/chat/skills/builtin/index.ts)
+- 工具执行器：[src-tauri/src/chat_v2/tools/chatanki_executor.rs](../src-tauri/src/chat_v2/tools/chatanki_executor.rs)
+- APKG 导入：[src-tauri/src/apkg_importer_service.rs](../src-tauri/src/apkg_importer_service.rs)
+- FSRS 复习服务：[src-tauri/src/fsrs_review_service.rs](../src-tauri/src/fsrs_review_service.rs)
+
+## 工具总览
+
+| 工具 | 用途 | 作用域 | 是否写数据 |
+|---|---|---|---|
+| `builtin-chatanki_import_apkg` | 把已有 APKG 导入本地卡片库 | 当前会话资源或用户给出的绝对路径 | 是 |
+| `builtin-chatanki_run` | 从文本或文件自动解析并启动制卡 | 当前会话 | 是，后台执行 |
+| `builtin-chatanki_start` | 从已整理的纯文本/Markdown 直接启动制卡 | 当前会话 | 是，后台执行 |
+| `builtin-chatanki_status` | 查询文档级生成进度 | 当前会话的 `documentId` | 否 |
+| `builtin-chatanki_wait` | 等待生成流程进入终态或超时 | 当前会话的块或文档 | 否 |
+| `builtin-chatanki_get_cards` | 分页读回卡片全文与版本 | 当前会话的 `documentId` | 否 |
+| `builtin-chatanki_update_card` | 乐观锁修改一张卡 | 当前会话拥有的 `cardId` | 是 |
+| `builtin-chatanki_delete_card` | 按内容及复习版本删除一张卡 | 当前会话拥有的 `cardId` + `expectedVersion` + `expectedReviewVersion` | 是 |
+| `builtin-chatanki_add_cards` | 向已有文档补卡 | 当前会话的 `documentId` | 是 |
+| `builtin-chatanki_enqueue_review` | 加入内置 FSRS 复习计划 | 当前会话的文档或卡片 | 是 |
+| `builtin-chatanki_review_stats` | 查询 FSRS 全库统计 | 库级 | 否 |
+| `builtin-chatanki_undo_last_review` | 撤销单卡最后一次可撤销评分 | 当前会话拥有且已入队的卡片 | 是 |
+| `builtin-chatanki_set_suspended` | 暂停或恢复单卡复习状态 | 当前会话拥有且已入队的卡片 | 是 |
+| `builtin-chatanki_list_library_cards` | 搜索并分页读取完整本地卡片库 | 全库 | 否 |
+| `builtin-chatanki_update_library_card` | 按内容版本修改一张库卡片 | 全库 | 是 |
+| `builtin-chatanki_enqueue_library_review` | 按内容版本批量加入复习计划 | 全库 | 是 |
+| `builtin-chatanki_set_library_suspended` | 按复习版本暂停或恢复库卡片 | 全库 | 是 |
+| `builtin-chatanki_undo_library_last_review` | 按复习版本撤销库卡片最后评分 | 全库 | 是 |
+| `builtin-chatanki_delete_library_card` | 按内容及复习版本删除库卡片 | 全库 | 是 |
+| `builtin-chatanki_retemplate` | 乐观锁批量换模板 | 当前会话的文档或卡片 | 是 |
+| `builtin-chatanki_control` | 暂停、恢复、重试或取消生成 | 当前会话的 `documentId` | 是 |
+| `builtin-chatanki_export` | 导出 APKG 或 JSON | 当前会话的 `documentId` | 是，写文件 |
+| `builtin-chatanki_sync` | 通过 AnkiConnect 同步到桌面 Anki | 当前会话的 `documentId` | 是，写外部 Anki |
+| `builtin-chatanki_list_templates` | 列出本地模板及字段契约 | 库级 | 否 |
+| `builtin-chatanki_analyze` | 预分析文本密度，不生成卡片 | 当前调用内容 | 否 |
+| `builtin-chatanki_check_anki_connect` | 检查 AnkiConnect 可用性 | 本机环境 | 否 |
+
+## 通用契约
+
+### ID 不可混用
+
+| 字段 | 含义 | 来源 |
+|---|---|---|
+| `ankiBlockId` | 聊天中的 `anki_cards` 预览块 ID | `run`/`start` 返回值或最近的预览块 |
+| `documentId` | 一批卡片及其分段任务的文档 ID | `run`/`start`/`wait`/`import_apkg` 返回值 |
+| `cardId` | `anki_cards` 表中一张真实卡片的 ID | `get_cards` 或 `list_library_cards` 返回值 |
+| `version` | 卡片当前的乐观锁版本，当前实现等于 `updatedAt` | `get_cards` 或 `list_library_cards` 返回值 |
+| `reviewVersion` | FSRS 调度状态的整数乐观锁版本，与内容 `version` 相互独立 | `get_cards.cards[].reviewState` 或 `list_library_cards.cards[].reviewState` 返回值 |
+| `taskId` | 文档中的单个分段任务 ID | 任务诊断或定点 `retry` 时使用 |
+
+禁止使用牌组名、数组序号、临时字符串或 UI 合成 ID 代替上述真实 ID。
+
+### 会话所有权
+
+除库级工具外，所有按 `documentId` 操作的工具都会校验文档是否属于当前 ChatV2 会话。按 `cardId` 操作的工具会先解析卡片所属文档，再校验该文档的会话所有权。
+
+跨会话、mixed-owner、已删除或不存在的文档/卡片统一表现为 `blocks.ankiCards.errors.statusNotFound`。文档级写操作要求该文档的全部未删除 task 都属于当前会话；这是有意的信息隐藏，调用方不能据此区分“确实不存在”和“所有权不完整”。
+
+六个 `*_library_*` 工具是显式的全库作用域：它们可读取或修改其他 ChatV2 会话及 APKG 导入产生的 live 本地卡片，不使用当前会话的 document ownership 过滤。进入全库作用域必须来自用户对“卡片库、以前的卡、全部卡片、到期卡”等明确意图；当前会话刚生成的卡仍优先使用会话级工具。`review_stats`、`list_templates`、`analyze`、`check_anki_connect` 也不受单个文档所有权约束。
+
+### 工具失败与业务拒绝
+
+ChatV2 的工具结果外层带有 `success`。本文各工具的“返回值”指外层结果中的 `output`。
+
+- 参数解析失败、数据库不可用、所有权拒绝等通常是工具失败：外层 `success=false`，`error` 是错误消息或 i18n key。
+- `update_card` 的版本冲突，以及 `retemplate` 的版本、选择集或 Cloze 冲突，是可恢复的业务结果：外层 `success=true`，`output.status` 为 `conflict`、`blocked` 或 `rejected`，并带结构化 `error`。
+- `undo_last_review` 与 `set_suspended` 的调度版本冲突也是结构化业务结果：外层 `success=true`、`output.status=conflict`、`error=review_state_conflict`。必须重新读取 `get_cards.reviewState`，不能复用旧 `reviewVersion` 或旧日志 ID。
+- 复习写操作不能安全执行时返回 `status=blocked`、当前 `reviewState` 和稳定原因；这是明确拒绝，不得改用其他写工具绕过。卡片不存在、跨会话或未入队时仍使用统一 not-found 工具失败，不泄露所有权信息。
+- 库级内容写入的 `version_conflict`、库级复习写入的 `review_state_conflict` 都要求重新调用 `list_library_cards`。库级批量入队还可能结构化返回 `status=not_found` 或 `blocked`；这些结果均保证 `mutationApplied=false`，不能把部分命中项视为已写入。
+- `wait` 的 `timeout` 是结构化成功结果，表示仍可继续等待；`invalid_args` 和 `not_found` 的外层 `success=false`。
+- 写卡工具可能返回 `status=partial`。此时数据库修改已经生效，但聊天预览块的持久化同步失败，应重新 `get_cards` 获取权威数据，不要重复盲写。
+
+### 实时刷新与复习事件
+
+`update_card`、`delete_card`、`add_cards` 和 `retemplate` 在当前会话存在该文档的 `anki_cards` 预览块时，会严格校验块的类型、文档和会话归属，持久化并发送卡片 patch，使已打开的聊天块按卡片 ID 更新；同时发送 `fsrs://changed`。库级修改/删除会在来源聊天块仍存在时执行相同同步；无来源块（例如外部 APKG）时返回 `uiSync.status=not_required`。`import_apkg` 和成功入队也会发送 `fsrs://changed`。会话级与库级撤销/暂停工具仅在实际写入时发送该事件；冲突、拒绝和幂等 no-op 不发送。闪卡 Today、Library、Stats 及活动复习 session 会据此协调刷新。事件发送失败不会回滚已经成功的数据库写入。
+
+聊天预览块在流式生成期间可以使用 `anki_synthetic_*`、`chat-batch-*` 或缺失 ID 表示尚未落库的卡片。用户执行本地保存时，`save_anki_cards` 会为这些卡片分配真实 ID，并返回输入索引到实际落库 ID 的映射；前端必须把映射合并到最新块数据并持久化 `tool_output`，完成后才允许“复习这批”。批量复习不得携带临时 ID。
+
+`import_apkg` 创建数据库文档，但不会为整包卡片伪造或回填聊天预览块。对这类文档调用上述四个写工具时，只要 Anki 文档/卡片归属校验通过，数据库 mutation 会正常执行，并返回 `uiSync.status=not_required`、`uiSync.eventAttempted=false`，不包含 `blockId`。这不是降级或部分失败。若 Chat V2 数据库本身不可用或查询失败，预检仍会阻止写入。
+
+### 破坏性操作确认
+
+技能层要求以下操作先调用 `builtin-ask_user` 明确确认：
+
+- 一次删除超过 3 张卡；
+- 更换超过 3 张卡的模板或整份文档换模板；
+- 整批重做；
+- 覆盖用户已经手动编辑的内容；
+- 导出或同步完整卡片内容；
+- 把卡片加入复习计划。
+
+撤销评分、暂停或恢复复习状态只允许响应用户对目标单卡的明确要求；如果“这张”“上一次”或暂停/恢复方向有歧义，也必须先确认。Agent 不得根据卡片难度、答题正确率或内容自行决定暂停，更不得推断或代替用户选择 Again/Hard/Good/Easy。本工具面有撤销工具，但没有 Agent 评分工具。
+
+`cancel` 只停止未完成的生成，已生成卡片会保留。
+
+## 生成状态模型
+
+底层分段任务状态为 `pending`、`processing`、`streaming`、`paused`、`completed`、`failed`、`truncated`、`cancelled`。`status` 和 `wait` 将其聚合为文档级状态：
+
+| 聚合状态 | 含义 | 后续动作 |
+|---|---|---|
+| `running` | 至少一个分段仍在处理 | 继续 `wait` 或稍后 `status` |
+| `paused` | 文档已暂停 | 用户要求后 `control(resume)` |
+| `completed` | 所有分段正常结束，或因达到 `maxCards` 上限而正常收口 | 进入 `get_cards` 全量验收 |
+| `completed_with_errors` | 已结束，但至少有一个 `failed`/`truncated` 分段；通常仍保留部分结果 | 检查 `cardsCount`，先验收现有卡，再按需 `control(retry)` |
+| `cancelled` | 用户或系统取消，且不是达到卡数上限的收口 | 保留已有卡，向用户说明 |
+| `error` | 预览块以错误终止；该值由 `wait` 返回 | 查看 `error`，按原因处理 |
+| `timeout` | 本次等待到期，任务不一定失败 | 再次 `wait` 或调用 `status` |
+| `not_found` | ID 不存在、不可见或不属于当前会话 | 重新定位真实 ID；不要猜测 |
+| `invalid_args` | `wait` 未提供可用的块 ID 或文档 ID | 补充 `ankiBlockId` 或 `documentId` |
+
+`limitReached=true` 表示已达到本批 `maxCards` 上限，这是正常完成信号，不是取消或失败。
+
+## 工具明细
+
+### `builtin-chatanki_import_apkg`
+
+把 APKG 中的卡片导入本地 `anki_cards`，创建一个归属当前会话的新 `documentId`。导入优先读取 `collection.anki21`，否则读取 `collection.anki2`；字段名大小写无关地优先用 `Front`/`Back` 映射正反面，缺少这些命名时才回退首/次字段。Cloze model 的 `Text` 写入卡片 `text`，Basic model 中名为 `Text` 的自定义字段则保留在 `extraFields`。`Header`、`Subject`、`Question`、`Extra` 等非核心字段无论位于哪个槽位都会进入 `extraFields`。
+
+参数：
+
+| 参数 | 必填 | 约束 |
+|---|---|---|
+| `resourceId` | 与 `path` 二选一 | 当前会话可访问的 `file_`、`att_`，或可解析到文件的 `res_` |
+| `path` | 与 `resourceId` 二选一 | 用户明确提供的本机绝对路径；相对路径被拒绝 |
+
+两者必须且只能提供一个。不得猜测路径，也不得把非当前会话资源作为 `resourceId`。
+
+成功返回：
+
+```json
+{
+  "documentId": "apkg-...",
+  "importedCards": 146,
+  "importedTemplates": 0,
+  "mediaSkipped": 2
+}
+```
+
+当前实现不导入 APKG 模板，故 `importedTemplates` 为 `0`。本应用导出的 APKG 会在 model 中携带模板 ID 元数据，重新导入时该 ID 会写回卡片，因此只要本地仍有对应模板即可直接再次导出，无需先 `retemplate`；无此元数据的外部 APKG 保持 `templateId=null`。导出 Cloze 时，每个唯一且有效的 `{{cN::答案}}` 会写入一条 `ord=N-1` 的 Anki card row；Basic 始终只有一条 `ord=0`。自有包还携带 Cloze 折叠元数据，导回时同一 note 的多个 ord 只恢复成一张内部内容卡，反复导入/导出不会倍增；无该元数据的外部包仍按每条 Anki card row 导入。媒体文件会统计但不落库，`mediaSkipped` 是媒体 manifest 声明项和数字媒体项的去重计数。导入成功后应立即用返回的 `documentId` 分页 `get_cards`。
+
+失败时 `output.error` 是结构化 `AppError`，稳定错误码位于 `output.error.details.errorCode`：
+
+| 错误码 | 含义 |
+|---|---|
+| `apkg_invalid_input` | 参数、空文件或输入形式无效 |
+| `apkg_not_found` | 路径、资源或会话资源不可见 |
+| `apkg_not_file` | 路径不是普通文件 |
+| `apkg_io` | 文件或临时文件读写失败 |
+| `apkg_invalid_archive` | ZIP、entry、media manifest 或压缩数据无效 |
+| `apkg_limit_exceeded` | 超过安全限制，例如压缩包大于 256 MiB |
+| `apkg_collection_missing` | 缺少 `collection.anki21` 和 `collection.anki2` |
+| `apkg_collection_invalid` | SQLite schema、models/decks、notes/cards 数据无效或不受支持 |
+| `apkg_database` | 本地数据库或导入事务失败 |
+| `apkg_resource_mismatch` | VFS 原始路径文件与记录的 SHA-256 不一致 |
+
+### `builtin-chatanki_run`
+
+从当前会话的文件/图片上下文或直接文本自动解析材料，并异步启动完整制卡流水线。适合原始上传材料；若材料已经整理为最终 Markdown，优先使用 `start`。
+
+参数：
+
+| 参数 | 必填 | 约束与语义 |
+|---|---|---|
+| `goal` | 是 | 非空学习目标，影响拆卡粒度和模板生成提示 |
+| `maxCards` | 是 | 整数 `1..100`；表示上限，不保证精确生成该数量 |
+| `templateMode` | 是 | `single`、`multiple` 或 `all` |
+| `templateId` | `single` 时是 | 来自 `list_templates` 的模板 ID |
+| `templateIds` | `multiple` 时是 | 非空模板 ID 数组 |
+| `content` | 否 | 无文件时的正文；有文件时只能作补充说明，不能替代材料主体 |
+| `route` | 否 | `simple_text`、`vlm_light`、`vlm_full`；省略则自动路由 |
+| `resourceId` | 否 | 指定一个直接文件类资源 |
+| `resourceIds` | 否 | 指定多个资源；实现会与 `resourceId` 合并并去重 |
+| `deckName` | 否 | 后续导出/同步默认牌组；默认取设置或 `Default` |
+| `noteType` | 否 | 后续导出/同步默认笔记类型；默认取设置或 `Basic` |
+| `debug` | 否 | 是否在预览块中附加路由和资源诊断信息 |
+
+`templateMode=all` 使用全部激活模板；若目标明确是选择题，实现可能收敛到匹配的单模板。Schema 已强制 `maxCards<=100`，超过 100 张必须拆批，不应依赖执行器的兼容性截断。
+
+立即返回，不等待后台完成：
+
+```json
+{
+  "status": "started",
+  "ankiBlockId": "blk_...",
+  "documentId": "...",
+  "message": "ChatAnki pipeline started (background)"
+}
+```
+
+常见失败没有独立稳定错误码，外层 `error` 为消息，包括参数解析失败、`goal is required`、模板选择无效或模板不存在、数据库或 LLM 管理器不可用。内容解析和后台生成错误发生在工具返回之后，会写入预览块和文档任务，由下一轮 `wait`/`status` 观察。
+
+### `builtin-chatanki_start`
+
+从已经准备好的纯文本或 Markdown 直接启动制卡，跳过文件解析并固定走文本路径。
+
+参数与 `run` 的模板、牌组、卡数和 `debug` 参数相同，但有两点不同：
+
+- `content` 必填且应为实际材料正文；
+- 不接受 `route`、`resourceId` 或 `resourceIds`。
+
+成功返回与 `run` 相同：`status=started`、真实 `ankiBlockId`、预分配的真实 `documentId` 和后台启动消息。参数/模板/运行环境失败语义也与 `run` 相同。
+
+`run`/`start` 后不要在同一轮并发调用 `wait`。使用返回的真实 ID，在下一轮调用 `wait`。
+
+### `builtin-chatanki_status`
+
+获取文档级瞬时进度，不阻塞等待。
+
+参数：
+
+| 参数 | 必填 | 说明 |
+|---|---|---|
+| `documentId` | 是 | 当前会话拥有的真实文档 ID |
+
+成功返回：
+
+```json
+{
+  "status": "running",
+  "documentId": "...",
+  "counts": {
+    "counts": {
+      "total": 4,
+      "pending": 1,
+      "processing": 1,
+      "streaming": 0,
+      "paused": 0,
+      "completed": 2,
+      "failed": 0,
+      "truncated": 0,
+      "cancelled": 0
+    },
+    "completedRatio": 0.5
+  },
+  "cardsCount": 18,
+  "limitReached": false,
+  "error": null,
+  "shouldRetry": false
+}
+```
+
+`status` 可能为 `running`、`paused`、`completed`、`completed_with_errors`、`cancelled` 或 `not_found`。`completedRatio` 只按 `completed/total` 计算，不把失败、截断或取消计为完成。
+
+当前 `status` 的聚合只要看见 `failed`/`truncated` 就会返回 `completed_with_errors`，即使 `cardsCount=0`。因此还要结合 `cardsCount` 和预览块错误判断是否属于完全失败；不能仅凭状态名断言已有可用卡片。
+
+错误包括缺少 `documentId`、数据库不可用和 `blocks.ankiCards.errors.statusNotFound`。`not_found` 时外层 `success=false`，`shouldRetry=true`。
+
+### `builtin-chatanki_wait`
+
+轮询预览块或文档任务，直到终态、暂停、取消或等待超时。优先提供稳定的 `documentId`；只有尚未取得它时才用 `ankiBlockId` 回退。两个 ID 同传时必须来自同一次 `run`/`start`，不匹配会返回 `chatanki_wait_document_mismatch`。
+
+参数：
+
+| 参数 | 必填 | 约束 |
+|---|---|---|
+| `ankiBlockId` | 至少一个 ID | `run`/`start` 返回的预览块 ID；仅在缺少 documentId 时使用 |
+| `documentId` | 至少一个 ID | 文档任务 ID；稳定优先路径 |
+| `timeoutMs` | 否 | 默认 30 分钟，最大 60 分钟；`0` 按默认值处理 |
+
+返回：
+
+```json
+{
+  "status": "completed_with_errors",
+  "ankiBlockId": "blk_...",
+  "documentId": "...",
+  "cardsCount": 22,
+  "progress": {
+    "counts": {
+      "total": 4,
+      "pending": 0,
+      "processing": 0,
+      "streaming": 0,
+      "paused": 0,
+      "completed": 3,
+      "failed": 1,
+      "truncated": 0,
+      "cancelled": 0
+    },
+    "completedRatio": 0.75
+  },
+  "ankiConnect": null,
+  "limitReached": false,
+  "error": null,
+  "shouldRetry": false
+}
+```
+
+`status` 可为 `completed`、`completed_with_errors`、`paused`、`cancelled`、`error`、`timeout`、`not_found` 或 `invalid_args`。`timeout`/`not_found` 的 `shouldRetry=true`；其中 `timeout` 外层仍成功，不能直接报告生成失败。仅靠块 ID 且约 8 秒内始终找不到块时会提前返回 `not_found`。
+
+稳定错误 key：
+
+- `blocks.ankiCards.errors.waitInvalidArgs`
+- `blocks.ankiCards.errors.waitNotFound`
+- `blocks.ankiCards.errors.waitTimeout`
+- `blocks.ankiCards.errors.statusNotFound`
+
+### `builtin-chatanki_get_cards`
+
+分页读取某文档当前的 live 卡片，是任何 Agent 修改、换模板、导出或入队前的权威观测入口。
+
+参数：
+
+| 参数 | 必填 | 默认/约束 |
+|---|---|---|
+| `documentId` | 是 | 当前会话拥有的文档 |
+| `page` | 否 | 默认 `1`，最小 `1` |
+| `pageSize` | 否 | 默认 `20`，范围 `1..50` |
+| `filter` | 否 | `all`、`error_only`、`edited_only`；默认 `all` |
+
+成功返回顶层字段：`status=ok`、`documentId`、`total`、`page`、`pageSize`、`filter`、`cards`。`total` 是应用筛选后的总数。卡片中的 `index` 仍是原始文档顺序，从 1 开始。
+
+每张卡返回：
+
+```json
+{
+  "id": "...",
+  "index": 1,
+  "front": "...",
+  "back": "...",
+  "text": null,
+  "tags": ["..."],
+  "templateId": "design-swiss",
+  "extraFields": {},
+  "isErrorCard": false,
+  "errorContent": null,
+  "updatedAt": "2026-07-14T...Z",
+  "version": "2026-07-14T...Z",
+  "reviewState": {
+    "ankiCardId": "...",
+    "cardStateId": "...",
+    "state": 2,
+    "suspended": false,
+    "dueMs": 1784000000000,
+    "lastReviewMs": 1783900000000,
+    "reviewVersion": 7,
+    "latestReview": {
+      "logId": "...",
+      "rating": 3,
+      "reviewMs": 1783900000000,
+      "undoable": true
+    }
+  },
+  "truncated": false,
+  "truncatedFields": []
+}
+```
+
+`reviewState=null` 表示卡片尚未进入 FSRS 队列，不能调用复习状态写工具。非空时，`state` 的 `0/1/2/3` 分别表示 new/learning/review/relearning；`lastReviewMs` 与 `latestReview` 在没有评分记录时为 `null`。`reviewVersion` 是调度写操作唯一接受的 CAS token，不能用卡片内容的字符串 `version` 代替。`latestReview.undoable=false` 时不得调用撤销工具。
+
+`front`、`back`、`text`、每个 tag、每个 `extraFields` 值和 `errorContent` 分别按 2000 个字符截断。只要任一字段截断，`truncated=true` 且 `truncatedFields` 列出字段路径。截断内容不能作为覆盖原字段的完整来源。
+
+`edited_only` 的当前判断是 `updatedAt != createdAt`。错误包括参数无效、数据库不可用、读取失败和 `blocks.ankiCards.errors.statusNotFound`。
+
+### `builtin-chatanki_update_card`
+
+带乐观锁修改单卡。调用前必须用 `get_cards` 取得当前 `cardId` 和 `version`。
+
+参数：
+
+| 参数 | 必填 | 说明 |
+|---|---|---|
+| `cardId` | 是 | 当前会话拥有的真实卡片 ID |
+| `expectedVersion` | 是 | 最近一次 `get_cards` 返回的 `version` |
+| `patch` | 是 | 至少包含 `front`、`back`、`text`、`tags`、`extraFields` 之一 |
+
+`patch` 不接受其他字段。`tags` 和 `extraFields` 是整字段替换，不是增量合并；`extraFields` 的 key 会 trim 后转小写，空 key 被丢弃。写入后卡片必须满足“非空 `front` 与 `back`”或“非空 Cloze `text`”之一。
+
+成功更新返回：
+
+```json
+{
+  "status": "ok",
+  "documentId": "...",
+  "card": { "id": "...", "version": "..." },
+  "mutationApplied": true,
+  "retryable": false,
+  "uiSync": {
+    "status": "ok",
+    "blockId": "blk_...",
+    "eventAttempted": true
+  }
+}
+```
+
+若数据库写入成功但聊天块持久化失败，顶层 `status=partial`，`mutationApplied=true`，`uiSync.status=failed`。此时不要用旧版本重试写入，应重新 `get_cards`。
+
+当前会话没有该文档的 `anki_cards` 预览块时，成功更新仍返回顶层 `status=ok`，但 `uiSync={"status":"not_required","eventAttempted":false}`。APKG 导入文档通常属于此路径。
+
+版本冲突是结构化成功结果：
+
+```json
+{
+  "status": "conflict",
+  "error": "version_conflict",
+  "documentId": "...",
+  "current": { "id": "...", "version": "当前版本" },
+  "retryable": true
+}
+```
+
+冲突后必须保留 `current` 中用户的最新内容，重新构造 patch。其他失败没有统一业务码，包括空 patch、卡片内容无效、UI 同步预检失败、数据库失败和 `blocks.ankiCards.errors.statusNotFound`。
+
+### `builtin-chatanki_delete_card`
+
+按双乐观锁删除一张当前会话完整拥有其文档的卡片。删除会在单个 `IMMEDIATE` 事务内复验完整文档归属、内容版本和 FSRS 状态存在性/`local_version`，然后物理移除 `anki_cards` 行及对应的 FSRS 状态与复习历史。
+
+三个参数都必填，并且必须来自最近一次 `builtin-chatanki_get_cards` 的同一卡片快照：
+
+| 参数 | 约束 |
+|---|---|
+| `cardId` | 当前会话完整拥有其文档的真实卡片 ID |
+| `expectedVersion` | 卡片的 `version` 内容版本 |
+| `expectedReviewVersion` | 已入队时传 `reviewState.reviewVersion`；未入队即 `reviewState=null` 时必须显式传 `null` |
+
+成功返回 `status`、`documentId`、`cardId`、`deleted=true`、`mutationApplied=true`、`retryable=false` 和 `uiSync`。`status` 可能为 `ok` 或前述 UI 同步失败时的 `partial`。
+
+版本过期时外层工具调用仍成功，且不会删除卡片、清理 FSRS 或发送 UI 删除事件：
+
+```json
+{
+  "status": "conflict",
+  "error": "version_conflict",
+  "documentId": "...",
+  "current": { "id": "...", "version": "当前版本" },
+  "retryable": true
+}
+```
+
+FSRS 状态在读取后发生入队、评分、暂停、恢复或撤销时，返回同样不会写数据的复习冲突：
+
+```json
+{
+  "status": "conflict",
+  "error": "review_state_conflict",
+  "documentId": "...",
+  "current": { "id": "...", "version": "...", "reviewState": { "reviewVersion": 2 } },
+  "mutationApplied": false,
+  "retryable": true
+}
+```
+
+任何冲突后都必须重新调用 `get_cards`，基于完整 `current` 和用户意图决定是否使用新 token 重试；不得复用旧 `expectedVersion` / `expectedReviewVersion`，也不得把未知状态猜成 `null`。
+
+当前会话没有该文档的预览块时，删除只写数据库，`uiSync.status=not_required` 且 `eventAttempted=false`。错误包括缺少必填 token、非法复习版本、数据库/UI 同步失败和 `blocks.ankiCards.errors.statusNotFound`。一次需要删除超过 3 张时，必须在逐张调用前先征得用户确认。
+
+### `builtin-chatanki_add_cards`
+
+向已有文档补充卡片，不重新运行整批生成。
+
+参数：
+
+| 参数 | 必填 | 约束 |
+|---|---|---|
+| `documentId` | 是 | 当前会话拥有的文档 |
+| `cards` | 是 | `1..100` 张 |
+
+每个卡片对象可包含 `front`、`back`、`text`、`tags`、`extraFields`、`templateId`，并必须提供 `front+back` 或 `text`。未提供的 `front/back/tags/extraFields` 使用空值；`extraFields` key 会规范为小写。
+
+成功返回：
+
+```json
+{
+  "status": "ok",
+  "documentId": "...",
+  "requested": 3,
+  "inserted": 3,
+  "skipped": 0,
+  "cards": [{ "id": "...", "version": "..." }],
+  "mutationApplied": true,
+  "retryable": false,
+  "uiSync": {}
+}
+```
+
+`cards` 是实际插入卡片的完整工具视图，包含新 `id/version`。`status` 同样可能因 UI 同步持久化失败变为 `partial`。失败包括数量/内容无效、所有权拒绝、数据库或 UI 同步失败。
+
+当前会话没有该文档的预览块时（包括 `import_apkg` 创建的文档），新增卡片仍正常入库，`uiSync.status=not_required` 且 `eventAttempted=false`；不会把 APKG 的全量卡片写进聊天块。
+
+### `builtin-chatanki_enqueue_review`
+
+将已验收的非诊断卡片加入内置 FSRS 默认牌组。新卡立即到期；已经存在且未删除的 FSRS 状态会幂等跳过。
+
+参数必须且只能选择一种：
+
+| 参数 | 约束 |
+|---|---|
+| `documentId` | 整批入队；事务内重新解析该文档所有 live、非诊断卡片 |
+| `cardIds` | 精确入队 `1..100` 个真实卡片 ID；重复 ID 会去重 |
+
+成功返回：
+
+```json
+{
+  "status": "ok",
+  "enqueued": 8,
+  "skipped": 2
+}
+```
+
+`skipped` 主要表示已经入队的卡片，不是失败。`documentId` 选择器会自动排除 `isErrorCard=true` 的生成诊断卡；显式 `cardIds` 只要包含诊断卡就原子拒绝整批，并在 `output.error.details` 返回 `errorCode=fsrs_diagnostic_card_not_reviewable` 与对应 `cardId`。整批校验和写入在同一事务中，任何所有权变化或缺失卡片会使整批回滚。其他失败包括选择器无效、卡片数量超限、数据库错误和 `blocks.ankiCards.errors.statusNotFound`。
+
+只有用户明确同意加入复习计划后才调用；部分入队只能使用 `get_cards` 返回的真实 `cardIds`。
+
+### `builtin-chatanki_review_stats`
+
+库级只读工具，参数必须是空对象 `{}`。
+
+成功返回：
+
+```json
+{
+  "status": "ok",
+  "total": 120,
+  "due": 18,
+  "new": 20,
+  "learning": 4,
+  "review": 80,
+  "relearning": 2,
+  "suspended": 3,
+  "reviews_today": 15
+}
+```
+
+注意返回字段是 `new` 和 `reviews_today`，不是 Rust 内部字段名 `newCount`/`reviewsToday`。失败只有参数非空、数据库不可用或统计查询错误，没有独立稳定错误码。
+
+### `builtin-chatanki_undo_last_review`
+
+撤销当前会话拥有的一张卡最后一次仍可撤销的 FSRS 评分。该工具不会重新评分，也不会替用户选择下一次评分。
+
+调用前重新 `get_cards`，从同一张卡的同一份 `reviewState` 取得：
+
+| 参数 | 必填 | 约束 |
+|---|---|---|
+| `cardId` | 是 | 当前会话拥有的真实卡片 ID |
+| `expectedReviewVersion` | 是 | 非负整数，等于最新 `reviewState.reviewVersion` |
+| `expectedLogId` | 是 | 最新 `reviewState.latestReview.logId`，且 `undoable=true` |
+
+成功返回 `status=ok`、`cardId`、`changed=true` 和撤销后的 `reviewState`。成功撤销会软删除目标 review log、原子恢复评分前调度快照并递增 `reviewVersion`。
+
+若 CAS、最新日志或调度指纹已变化，返回：
+
+```json
+{
+  "status": "conflict",
+  "error": "review_state_conflict",
+  "cardId": "...",
+  "current": {},
+  "mutationApplied": false,
+  "retryable": true
+}
+```
+
+此时必须重新 `get_cards` 并向用户说明变化；不得把 `current` 中的新版本和旧的用户意图拼接后静默重试。缺少、损坏或不适用的撤销快照返回 `status=blocked`、`error` 原因、`current`、`mutationApplied=false`、`retryable=false`。不存在、跨会话、已删除或未入队统一工具失败为 `blocks.ankiCards.errors.statusNotFound`。
+
+### `builtin-chatanki_set_suspended`
+
+设置当前会话拥有的一张已入队卡片的暂停状态。参数：
+
+| 参数 | 必填 | 约束 |
+|---|---|---|
+| `cardId` | 是 | 当前会话拥有的真实卡片 ID |
+| `expectedReviewVersion` | 是 | 非负整数，等于最新 `reviewState.reviewVersion` |
+| `suspended` | 是 | `true` 暂停，`false` 恢复 |
+
+成功返回 `status=ok`、`cardId`、`changed` 和最新 `reviewState`。目标已经处于所需状态时 `changed=false`，这是幂等成功，不发送 `fsrs://changed`。实际修改时 `changed=true`、`reviewVersion` 递增，并实时刷新复习界面。
+
+版本变化返回与撤销相同的 `review_state_conflict` 结构；诊断卡等不允许操作的状态返回 `status=blocked`。冲突或拒绝都不会写数据。Agent 只能执行用户明确指定的暂停/恢复，不能把“这张很难”“最近总答错”自行解释为暂停指令。
+
+### `builtin-chatanki_list_library_cards`
+
+分页读取本机完整 live 卡片库。该工具不受当前 ChatV2 会话限制，是后续五个库级写工具唯一的权威观测入口。
+
+| 参数 | 必填 | 默认/约束 |
+|---|---|---|
+| `search` | 否 | 搜索 `front/back/text/tags`；空白按未提供处理 |
+| `templateId` | 否 | 精确匹配模板 ID |
+| `schedule` | 否 | `all`、`due`、`not_enqueued`、`suspended`、`enqueued`；默认 `all` |
+| `filter` | 否 | `all` 或 `error_only`；默认 `all` |
+| `page` | 否 | 默认 `1`，小于 1 规范为 1 |
+| `pageSize` | 否 | 默认 `20`，范围 `1..20`，超出时后端钳制 |
+
+结果按 `created_at DESC, id DESC` 稳定分页，返回 `status/total/page/pageSize/search/templateId/schedule/filter/cards` 及顶层 `ratingAvailableToAgent=false`。每张卡包含会话级卡片视图中的内容、`version` 和截断标记，并额外包含：
+
+```json
+{
+  "documentId": "...",
+  "sourceType": "...",
+  "sourceId": "...",
+  "enqueued": true,
+  "isDue": false,
+  "reviewState": {
+    "cardStateId": "...",
+    "reviewVersion": 4,
+    "latestReview": { "logId": "...", "undoable": true }
+  },
+  "ratingAvailableToAgent": false
+}
+```
+
+`reviewState=null` 只表示已成功读取且该卡未入队。若响应含 `reviewStateUnavailable=true`，说明写入已完成但复习状态重读失败；不得把它当成未入队，也不得据此构造复习状态写操作，必须重新 `list_library_cards`。必须根据 `total/page/pageSize` 翻完所需范围；不能把前 20 条当作完整卡片库。卡片字段沿用工具统一的单字段 2,000 字符上限；发生截断时返回 `truncated=true` 和具体的 `truncatedFields`，不得把截断文本当作完整字段，也不得在未取得完整替换内容时覆盖该字段。`ratingAvailableToAgent=false` 是硬边界：读取结果中的历史 `rating` 不授权 Agent 评分。
+
+### `builtin-chatanki_update_library_card`
+
+带内容 CAS 修改任意一张库卡片。必须先从同一次 `list_library_cards` 取得 `cardId` 和字符串 `version`。
+
+| 参数 | 必填 | 约束 |
+|---|---|---|
+| `cardId` | 是 | list 返回的真实卡片 ID |
+| `expectedVersion` | 是 | 同一快照的内容 `version` |
+| `patch` | 是 | 至少一个 `front/back/text/tags/extraFields`；`text=null` 表示清除 |
+
+写后卡片仍必须满足非空 `front+back` 或非空 Cloze `text`。成功返回 `status=ok`（来源聊天块同步或复习状态重读失败时为 `partial`）、`documentId`、更新后 `card`、`mutationApplied=true`、`retryable=false` 和 `uiSync`。复习状态重读失败会带 `reviewStateUnavailable=true`，此时 card 内不提供 `reviewState`，必须重新 list。无来源聊天块时 `uiSync.status=not_required`。
+
+内容版本变化返回 `status=conflict`、`error=version_conflict`、包含最新内容及 `reviewState` 的 `current`、`mutationApplied=false`、`retryable=true`，并明确要求重新 list。不存在的卡是工具失败 `blocks.ankiCards.errors.statusNotFound`。冲突后不得去掉 `expectedVersion` 或换用会话级更新绕过。
+
+### `builtin-chatanki_enqueue_library_review`
+
+把完整库中的 `1..100` 张卡原子加入 FSRS 队列。参数只有 `cards` 数组；每项必须是同一次或仍然最新的 list 快照中的 `{ cardId, expectedVersion }`，`cardId` 不得重复。
+
+成功返回；若复习状态回读失败则顶层 `status=partial` 并带 `reviewStateUnavailable=true`，各卡不提供 `reviewState`，但 `enqueued` 仍然是已成功写入的真实结果：
+
+```json
+{
+  "status": "ok",
+  "enqueued": 8,
+  "skipped": 2,
+  "cards": [{ "cardId": "...", "reviewState": {} }],
+  "mutationApplied": true,
+  "retryable": false
+}
+```
+
+已经入队的卡计入 `skipped`。任一卡内容版本变化会使整批返回 `status=conflict`、`error=version_conflict` 和 `conflicts`；缺失卡返回结构化 `status=not_found`、`error=card_not_found`、`cardIds`；诊断卡等不可入队对象返回 `status=blocked`、原因和 `cardIds`。三种结果都不会部分写入。只有用户明确同意目标集合后才可调用，不能把一次搜索的全部命中项自动入队。
+
+### `builtin-chatanki_set_library_suspended`
+
+暂停或恢复一张已入队的库卡片。参数为 `cardId`、非负整数 `expectedReviewVersion` 和布尔 `suspended`；三者都必须来自用户明确目标及最新 `list_library_cards.reviewState`。
+
+成功返回 `status=ok`、`cardId`、`changed`、`mutationApplied=changed`、`retryable=false` 和最新 `reviewState`。目标已经处于所需状态时 `changed=false`，不发送变更事件。版本冲突返回 `review_state_conflict` 及 `current`；不可操作状态返回 `blocked`；不存在或未入队是 `blocks.ankiCards.errors.statusNotFound` 工具失败。
+
+### `builtin-chatanki_undo_library_last_review`
+
+撤销一张库卡片最后一次仍可撤销的评分。仅当用户明确要求且最新 list 快照满足 `reviewState.latestReview.undoable=true` 时调用，参数为该卡 `cardId`、`expectedReviewVersion` 和同一快照的 `expectedLogId=latestReview.logId`。
+
+成功、冲突、拒绝和 not-found 结构与库级暂停工具一致；成功的 `reviewState` 是撤销后的新快照。冲突 guidance 指向 `list_library_cards`，不得使用旧日志 ID 静默重试。此工具只撤销，不会重新评分；撤销后的 Again/Hard/Good/Easy 必须由用户在复习 UI 选择。
+
+### `builtin-chatanki_delete_library_card`
+
+从完整库删除一张内容卡，并在同一数据库事务内删除对应 FSRS 状态和复习日志。它同时使用内容与复习两个 CAS：
+
+| 参数 | 必填 | 约束 |
+|---|---|---|
+| `cardId` | 是 | list 返回的真实卡片 ID |
+| `expectedVersion` | 是 | 同一快照的内容 `version` |
+| `expectedReviewVersion` | 是 | 已入队传 `reviewState.reviewVersion`；未入队即 `reviewState=null` 时必须显式传 `null` |
+
+成功返回 `status=ok/partial`、`documentId`、`cardId`、`deleted=true`、`mutationApplied=true`、`retryable=false` 和 `uiSync`。内容 CAS 变化返回 `error=version_conflict`；FSRS 状态在预检后变化返回 `error=review_state_conflict`；两者都返回最新 `current`、不写数据并要求重新 list。不存在返回统一 not-found 工具失败。
+
+删除是 High 风险。用户明确指定单卡并要求删除时才可执行；目标不唯一或一次计划删除超过 3 张时，必须先汇总目标、数量及后果并调用 `builtin-ask_user`。不能把 `expectedReviewVersion` 猜成 `null`，也不能在冲突后改用会话级删除。
+
+### `builtin-chatanki_retemplate`
+
+在不重做内容的情况下批量更换模板。整批在同一事务内校验选择集和所有版本，任何冲突都不会写入部分结果。
+
+参数：
+
+| 参数 | 必填 | 约束 |
+|---|---|---|
+| `documentId` | 与 `cardIds` 二选一 | 选择当前文档全部 live 卡片 |
+| `cardIds` | 与 `documentId` 二选一 | `1..100` 个不重复真实 ID，且必须来自同一文档 |
+| `targetTemplateId` | 是 | 来自 `list_templates` 的激活模板 |
+| `strategy` | 是 | `map_only` 或 `fill_missing` |
+| `expectedVersions` | 是 | `cardId -> version`，必须与本次完整选择精确一致 |
+
+`map_only` 映射已有同名/别名字段并报告缺失字段。`fill_missing` 仍不会调用 LLM 或自动填值，只会在缺字段卡片上额外返回 `source`，供后续 `update_card` 使用。
+
+成功返回：
+
+```json
+{
+  "status": "ok",
+  "documentId": "...",
+  "targetTemplateId": "design-lexicon",
+  "targetNoteType": "Basic",
+  "isCloze": false,
+  "strategy": "map_only",
+  "updated": 10,
+  "missingCards": 2,
+  "cards": [
+    {
+      "id": "...",
+      "version": "新版本",
+      "missingFields": ["example"],
+      "missingFieldDetails": [{ "field": "example", "required": true }]
+    }
+  ],
+  "mutationApplied": true,
+  "retryable": false,
+  "uiSync": {}
+}
+```
+
+结构化拒绝/冲突：
+
+| `error` | `status` | 含义与处理 |
+|---|---|---|
+| `selection_changed` | `conflict` | 卡片已删除或文档集合变化；重新 `get_cards` |
+| `expected_versions_mismatch` | `conflict` | `expectedVersions` 缺少或多出卡片；重建完整映射 |
+| `version_conflict` | `conflict` | 至少一张卡版本过期；返回 `conflicts`，重新读取全部选择 |
+| `invalid_cloze_text` | `blocked` | 目标为 Cloze，但卡片缺少有效 `{{cN::answer}}`；先逐卡 `update_card` |
+| `cross_document_selection` | `rejected` | `cardIds` 跨文档；拆成每文档一次调用 |
+| `blocks.ankiCards.errors.statusNotFound` | `rejected` 或工具失败 | 所有权拒绝或选择不可见 |
+
+目标模板不存在/未激活分别以工具失败消息 `target_template_not_found`、`target_template_inactive` 返回。成功写入后也可能出现 `status=partial`，含义与其他写卡工具相同。
+
+当前会话没有该文档的预览块时，换模板仍会在完整的 Anki 所有权与乐观锁校验后写入，`uiSync.status=not_required` 且 `eventAttempted=false`。
+
+### `builtin-chatanki_control`
+
+控制文档后台任务。
+
+参数：
+
+| 参数 | 必填 | 说明 |
+|---|---|---|
+| `action` | 是 | `pause`、`resume`、`retry`、`cancel` |
+| `documentId` | 是 | 当前会话拥有的文档 |
+| `taskId` | 否 | 仅 `retry` 的高级用法；必须属于该文档 |
+
+不传 `taskId` 的 `retry` 会根据文档失败/错误卡片构建统一重试任务，并恢复文档处理；传入时只把指定分段置为 `pending` 后恢复。统一重试会追加修复结果，不会按生成数量猜测并自动删除旧诊断卡；验收修复结果后可用 `delete_card` 明确删除旧错误卡。`cancel` 保留已经生成的卡片。
+
+成功返回：
+
+```json
+{
+  "status": "ok",
+  "action": "retry",
+  "documentId": "...",
+  "counts": {
+    "counts": {},
+    "completedRatio": 0.5
+  }
+}
+```
+
+错误包括不支持的 action、LLM/数据库不可用、动作执行失败、`taskId` 不属于文档，以及 `blocks.ankiCards.errors.statusNotFound`。
+
+### `builtin-chatanki_export`
+
+把当前文档中的非错误卡片导出为 APKG 或 JSON。调用前应完成 `get_cards` 验收并取得用户明确确认。
+
+参数：
+
+| 参数 | 必填 | 说明 |
+|---|---|---|
+| `documentId` | 是 | 当前会话拥有的文档 |
+| `format` | 是 | `apkg` 或 `json` |
+| `deckName` | 否 | 默认取设置或 `Default` |
+| `noteType` | 否 | 默认取设置或 `Basic`；全 Cloze 批次自动改为 `Cloze` |
+| `templateId` | 否 | APKG 中卡片缺少模板 ID 时的回退模板 |
+| `suggestedName` | 否 | 建议文件名，不是输出路径 |
+
+成功返回：
+
+```json
+{
+  "status": "ok",
+  "documentId": "...",
+  "format": "apkg",
+  "path": "/absolute/output/path.apkg",
+  "deckName": "Default",
+  "noteType": "Basic",
+  "cardsCount": 20
+}
+```
+
+APKG 支持同一包内按卡片 `templateId` 建立多个 Anki model。若某些卡无模板，优先使用显式 `templateId`，其次使用整批唯一模板；仍无法解析时返回 `blocks.ankiCards.errors.templateNotFound`。
+
+其他失败包括 `blocks.ankiCards.errors.statusNotFound`、没有可导出的非错误卡片、格式不支持、模板加载/文件写入失败。除上述 i18n key 外多数是错误消息，不是稳定错误码。
+
+### `builtin-chatanki_sync`
+
+通过本机 AnkiConnect 将当前文档中的非错误卡片写入桌面 Anki。可先调用 `check_anki_connect`。
+
+公开 Schema 参数：
+
+| 参数 | 必填 | 说明 |
+|---|---|---|
+| `documentId` | 是 | 当前会话拥有的文档 |
+| `deckName` | 否 | 默认取设置或 `Default` |
+| `noteType` | 否 | 默认取设置或 `Basic`；全 Cloze 批次强制使用 `Cloze` |
+
+执行器还保留 `templateId`、`templateIds`、`templateMode` 兼容字段，但当前 Agent 工具 Schema 未公开，不能依赖它们作为稳定调用契约。默认会从卡片已有 `templateId` 推断 model，并在需要时创建自定义 Anki model。
+
+返回：
+
+```json
+{
+  "status": "ok",
+  "documentId": "...",
+  "deckName": "Default",
+  "noteType": "Basic",
+  "total": 20,
+  "added": 18,
+  "duplicates": 2,
+  "failed": 0,
+  "createdModels": [],
+  "receiptWritten": 18,
+  "error": null,
+  "warning": null
+}
+```
+
+三态语义：
+
+- `ok`：`failed=0`，包括全部卡片已存在的幂等成功；
+- `partial`：既有新增或重复，又有真实失败，外层工具结果仍成功；`warning.code=anki_sync_partial`；
+- `error`：全部真实失败，外层 `success=false`，`error=blocks.ankiCards.errors.ankiSyncEmpty`。
+
+`duplicates` 不是失败。常见稳定错误 key 还有 `blocks.ankiCards.errors.ankiConnectUnavailable`、`blocks.ankiCards.errors.missingClozeNoteType` 和 `blocks.ankiCards.errors.statusNotFound`。网络、AnkiConnect API 或模型创建失败可能以原始消息返回。
+
+### `builtin-chatanki_list_templates`
+
+列出本地模板及 Agent 换模板所需的字段契约。若模板库为空，执行器会尝试导入内置模板。
+
+参数：
+
+| 参数 | 必填 | 默认/语义 |
+|---|---|---|
+| `category` | 否 | 在 ID、名称、描述和 note type 中做不区分大小写的包含匹配 |
+| `activeOnly` | 否 | 默认 `true` |
+| `page` | 否 | 默认 `1`；`0` 按 `1` 处理；负数参数无效 |
+| `pageSize` | 否 | 默认 `20`；限制为 `1..50` |
+
+系统先应用 `activeOnly/category` 筛选，再对筛选结果分页。成功返回 `status=ok`、`activeOnly`、`query`、`total`、`page`、`pageSize`、`count` 和 `templates`：`total` 是筛选后的总数，`count` 是当前页 `templates` 数量；尾页可少于 `pageSize`，越过尾页时 `templates=[]`、`count=0`，但 `total` 保持不变。每个模板项包含：
+
+- `id`、`name`、`description`、固定的 `category=general`；
+- `noteType`、`isCloze`、`fields`、`field_extraction_rules`；
+- `isActive`、`isBuiltIn`；
+- `complexityLevel`、`useCaseDescription`、`generation_prompt`。
+
+失败包括参数解析、数据库不可用或模板查询失败，没有独立稳定错误码。
+
+### `builtin-chatanki_analyze`
+
+对直接文本做轻量启发式分析，不创建卡片。
+
+参数：
+
+| 参数 | 必填 | 说明 |
+|---|---|---|
+| `content` | 是 | 非空文本/Markdown |
+| `goal` | 否 | 原样回显，供调用方关联学习目标 |
+
+成功返回：
+
+```json
+{
+  "status": "ok",
+  "goal": null,
+  "metrics": {
+    "chars": 1200,
+    "nonEmptyLines": 60,
+    "entryLikeLines": 45
+  },
+  "recommended": {
+    "route": "simple_text",
+    "glossaryMode": true,
+    "segmentOverlapSize": 0,
+    "maxOutputTokensOverride": 2400,
+    "temperature": 0.2
+  }
+}
+```
+
+当前实现只对术语表形态做启发式推荐，`recommended.route` 固定为 `simple_text`；它不会读取上传文件，也不会估出精确卡数。失败为参数解析错误或 `content is required`。
+
+### `builtin-chatanki_check_anki_connect`
+
+无参数，调用 `{}`。无论检查服务是否报错，工具本身都会返回结构化成功：
+
+```json
+{
+  "status": "ok",
+  "available": false,
+  "error": "连接失败的原始消息或 null"
+}
+```
+
+因此必须检查 `available`，不能只检查外层 `success`。`available=false` 时不要继续 `sync`，应提示用户启动 Anki 并启用 AnkiConnect。
+
+## 标准工作流
+
+### 新制卡与验收循环
+
+1. 确认材料、目标、`maxCards` 和模板选择。只有直接 `content` 少于 800 字、`maxCards<=10` 且所有必需参数无歧义时，允许省略启动前确认。
+2. 原始文件/图片调用 `run`；已清洗 Markdown 调用 `start`。
+3. 在下一轮调用 `wait`，遇到 `timeout` 继续等待或用 `status` 查询，直到进入终态。
+4. 用 `get_cards` 分页读回全部卡片，检查事实、正反面、Cloze 挖空、必需字段、目标偏离和重复项。
+5. 用 `update_card`、`delete_card`、`add_cards` 修正。删除必须传同一次 `get_cards` 的内容与复习版本；未入队时显式传 `expectedReviewVersion=null`。每次写入后重新 `get_cards`，直到验收通过。
+6. 向用户报告生成数、修改数、删除数、补卡数和未决事项。
+7. 主动询问是否入队复习。只有同意后调用 `enqueue_review`；导出或同步也必须有用户明确要求或确认。
+
+用户说“第 N 张错了”时，先 `get_cards` 定位真实 `cardId/version/reviewState`，只修改该卡；除非用户明确要求，不得整批重跑。
+
+### 更换模板
+
+1. `list_templates` 查看目标模板的 `noteType`、`fields` 和字段规则；根据 `total/page/pageSize` 翻完所需页面，不能把第一页当作完整模板库。
+2. `get_cards` 分页读完完整选择，构造每张卡的 `cardId -> version`。
+3. 用户确认后调用 `retemplate(strategy=map_only)`。
+4. 检查每张卡的 `missingFields`。若目标为 Cloze，先用 `update_card` 写入有效 `{{cN::...}}` 文本。
+5. 按卡调用 `update_card` 补齐字段；`fill_missing` 只提供源内容，不会自动填值。
+6. 再次分页 `get_cards` 验收。任何版本冲突都要刷新完整选择和全部版本，不得复用旧映射。
+
+### APKG 加工闭环
+
+1. 上传资源用 `import_apkg(resourceId)`；明确绝对路径用 `import_apkg(path)`。
+2. 记录返回的真实 `documentId`、`importedCards`、`importedTemplates` 和 `mediaSkipped`。
+3. 立即分页 `get_cards`，检查 Basic/Cloze 映射、重复项、缺失字段和媒体缺失影响。
+4. 使用单卡修改、删卡、补卡或版本化换模板流程加工，每次修改后复核。
+5. 用户确认后按需 `export`、`enqueue_review` 或 `sync`。
+
+### 撤销评分与暂停/恢复
+
+1. 先用 `get_cards` 定位目标真实 `cardId` 并读取最新 `reviewState`；`reviewState=null` 时停止。
+2. 撤销只在用户明确要求且 `latestReview.undoable=true` 时执行，把同一快照的 `reviewVersion` 和 `latestReview.logId` 原样传入 `undo_last_review`。
+3. 暂停/恢复只在用户明确指定方向时执行，把最新 `reviewVersion` 传入 `set_suspended`。
+4. `conflict` 时重新读取并报告，不盲重试；`blocked` 时报告原因，不绕过。
+5. Agent 不得评分，也不得从用户描述、卡片难度或历史 rating 推断 Again/Hard/Good/Easy。撤销后的下一次评分必须由用户在复习 UI 中完成。
+
+### 完整卡片库闭环
+
+1. 只有用户明确指向卡片库或既有卡片时进入全库流程；先用 `list_library_cards` 搜索/筛选并按 `total/page/pageSize` 翻页定位，不能猜 ID。
+2. 目标不唯一时展示足够的区分信息并询问；后续所有 CAS token 必须来自最终选中卡的最新同一快照。
+3. 编辑使用 `update_library_card(expectedVersion)`；入队使用最多 100 个不重复 `{cardId, expectedVersion}`，且先取得用户对完整集合的同意。
+4. 暂停/恢复及撤销使用 `reviewState.reviewVersion`；撤销还要求同一快照的 `latestReview.logId` 和 `undoable=true`。
+5. 删除同时传内容版本和复习版本；未入队时显式传 `expectedReviewVersion=null`。批量删除超过 3 张先确认。
+6. 任一 `version_conflict/review_state_conflict/not_found` 后重新 list 并报告变化，不复用旧 token、不盲重试、不切换到会话级工具绕过。
+7. 写后再次 list 验证权威终态。全库工具始终不开放评分；需要 Again/Hard/Good/Easy 时打开复习 UI 由用户操作。
+
+### 超过 100 张的大批量
+
+单次 `run`/`start` 的 `maxCards` 上限为 100。目标超过 100 张时：
+
+1. 按 `resourceId`/`resourceIds` 子集拆成多批，每批 `maxCards<=100`；
+2. 每批分别 `wait`；
+3. 每批分别用 `get_cards` 读回全部卡片并完成修正；
+4. 全部批次通过验收后，再汇总各批 `documentId`、生成数和修订数；
+5. 不得一次塞入几十个资源后跳过逐批等待和验收。
+
+## 已知边界与后续工作
+
+- APKG 媒体当前只统计并跳过，不导入附件内容；APKG 模板当前不落入本地模板库，`importedTemplates=0`。
+- 统一失败分段重试不会自动删除旧错误诊断卡；必须在 `get_cards` 验收替代卡后显式删除，避免部分修复时误删证据。
+- FSRS 目前使用默认牌组，不提供每日新卡上限或 Agent 牌组管理工具。
+- `analyze` 是文本启发式工具，不解析上传文件，也不提供精确卡数预测。
+- `sync` 依赖本机 Anki 和 AnkiConnect；本工具面不改变 AnkiConnect 协议。
+- 聊天输入栏不提供模板选择 UI，模板选择由 Agent 工具参数和现有模板管理界面承担。
