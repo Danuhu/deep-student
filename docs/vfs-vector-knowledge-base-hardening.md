@@ -227,10 +227,12 @@ Chat 持久化的 canonical part 包括：
 - [x] Unit `text_content` 提供无 TE/Segment 时的 lexical fallback。
 - [x] 目录过滤改为 SQLite `folder_items` 权威后过滤。
 - [x] 旧 cross-dimension 和 direct multimodal 入口接入统一 runtime，旧 raw-score 路径不可达。
+- [x] Chat builtin search、MemoryService 和所有兼容搜索包装统一接入 profile-aware retriever；无身份 bare vector 不再选择 VFS 空间，旧 dimension-only Lance API 显式拒绝。
 - [x] 纯文本候选选 text reranker，含图候选选 VL reranker；未配置或失败保留 RRF。
 - [x] 后台 text/MM worker 自动消费 pending，并在能力未配置时不消耗 retry。
 - [x] 目录移动把启用中的 text/MM route 置为 pending，disabled 保持 disabled。
 - [x] 备份、恢复和云同步把 Lance 视为本机派生数据；不完整恢复时清账本后重建。
+- [x] 主桌面恢复流程执行 VFS restore prepare/finalize 契约；`vfs_index_profiles` 归类为 `DerivedRebuild`，不参与跨设备 RowSync/checksum。
 - [x] 旧 `image` modality 迁移为 multimodal protocol，并确定性回填 MM Unit profile。
 - [x] 前端 TE/ME/text-reranker/VL-reranker 能力互斥校验和真实 VFS API 已恢复。
 - [x] 搜索 DTO 保留 embedding/provenance/resource filter；详细 IPC 暴露 plan、failure 和查询派生。
@@ -240,6 +242,11 @@ Chat 持久化的 canonical part 包括：
 - [x] System OCR 作为 native candidate 参与回退，显式禁用语义和平台默认值可区分。
 - [x] 含图请求的 provider failover 只选择 MM；TM 与 MM variant 分别编译上下文。
 - [x] TM/MM 任意交替与 multi-variant 独立编译。
+- [x] 辅助 MM/OCR 具有 30s/45s 分段超时和 75s 每轮总预算，取消会传播并终止仍在运行的 provider work。
+- [x] canonical artifact 按 `(message_index, image_id)` 绑定；同一 Blob 跨轮重复引用不会串用观察结果，能力不可用占位符也不会阻止后续恢复重试。
+- [x] legacy profile 仅允许精确绑定的 `legacy:model-config:<config_id>` 滚动升级；unbound、错配 ID 和迟到批次不能重新污染 active profile。
+- [x] retired 且零引用的 legacy 物理表由持久 sweep 回收；drop 失败会在后续 worker/startup 重试且不阻塞 row-level orphan queue。
+- [x] retired ledger 在物理表已删除后走本地目录快路径，避免 5 秒 worker 周期反复打开 Lance catalog，同时保留失败 drop 的持久重试语义。
 
 ### 7.2 仍建议继续优化的质量与性能项
 
@@ -289,3 +296,20 @@ Chat 持久化的 canonical part 包括：
 8. 一个向量 profile 超时后，FTS 和其他 profile 仍返回结果，并记录失败 provenance。
 9. 目录移动后按新目录检索可命中，按旧目录不能命中。
 10. 不含 Lance 的恢复包或跨设备同步会把索引状态重置 pending 并自动重建。
+
+## 10. 本轮实现后复核
+
+隔离工作树验证避免了共享工作树中无关开发改动的干扰，结果如下：
+
+- `cargo fmt --all -- --check` 通过。
+- `cargo check --lib` 通过。
+- Chat context compiler 18 项测试通过，覆盖 MM 原图直送、TM 回退、TM/MM 连续切换、canonical artifact、超时与取消。
+- 32 能力子集、RRF 和 route failure 11 项测试通过。
+- unified retriever 18 项、Lance/profile/legacy GC 9 项、embedding profile 8 项测试通过。
+- VFS handlers 21 项、indexing 8 项、multimodal compatibility 5 项、routing 25 项测试通过。
+- Memory lexical-only/bare-vector 隔离、VFS migration 幂等修复和两类 restore contract 测试通过。
+
+真实 `slotA` VFS 数据库只读检查：SQLite `quick_check=ok`、无外键或悬空
+Unit/Segment/profile；strong 1024 维 profile 为 active，21 个 Unit 与 21 个 Segment
+均为 generation 1，legacy profile 为 retired，orphan queue 为 0。启动日志中 worker
+两批分别 `10/10`、`6/6` 成功，未发现 stale fingerprint、Tokio reactor panic 或运行时 panic。
