@@ -1,8 +1,8 @@
 # Agent 工具面总览
 
 > 更新日期：2026-07-14  
-> 运行时事实源：`src/features/chat/skills/builtin-tools/*.ts` 的 `embeddedTools` 与
-> `allowedTools`，以及 `src-tauri/src/chat_v2/tools/*_executor.rs`。本文记录产品边界、
+> 运行时事实源：`src/features/chat/skills/builtin-tools/*.ts` 的 `embeddedTools`，
+> 以及 `src-tauri/src/chat_v2/tools/*_executor.rs`。本文记录产品边界、
 > 通用契约与领域索引；字段级 JSON Schema 以运行时事实源为准，禁止在本文另造第二套契约。
 
 ## 1. 通用契约
@@ -10,8 +10,9 @@
 ### 1.1 渐进披露
 
 首轮只提供 `load_skills`。模型加载某个 builtin skill 后，才获得该 skill 的
-`embeddedTools`；工具必须同时出现在 `allowedTools`。后端 executor、前端 skill schema、
-skill 工作流说明任一缺失，都不算可用能力。
+`embeddedTools`。技能不再通过 `allowedTools` 限制其他工具；该字段仅作为旧
+SKILL.md 包的兼容元数据保留。后端 executor、前端 skill schema、skill 工作流说明
+任一缺失，都不算可用能力。
 
 ### 1.2 敏感度与审批
 
