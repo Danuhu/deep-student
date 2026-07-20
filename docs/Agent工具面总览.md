@@ -1,6 +1,6 @@
 # Agent 工具面总览
 
-> 更新日期：2026-07-14  
+> 更新日期：2026-07-20  
 > 运行时事实源：`src/features/chat/skills/builtin-tools/*.ts` 的 `embeddedTools`，
 > 以及 `src-tauri/src/chat_v2/tools/*_executor.rs`。本文记录产品边界、
 > 通用契约与领域索引；字段级 JSON Schema 以运行时事实源为准，禁止在本文另造第二套契约。
@@ -26,10 +26,12 @@ SKILL.md 包的兼容元数据保留。后端 executor、前端 skill schema、s
 密钥、OAuth token、WebDAV/S3/FTP 密码不得出现在工具参数、回执或日志中。
 
 只有 `approval_scope.rs` 明确列入 always-confirm/never-remember 的家族才要求每次确认并禁用
-“本会话允许/始终允许”：权限升级（skill install/workshop apply、MCP server propose、runtime
+“本会话允许/始终允许”：权限升级（skill install/workshop apply、skill remove、skill trust
+request（grant）、MCP server propose/update/remove、custom_agent apply/remove、runtime
 root request、automation propose）、高危 Workbench、领域破坏性操作、DSTU purge、backup/sync，
-以及按具体参数判定的 shell/高风险外部 MCP。`index_rebuild`、`memory_export_all` 虽为 High，
-当前不属于该单次批准清单；不得仅凭 High 标签虚构更严格策略。
+以及按具体参数判定的 shell/高风险外部 MCP。`skill_set_enabled`、`mcp_server_set_enabled`
+为 Medium、审批 scope 绑定“目标 + 启停方向”且可 remember，不在该清单。`index_rebuild`、
+`memory_export_all` 虽为 High，当前不属于该单次批准清单；不得仅凭 High 标签虚构更严格策略。
 
 ### 1.3 用户可见消息 i18n
 
@@ -110,10 +112,25 @@ skill schema；返回列说明主要可观测结果。`L/M/H` 分别表示 Low/M
 | 模板 | `builtin-template_list`, `builtin-template_get`, `builtin-template_preview`, `builtin-template_validate`, `builtin-template_create`, `builtin-template_fork`, `builtin-template_update`, `builtin-template_delete` | template/spec/ID；返回模板、预览、校验/变更 | 读 L，写 M，delete H/不可恢复；`TEMPLATE_*` |
 | Workbench | `builtin-workbench_get_capabilities`, `builtin-workbench_list_windows`, `builtin-workbench_observe`, `builtin-workbench_query_state`, `builtin-workbench_wait_for`, `builtin-workbench_open_app`, `builtin-workbench_app_command`, `builtin-workbench_act`, `builtin-workbench_act_high`, `builtin-workbench_close_window`, `builtin-workbench_undo` | app/window、动作批次、期望条件、undoToken；返回权威 observation、done/undone、一次性 token | 读 L，普通 act M，高危/close/undo H；`WORKBENCH_*`, `UNDO_*`, `RESULT_UNKNOWN` |
 | Browser | `builtin-browser_open`, `builtin-browser_navigate`, `builtin-browser_back`, `builtin-browser_snapshot`, `builtin-browser_click`, `builtin-browser_type`, `builtin-browser_scroll`, `builtin-browser_close` | page/selector/text/方向；返回浏览器状态/截图语义 | 平台与动作分级见 schema；`BROWSER_*` |
-| Workspace/子代理 | `builtin-workspace_create`, `builtin-workspace_create_agent`, `builtin-subagent_call`, `builtin-workspace_get_context`, `builtin-workspace_set_context`, `builtin-workspace_query`, `builtin-workspace_send`, `builtin-workspace_read_document`, `builtin-workspace_update_document`, `builtin-workspace_file_list`, `builtin-workspace_file_read`, `builtin-workspace_file_write`, `builtin-workspace_file_move`, `builtin-workspace_file_delete`, `builtin-workspace_artifact_write`, `builtin-workspace_change_revert`, `builtin-coordinator_sleep`, `builtin-local_shell_preflight`, `builtin-local_shell_execute`, `builtin-skill_scan`, `builtin-skill_install`, `builtin-runtime_root_request`, `builtin-tool_pack` | subagent_call 必填 workspace_id/真实 skill_id/task，可选 JSON context；由后端即时建会话并派发，返回 workspace_id、agent_session_id、task_message_id、run_id、status；其唯一生产 schema 是 workspace skill 的 TypeScript embeddedTools，不保留 Rust 重复 schema。其余工具返回消息、文件变更、审批计划、任务状态 | subagent_call M；当前失败为自然语言错误、无稳定 code。其余读 L、写/execute M，高危命令与授权按审批结果；`WORKSPACE_*`, `SHELL_*`, `ROOT_*` |
+| Workspace/子代理 | `builtin-workspace_create`, `builtin-workspace_create_agent`, `builtin-subagent_call`, `builtin-workspace_get_context`, `builtin-workspace_set_context`, `builtin-workspace_query`, `builtin-workspace_send`, `builtin-workspace_read_document`, `builtin-workspace_update_document`, `builtin-workspace_file_list`, `builtin-workspace_file_read`, `builtin-workspace_file_write`, `builtin-workspace_file_move`, `builtin-workspace_file_delete`, `builtin-workspace_artifact_write`, `builtin-workspace_change_revert`, `builtin-coordinator_sleep`, `builtin-local_shell_preflight`, `builtin-local_shell_execute`, `builtin-skill_scan`, `builtin-skill_install`, `builtin-runtime_root_request`, `builtin-tool_pack` | subagent_call 单 Task 委托：必填 task，可选 workspace_id（缺省后端自动创建工作区并注册当前会话为 coordinator，返回 auto_created_workspace=true）、profile（自由字符串：worker 默认/explorer 只读检索面/default，或 {appData}/workspaces/agents/*.md 自定义 profile 的 name，未知值报错并列出可用 profile）、resume_agent_session_id（续跑：传首次返回的 agent_session_id 并配合其 workspace_id，向同一子代理会话追问，返回 resumed=true/false）、skill_id（legacy 别名）、model、JSON context、wait（默认 true 阻塞等待，750s 预算内直接返回 output/output_truncated；wait=false 立即返回 ids 供 fan-out）；返回 workspace_id、agent_session_id、task_message_id、run_id、status、output、profile_id、resumed、token_usage（可能为 null 的 camelCase TokenUsage 对象，与 workspace_agent_completion 事件一致）等；其唯一生产 schema 是 workspace skill 的 TypeScript embeddedTools，不保留 Rust 重复 schema。coordinator_sleep 定位为等待 wait=false 派发的子代理，不再是创建 Worker 后的必需步骤。其余工具返回消息、文件变更、审批计划、任务状态 | subagent_call M；当前失败为自然语言错误、无稳定 code。其余读 L、写/execute M，高危命令与授权按审批结果；`WORKSPACE_*`, `SHELL_*`, `ROOT_*` |
 | ChatAnki 制卡闭环 | `builtin-chatanki_run`, `builtin-chatanki_start`, `builtin-chatanki_status`, `builtin-chatanki_wait`, `builtin-chatanki_get_cards`, `builtin-chatanki_analyze`, `builtin-chatanki_list_templates`, `builtin-chatanki_import_apkg`, `builtin-chatanki_add_cards`, `builtin-chatanki_update_card`, `builtin-chatanki_delete_card`, `builtin-chatanki_retemplate`, `builtin-chatanki_control`, `builtin-chatanki_check_anki_connect`, `builtin-chatanki_export`, `builtin-chatanki_sync` | 输入材料/附件或 APKG、document/card/version、模板映射、控制动作与导出格式；返回真实异步任务、分页完整卡片、版本化变更、APKG/JSON 产物或 AnkiConnect 终态。写卡后必须 get_cards 复核；导出/同步/入队须用户明确意图 | import/export/sync M，其余当前 executor 为 L；返回 `status/error/output`，细分错误见 `docs/anki-agent-tools.md`，没有跨工具统一稳定 code |
 | ChatAnki 卡库/FSRS | `builtin-chatanki_list_library_cards`, `builtin-chatanki_update_library_card`, `builtin-chatanki_delete_library_card`, `builtin-chatanki_enqueue_library_review`, `builtin-chatanki_set_library_suspended`, `builtin-chatanki_undo_library_last_review`, `builtin-chatanki_enqueue_review`, `builtin-chatanki_review_stats`, `builtin-chatanki_undo_last_review`, `builtin-chatanki_set_suspended` | library scope 跨会话访问完整 live 卡片库；list 支持 search/templateId/schedule/filter 与最多 20 条/页。内容写使用字符串 `version`，复习写使用独立整数 `reviewVersion`，delete 同时校验二者且未入队显式传 null；library enqueue 对 1..100 张卡全批 CAS。返回明确 `ratingAvailableToAgent=false` | list/update/enqueue_review/stats L；library enqueue、两种 suspend M；两种 undo 与 library delete H。冲突为 `version_conflict` / `review_state_conflict`；不存在/blocked 语义见 `docs/anki-agent-tools.md`，评分工具不暴露 |
 | 自检/扩展 | `builtin-self_inspect`, `builtin-mcp_server_propose`, `builtin-skill_workshop_propose`, `builtin-skill_workshop_apply` | capability/server/skill draft；返回脱敏自检、提案或应用结果 | inspect L，提案/应用按 executor；`SELF_INSPECT_*`, `SKILL_*`, `MCP_*` |
+| 技能生命周期 | `builtin-skill_set_enabled`, `builtin-skill_remove`, `builtin-skill_trust_request` | skill_id、enabled 方向；trust 先 `action=inspect`（只读现扫，返回整包 SHA-256 + 风险信号）再 `action=grant`（原样携带 `expected_package_sha256`/`declared_risk_level`）；返回启停回执、删除回执（连带清理 provenance/信任记录）或绑定指纹的信任授予 | set_enabled M（scope 绑定 skill+方向，可 remember）；remove、trust grant H、never-remember；trust inspect L。指纹失配 fail-closed；builtin 技能可停用不可删除。executor：`skill_lifecycle_executor.rs` |
+| MCP 管理 | `builtin-mcp_server_update`, `builtin-mcp_server_set_enabled`, `builtin-mcp_server_remove` | server_id（id 或名称）、要改的字段（凭据红线：拒绝 `env` 明文，`env_required` 只收变量名）、enabled 方向、remove 必填 `expected_transport`（执行期复核）；返回脱敏 server 摘要、自动连测/失败回滚结果；写入后经 `chat_v2://settings_changed` 通知前端重连 | set_enabled M（scope 绑定 server+方向，可 remember）；update/remove H、never-remember；`MCP_*`。executor：`mcp_manage_executor.rs`，与 Settings 开关共享 `mcp.tools.list` 的 `enabled` 字段 |
+| 子代理 persona | `builtin-custom_agent_list`, `builtin-custom_agent_get`, `builtin-custom_agent_propose`, `builtin-custom_agent_apply`, `builtin-custom_agent_remove` | file_name（`<小写字母/数字/连字符>.md`）、persona 完整 Markdown（frontmatter 需合法 name，≤64KB）；propose 写 `{workspaces}/agents-pending/` 提案区，apply 原样携带 `proposal_id + expected_content_sha256 + expected_proposal_revision` 后原子落盘 `workspaces/agents/`；返回提案/落盘/删除回执，persona 每次 `subagent_call` 现扫即时生效 | list/get L，propose M，apply/remove H、never-remember；三重指纹 + TOCTOU 复核 fail-closed。executor：`custom_agent_executor.rs` |
+
+本地 shell 平台可用性（`builtin-local_shell_preflight` / `builtin-local_shell_execute`）：
+
+| 平台 | 沙箱后端 | 说明 |
+| --- | --- | --- |
+| macOS | `macos_seatbelt`（`/usr/bin/sandbox-exec` + `/bin/sh -c`） | 系统自带，无需安装 |
+| Windows | `windows_appcontainer_job`（System32 Windows PowerShell，`-NoProfile -NonInteractive`） | 系统自带 |
+| Linux 桌面 | `linux_bwrap`（bubblewrap `bwrap` + `/bin/sh -c`；全盘 `--ro-bind` 只读 + 可写根重挂 + protected roots 遮蔽 + 默认 `--unshare-net` 断网） | 需系统安装 `bubblewrap` 包；未安装时 preflight 标记 blocked 并给出安装指引，execute fail-closed 拒绝无沙箱执行 |
+| Android/iOS | `unavailable` | 不支持本地 shell（Android 的 target_os 是 `android`，不会误入 linux 分支） |
+
+事实源：`src-tauri/src/chat_v2/tools/shell_sandbox.rs`、`context.rs` 的
+`local_shell_contract_for_platform`、`local_shell_preflight_executor.rs` 的运行时 capability 探测。
 
 ## 3. 撤销覆盖矩阵
 
@@ -152,14 +169,21 @@ skill schema；返回列说明主要可观测结果。`L/M/H` 分别表示 Low/M
 
 ## 4. 明确不暴露的操作
 
+本轮（2026-07-20）起，以下操作已改为经审批工具正门暴露，不再属于本清单：技能停用/删除/信任
+（`skill_set_enabled`/`skill_remove`/`skill_trust_request`）、MCP server 修改/启停/删除
+（`mcp_server_update`/`mcp_server_set_enabled`/`mcp_server_remove`）、自定义子代理 persona 写入/删除
+（`custom_agent_propose` → `custom_agent_apply`/`custom_agent_remove`）。三族的删除/信任/落盘均为
+High + never-remember，详见第 2 节领域索引。仍然不暴露的操作如下：
+
 | 操作 | 原因与用户路径 |
 | --- | --- |
-| API key、OAuth token、WebDAV/S3/FTP 凭据读写 | 密钥不得进入模型上下文；仅 Settings 安全输入/secure store |
+| API key、OAuth token、WebDAV/S3/FTP 凭据读写 | 密钥不得进入模型上下文；仅 Settings 安全输入/secure store。MCP 工具的凭据红线同源：`env` 明文一律拒绝，`env_required` 只收变量名，值由用户在 Settings > MCP 工具填写 |
 | `purge_all_data`、备份恢复、ZIP 导入 | 可整体覆盖或清空本地数据；保持人工 Settings 流程 |
 | 会话硬删除、消息底层变体编辑 | 破坏历史且当前恢复/观测契约不足；仅 archive/restore |
 | FSRS `rate` 评分及平行 `builtin-fsrs_*` 工具组 | Again/Hard/Good/Easy 必须由用户本人选择；Agent 可用 ChatAnki 会话级与全库 list/update/enqueue/受约束撤销、暂停、删除能力，但不开放 `fsrs_rate` 或任何 library rate/score 工具，也不再造一套重复工具 |
 | 未经用户提供的题目答案、模拟考代答 | `agentCanAnswer=false`；Agent 只汇总用户在题库 UI 的真实作答 |
-| 任意系统设置键、内部 OAuth key | `settings_set` 使用显式低风险白名单；内部键在 Rust 层硬拒绝 |
+| 任意系统设置键、内部 OAuth key | `settings_set` 使用显式低风险白名单；内部键在 Rust 层硬拒绝。MCP 配置（`mcp.tools.list`）的增改启停删只准走 `mcp_server_*` 正门工具，禁止经 `settings_set`/shell/文件工具直改 |
+| 绕过正门直写技能/persona 目录 | `~/.deep-student/skills/` 与 `workspaces/agents/` 只准经各自的提案+审批工具写入；shell 侧门由 deny 规则封死 |
 | 未授权本地目录、任意 shell | workspace root/authorized root 与 preflight/审批共同约束 |
 | 浏览器凭据导出 | 浏览器工具只操作当前受控页面，不回传密码、cookie 或 session secret |
 
