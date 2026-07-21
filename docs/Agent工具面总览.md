@@ -20,7 +20,7 @@ SKILL.md 包的兼容元数据保留。后端 executor、前端 skill schema、s
 | --- | --- | --- |
 | Low | 只读或无实质副作用，通常直接执行 | list/get/search/stats/observe |
 | Medium | 普通写入或会触发外部计算；是否审批服从用户策略 | 创建、更新、软删、生成内容 |
-| High | 破坏性、系统级或难以恢复；谨慎/宽松档必须逐项审批，Full Access 档仅受不可覆盖守卫约束 | 永久删除、批删、备份/同步、全量覆盖、workbench undo |
+| High | 破坏性、系统级或难以恢复；谨慎/宽松档必须逐项审批，Full Access 档仅受不可覆盖守卫约束 | 永久删除、批删、备份/同步、全量覆盖、workbench undo；本地 shell 的写/网络/管道/脚本及未知命令 |
 
 具体调用的运行时事实源是
 `ToolExecutorRegistry::get_sensitivity_for_call(tool_name, arguments)`，不是本文或前端清单。
@@ -149,6 +149,15 @@ skill schema；返回列说明主要可观测结果。`L/M/H` 分别表示 Low/M
 | 技能生命周期 | `builtin-skill_set_enabled`, `builtin-skill_remove`, `builtin-skill_trust_request` | skill_id、enabled 方向；trust 先 `action=inspect`（只读现扫，返回整包 SHA-256 + 风险信号）再 `action=grant`（原样携带 `expected_package_sha256`/`declared_risk_level`）；返回启停回执、删除回执（连带清理 provenance/信任记录）或绑定指纹的信任授予 | set_enabled M（scope 绑定 skill+方向，可 remember）；remove、trust grant H、never-remember；trust inspect L。指纹失配 fail-closed；builtin 技能可停用不可删除。executor：`skill_lifecycle_executor.rs` |
 | MCP 管理 | `builtin-mcp_server_update`, `builtin-mcp_server_set_enabled`, `builtin-mcp_server_remove` | server_id（id 或名称）、要改的字段（凭据红线：拒绝 `env` 明文，`env_required` 只收变量名）、enabled 方向、remove 必填 `expected_transport`（执行期复核）；返回脱敏 server 摘要、自动连测/失败回滚结果；写入后经 `chat_v2://settings_changed` 通知前端重连 | set_enabled M（scope 绑定 server+方向，可 remember）；update/remove H、never-remember；`MCP_*`。executor：`mcp_manage_executor.rs`，与 Settings 开关共享 `mcp.tools.list` 的 `enabled` 字段 |
 | 子代理 persona | `builtin-custom_agent_list`, `builtin-custom_agent_get`, `builtin-custom_agent_propose`, `builtin-custom_agent_apply`, `builtin-custom_agent_remove` | file_name（`<小写字母/数字/连字符>.md`）、persona 完整 Markdown（frontmatter 需合法 name，≤64KB）；propose 写 `{workspaces}/agents-pending/` 提案区，apply 原样携带 `proposal_id + expected_content_sha256 + expected_proposal_revision` 后原子落盘 `workspaces/agents/`；返回提案/落盘/删除回执，persona 每次 `subagent_call` 现扫即时生效 | list/get L，propose M，apply/remove H、never-remember；三重指纹 + TOCTOU 复核 fail-closed。executor：`custom_agent_executor.rs` |
+
+本地 shell 敏感度（`builtin-local_shell_execute`，按 `command` 动态分级）：
+
+| 级别 | 条件 | Craft+宽松默认 |
+| --- | --- | --- |
+| Medium | 结构化纯只读家族（如 `ls`/`cat`/`rg`/`git status|log|diff|show`、PowerShell `Get-ChildItem` 等），且无管道/重定向/脚本包装，且命令守卫为 Allow | 静默执行 |
+| High | 写文件、网络、管道/操作符、脚本解释器、未知可执行文件，或命令守卫 Ask/Deny | 逐项审批 |
+
+名称级默认仍为 High（无参数时 fail-closed）。`local_shell_preflight` 为 Low。
 
 本地 shell 平台可用性（`builtin-local_shell_preflight` / `builtin-local_shell_execute`）：
 
