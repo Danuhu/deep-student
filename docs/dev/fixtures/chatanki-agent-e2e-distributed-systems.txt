@@ -1,0 +1,20 @@
+ChatAnki Agent E2E synthetic fixture: Distributed systems
+
+1. A distributed system is a set of independent computers that appears to users as one coherent system.
+2. A network partition prevents some nodes from communicating while other nodes may remain reachable.
+3. CAP says that during a partition, a system cannot guarantee both linearizable consistency and availability.
+4. Linearizability makes each completed operation appear to occur atomically between invocation and response.
+5. Sequential consistency preserves a single global operation order but does not require real-time ordering.
+6. Eventual consistency means replicas converge when updates stop and messages are eventually delivered.
+7. A logical clock orders events without relying on synchronized wall clocks.
+8. Lamport timestamps guarantee that if event A happened before event B, A has a smaller timestamp.
+9. Vector clocks can identify whether two observed versions are causally ordered or concurrent.
+10. Leader election selects one process to coordinate work for a term or epoch.
+11. A fencing token is a monotonically increasing value used to reject writes from stale leaders.
+12. A quorum is the minimum number of replicas required to accept or observe an operation.
+13. With N replicas, read quorum R and write quorum W overlap when R + W is greater than N.
+14. Consensus lets non-faulty nodes agree on one value despite specified classes of failure.
+15. Raft separates consensus into leader election, log replication, and safety rules.
+16. A replicated log commits an entry after the protocol's required quorum has acknowledged it.
+17. Idempotency means repeating an operation has the same intended effect as applying it once.
+18. An idempotency key lets a service recognize retries of the same logical request.

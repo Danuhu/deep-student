@@ -1,0 +1,9 @@
+FROM docker.m.daocloud.io/library/python:3.12-slim
+
+RUN python -m pip install --no-cache-dir pyftpdlib==2.2.0
+
+COPY ftp_server.py /opt/deep-student/ftp_server.py
+
+EXPOSE 21 30000-30009
+
+ENTRYPOINT ["python", "/opt/deep-student/ftp_server.py"]

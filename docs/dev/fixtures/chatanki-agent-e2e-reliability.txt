@@ -1,0 +1,20 @@
+ChatAnki Agent E2E synthetic fixture: Storage and reliability
+
+1. Write-ahead logging records a change durably before the corresponding data page is written.
+2. A checkpoint bounds recovery work by persisting a known database state and log position.
+3. Snapshot isolation gives each transaction a stable snapshot while detecting specified write conflicts.
+4. Serializable isolation makes committed transactions equivalent to some serial execution.
+5. A phantom is a newly matching row observed when a predicate query is repeated.
+6. MVCC keeps multiple row versions so readers and writers can proceed with less blocking.
+7. A primary key uniquely identifies a row in a relational table.
+8. A secondary index accelerates access paths that do not use the table's primary storage order.
+9. A covering index contains all columns needed to answer a query without fetching base rows.
+10. A B-tree maintains sorted keys and supports logarithmic point and range lookup.
+11. An LSM tree buffers writes and later merges sorted runs through compaction.
+12. Compaction trades background read and write work for fewer overlapping storage runs.
+13. A checksum detects accidental corruption by comparing stored and recomputed values.
+14. A backup is not verified until a restore test proves that required data can be recovered.
+15. Recovery point objective describes the maximum acceptable amount of lost data measured in time.
+16. Recovery time objective describes the target time to restore a service after disruption.
+17. Exponential backoff increases retry delay to reduce synchronized pressure on a failing dependency.
+18. Jitter randomizes retry timing so many clients are less likely to retry simultaneously.
