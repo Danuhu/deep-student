@@ -1,0 +1,112 @@
+# Build Windows (pt-BR, sem assinatura) — fork pessoal
+#
+# Por que existe: o workflow oficial (reusable-build-windows.yml) é fail-closed
+# e aborta sem os secrets de assinatura de código da Helixnow. Este workflow
+# gera o mesmo instalador NSIS, sem Authenticode e sem artefatos de updater.
+#
+# O instalador NÃO é assinado: o Windows SmartScreen vai exibir aviso na
+# primeira execução ("Mais informações" -> "Executar assim mesmo").
+# Uso pessoal apenas — não redistribua como se fosse build oficial.
+#
+# Como rodar: aba Actions -> "Build Windows (pt-BR, unsigned)" -> Run workflow.
+# O instalador sai em Artifacts, no fim da execução.
+
+name: Build Windows (pt-BR, unsigned)
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'Build number (deve ser > 14638; usado só para carimbar a versão)'
+        required: false
+        default: '90001'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      NODE_OPTIONS: '--max-old-space-size=6144'
+      # LTO desligado: o build oficial faz o mesmo para caber no tempo do runner.
+      CARGO_PROFILE_RELEASE_LTO: 'false'
+      CARGO_PROFILE_RELEASE_CODEGEN_UNITS: '16'
+      DEEP_STUDENT_BUILD_NUMBER: ${{ inputs.build_number }}
+
+    steps:
+      - uses: actions/checkout@v4
+        env:
+          GIT_CONFIG_COUNT: '1'
+          GIT_CONFIG_KEY_0: core.symlinks
+          GIT_CONFIG_VALUE_0: 'false'
+        with:
+          # generate-version.mjs precisa do histórico completo para achar o
+          # commit-base de numeração. DEEP_STUDENT_BUILD_NUMBER contorna isso,
+          # mas manter o histórico evita surpresas em outros scripts.
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: x86_64-pc-windows-msvc
+
+      - name: Setup protoc
+        uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Generate third-party notices
+        shell: bash
+        run: |
+          (cd src-tauri && cargo metadata --format-version 1 > /dev/null)
+          npm run licenses:generate
+
+      - name: Generate version info
+        run: node scripts/generate-version.mjs
+
+      # O updater é redirecionado para os releases DESTE fork (que provavelmente
+      # não existem). Sem isso, o app checaria o endpoint oficial e ofereceria
+      # instalar a build original por cima da versão em português.
+      # createUpdaterArtifacts=false remove a exigência de TAURI_SIGNING_PRIVATE_KEY.
+      - name: Build Tauri app (NSIS, unsigned)
+        shell: bash
+        run: |
+          npx tauri build \
+            --target x86_64-pc-windows-msvc \
+            --bundles nsis \
+            --config '{"bundle":{"createUpdaterArtifacts":false},"plugins":{"updater":{"endpoints":["https://github.com/${{ github.repository }}/releases/latest/download/latest.json"]}}}' \
+            -- --locked
+
+      - name: Locate installer
+        id: find
+        shell: bash
+        run: |
+          FILE="$(find src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis -name '*.exe' | head -1)"
+          test -n "$FILE" || { echo "::error::Instalador NSIS não encontrado"; exit 1; }
+          echo "path=$FILE" >> "$GITHUB_OUTPUT"
+          echo "Instalador: $FILE ($(du -h "$FILE" | cut -f1))"
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: deep-student-ptbr-windows-unsigned
+          path: ${{ steps.find.outputs.path }}
+          if-no-files-found: error
+          retention-days: 30
