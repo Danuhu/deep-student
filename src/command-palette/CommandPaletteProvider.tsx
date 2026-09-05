@@ -72,7 +72,7 @@ interface CommandPaletteProviderProps {
   /** 是否暗色模式 */
   isDarkMode: boolean;
   /** 切换语言 */
-  switchLanguage: (lang: 'zh-CN' | 'en-US') => void;
+  switchLanguage: (lang: 'zh-CN' | 'en-US' | 'pt-BR') => void;
 }
 
 // ==================== Provider 组件 ====================
