@@ -3526,7 +3526,8 @@
     "ai_setup_title": "Connect an AI service to get started",
     "ai_setup_desc": "One-click setup with SiliconFlow, or connect OpenAI, Claude, Gemini, Ollama or any compatible provider.",
     "cta_configure": "Set up AI service",
-    "cta_skip": "Just look around first"
+    "cta_skip": "Just look around first",
+    "lang_pt": "Português"
   },
   "onboarding": {
     "analysis_intro": "Click the Study Workspace icon in the sidebar to enter the analysis home. Walk through a sample question end-to-end and remember to save the result.",

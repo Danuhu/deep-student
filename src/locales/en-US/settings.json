@@ -1043,7 +1043,8 @@
     "switch_language": "Switch Language",
     "chinese": "中文",
     "english": "English",
-    "select_label": "Select language"
+    "select_label": "Select language",
+    "portuguese": "Português (BR)"
   },
   "system_notification": {
     "title": "System Notifications",
