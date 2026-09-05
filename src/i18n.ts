@@ -14,6 +14,8 @@ import zhCNCommon from './locales/zh-CN/common.json';
 import zhCNSidebar from './locales/zh-CN/sidebar.json';
 import enUSCommon from './locales/en-US/common.json';
 import enUSSidebar from './locales/en-US/sidebar.json';
+import ptBRCommon from './locales/pt-BR/common.json';
+import ptBRSidebar from './locales/pt-BR/sidebar.json';
 
 // 完整命名空间列表（保持与组件 useTranslation 引用一致）
 // 注：knowledge_graph 在 common.json 内；graph 无独立文件，已移除
@@ -67,6 +69,10 @@ const resources = {
     common: enUSCommon,
     sidebar: enUSSidebar,
   },
+  'pt-BR': {
+    common: ptBRCommon,
+    sidebar: ptBRSidebar,
+  },
 };
 
 if (!i18n.isInitialized) {
@@ -77,10 +83,12 @@ if (!i18n.isInitialized) {
       resources,
       defaultNS: 'common',
       ns: ALL_NS,
-      supportedLngs: ['en-US', 'zh-CN'],
+      supportedLngs: ['en-US', 'zh-CN', 'pt-BR'],
       fallbackLng: {
         'en': ['en-US'],
         'zh': ['zh-CN'],
+        'pt': ['pt-BR', 'en-US'],
+        'pt-BR': ['en-US'],
         default: ['en-US'],
       },
       fallbackNS: FALLBACK_NS,
@@ -175,9 +183,13 @@ void (async () => {
   const activeLang = normalizeSupportedLanguage(i18n.language);
   await loadDeferredNamespaces(activeLang);
 
-  // 后台加载另一种语言（供 fallback 和后续语言切换使用）。
-  const otherLang = activeLang === 'zh-CN' ? 'en-US' : 'zh-CN';
-  requestDeferredNamespaces(otherLang);
+  // 后台仅预加载 fallback 语言（en-US）。
+  // 语言数 >2 后不再预取全部：每种语言约 1.3MB JSON，全预取会白白占用
+  // 内存与网络。切换语言时 languageChanged 会按需加载目标语言。
+  const FALLBACK_LANG: SupportedLanguage = 'en-US';
+  if (activeLang !== FALLBACK_LANG) {
+    requestDeferredNamespaces(FALLBACK_LANG);
+  }
 })().catch(() => {
   // 保持首帧非阻塞；后续 languageChanged 仍会发起可重试加载。
 });

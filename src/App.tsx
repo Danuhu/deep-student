@@ -850,7 +850,7 @@ function App() {
   }, []);
 
   // 🎯 命令面板：语言切换回调
-  const switchLanguage = useCallback((lang: 'zh-CN' | 'en-US') => {
+  const switchLanguage = useCallback((lang: 'zh-CN' | 'en-US' | 'pt-BR') => {
     i18n.changeLanguage(lang);
   }, [i18n]);
 
