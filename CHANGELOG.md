@@ -10,6 +10,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.9.53](https://github.com/Danuhu/deep-student/compare/v0.9.52...v0.9.53) (2026-09-05)
+
+
+### Features
+
+* **i18n:** add Portugues (BR) to the language picker ([7e52fb8](https://github.com/Danuhu/deep-student/commit/7e52fb85532380e8f5358250128d0f3d46601396))
+* **i18n:** add pt-BR language label to zh-CN common ([7a8ab42](https://github.com/Danuhu/deep-student/commit/7a8ab42642166f4eca15f678ea7af0faa7ce3f03))
+* **i18n:** add pt-BR language labels to en-US ([6dd4f95](https://github.com/Danuhu/deep-student/commit/6dd4f95ef125c3454a93356b096bb032dd1eee42))
+* **i18n:** add pt-BR language labels to en-US ([ad0a944](https://github.com/Danuhu/deep-student/commit/ad0a944f81b6ea454b4f01fe53f984a0be683018))
+* **i18n:** add pt-BR language labels to zh-CN ([c4fad9e](https://github.com/Danuhu/deep-student/commit/c4fad9ef9edc5d49ad35d27f9733e19d05556589))
+* **i18n:** add pt-BR locale (45 namespaces) ([4a5b132](https://github.com/Danuhu/deep-student/commit/4a5b132d6d5bb16a06b0c8f013e921f07b82d698))
+* **i18n:** cycle language across zh-CN, en-US and pt-BR ([c0726da](https://github.com/Danuhu/deep-student/commit/c0726da1d8e920a0285c080def8195dc66f33ab2))
+* **i18n:** offer Portugues in the welcome dialog ([53a58ed](https://github.com/Danuhu/deep-student/commit/53a58edc628d1ef36769da2fcd7de4a2a8de5dbd))
+* **i18n:** register pt-BR as supported language ([d74d3f6](https://github.com/Danuhu/deep-student/commit/d74d3f65b53765dcad5bcf68113850b2806ba963))
+* **i18n:** widen command palette language type to pt-BR ([603553e](https://github.com/Danuhu/deep-student/commit/603553ea421a08666fe75305a02280c3a989cdc9))
+* **i18n:** widen command registry language type to pt-BR ([66cc233](https://github.com/Danuhu/deep-student/commit/66cc23311dd0245fdd8ea800d7ecb2806fa977d1))
+* **i18n:** wire pt-BR into i18n core and app ([f3c83b7](https://github.com/Danuhu/deep-student/commit/f3c83b71693a7157fe3d09975917eac1a435c39b))
+
 ## [0.9.52](https://github.com/helixnow/deep-student/compare/v0.9.51...v0.9.52) (2026-09-03)
 
 
