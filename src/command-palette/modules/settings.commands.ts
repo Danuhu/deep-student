@@ -69,7 +69,9 @@ export const settingsCommands: Command[] = [
     priority: 98,
     execute: (deps) => {
       const currentLang = deps.getCurrentLanguage();
-      const newLang = currentLang === 'zh-CN' ? 'en-US' : 'zh-CN';
+      const LANG_CYCLE = ['zh-CN', 'en-US', 'pt-BR'] as const;
+      const currentIndex = LANG_CYCLE.indexOf(currentLang as typeof LANG_CYCLE[number]);
+      const newLang = LANG_CYCLE[(currentIndex + 1) % LANG_CYCLE.length];
       deps.switchLanguage(newLang);
       deps.showNotification(
         'info',
