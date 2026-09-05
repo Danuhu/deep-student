@@ -48,7 +48,7 @@ declare module 'react-i18next' {
   }
 }
 
-export type SupportedLanguage = 'zh-CN' | 'en-US';
+export type SupportedLanguage = 'zh-CN' | 'en-US' | 'pt-BR';
 
 export interface LanguageOption {
   code: SupportedLanguage;
@@ -67,6 +67,11 @@ export const supportedLanguages: LanguageOption[] = [
     name: 'English',
     nativeName: 'English',
   },
+  {
+    code: 'pt-BR',
+    name: 'Portuguese (Brazil)',
+    nativeName: 'Português (Brasil)',
+  },
 ];
 
 export const normalizeSupportedLanguage = (language?: string | null): SupportedLanguage => {
@@ -76,6 +81,9 @@ export const normalizeSupportedLanguage = (language?: string | null): SupportedL
   }
   if (normalized.startsWith('en')) {
     return 'en-US';
+  }
+  if (normalized.startsWith('pt')) {
+    return 'pt-BR';
   }
   return 'en-US';
 };
