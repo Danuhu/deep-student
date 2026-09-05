@@ -24,6 +24,7 @@ import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Z_INDEX } from '@/config/zIndex';
 import { registerBackHandler, BACK_PRIORITY } from '@/app/navigation/androidBackCoordinator';
 import type { ApiConfig } from '@/types';
+import { normalizeSupportedLanguage } from '@/types/i18n';
 
 // ============================================================================
 // 完成状态存取
@@ -204,7 +205,7 @@ export const WelcomeOnboardingDialog: React.FC<WelcomeOnboardingDialogProps> = (
     [onSkip],
   );
 
-  const currentLanguage = i18n.language === 'zh-CN' ? 'zh-CN' : 'en-US';
+  const currentLanguage = normalizeSupportedLanguage(i18n.language);
 
   const features: FeatureRow[] = [
     {
@@ -303,6 +304,7 @@ export const WelcomeOnboardingDialog: React.FC<WelcomeOnboardingDialogProps> = (
               options={[
                 { value: 'zh-CN', label: t('welcome_onboarding.lang_zh') },
                 { value: 'en-US', label: t('welcome_onboarding.lang_en') },
+                { value: 'pt-BR', label: t('welcome_onboarding.lang_pt', 'Português') },
               ]}
             />
           </div>
