@@ -1,0 +1,162 @@
+{
+  "title": "Workspace",
+  "noActiveWorkspace": "No active workspace",
+  "viewFull": "View Full",
+  "defaultName": "Default Workspace",
+  "loadError": "Load Error",
+  "agents": "Agents",
+  "messages": "Messages",
+  "documents": "Documents",
+  "context": "Context",
+  "status": {
+    "active": "Active",
+    "completed": "Completed",
+    "archived": "Archived",
+    "noWorkspace": "No Workspace",
+    "historicalWorkspace": "Historical Workspace",
+    "workspaceSwitched": "Workspace Switched",
+    "historicalSnapshot": "Historical Snapshot",
+    "agentsDone": "All Agents Done",
+    "noAgents": "No Agents",
+    "recentMessages": "Recent Messages"
+  },
+  "agentRole": {
+    "coordinator": "Coordinator",
+    "worker": "Worker"
+  },
+  "agentStatus": {
+    "idle": "Idle",
+    "running": "Running",
+    "completed": "Completed",
+    "failed": "Failed"
+  },
+  "messageType": {
+    "task": "Task",
+    "progress": "Progress",
+    "result": "Result",
+    "query": "Query",
+    "correction": "Correction",
+    "broadcast": "Broadcast"
+  },
+  "documentType": {
+    "plan": "Plan",
+    "research": "Research",
+    "artifact": "Artifact",
+    "notes": "Notes"
+  },
+  "actions": {
+    "create": "Create Workspace",
+    "close": "Close Workspace",
+    "delete": "Delete Workspace",
+    "createAgent": "Create Agent",
+    "sendMessage": "Send Message"
+  },
+  "labels": {
+    "workspaceId": "Workspace ID",
+    "workspaceName": "Workspace Name",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "creatorSessionId": "Creator Session",
+    "skillId": "Skill ID",
+    "targetAgent": "Target Agent",
+    "messageContent": "Message Content"
+  },
+  "placeholders": {
+    "workspaceName": "Enter workspace name (optional)",
+    "skillId": "Enter skill identifier",
+    "messageContent": "Enter message to send..."
+  },
+  "errors": {
+    "createFailed": "Failed to create workspace",
+    "closeFailed": "Failed to close workspace",
+    "deleteFailed": "Failed to delete workspace",
+    "sendMessageFailed": "Failed to send message",
+    "loadFailed": "Failed to load workspace",
+    "notFound": "Workspace not found"
+  },
+  "tooltips": {
+    "coordinator": "Coordinator assigns tasks and aggregates results",
+    "worker": "Worker executes specific tasks",
+    "broadcast": "Broadcast messages are sent to all agents"
+  },
+  "log": {
+    "title": "Log",
+    "copy": "Copy",
+    "moreMessages": "More Messages"
+  },
+  "subagent": {
+    "noContent": "No Content",
+    "title": "Sub-agent",
+    "loading": "Loading...",
+    "processing": "Processing...",
+    "noOutput": "No Output"
+  },
+  "subagentEmbed": {
+    "cancel": "Cancel",
+    "cancelRequested": "Cancel request sent",
+    "cancelFailed": "Cancel failed: {{msg}}",
+    "finalResult": "Final Result",
+    "truncated": "(truncated)",
+    "ended": "Ended",
+    "tokens": "{{count}} tokens",
+    "resumed": "Resumed",
+    "errorDetail": "Error Details",
+    "failedGeneric": "Sub-agent failed without error details",
+    "copyResult": "Copy final result",
+    "pendingInbox": "{{count}} pending",
+    "pendingInboxHint": "This sub-agent has unconsumed messages; resume it to process them",
+    "openFull": "Open in full view",
+    "profile": {
+      "worker": "Worker",
+      "explorer": "Explorer",
+      "default": "Default"
+    }
+  },
+  "workspaceInjection": {
+    "titleFromCoordinator": "Message from coordinator",
+    "titleFromWorkspace": "Message from workspace",
+    "expand": "Show all",
+    "collapse": "Collapse"
+  },
+  "workspaceSend": {
+    "delivered": "Message delivered to {{target}}",
+    "failed": "Failed to deliver message to {{target}}",
+    "broadcast": "All agents (broadcast)",
+    "showMore": "Show full text",
+    "showLess": "Collapse"
+  },
+  "subagentRetry": {
+    "finalCancelled": "Sub-agent cancelled, retry terminated"
+  },
+  "sleep": {
+    "progress": "{{done}}/{{total}} done",
+    "subagent": {
+      "queued": "Queued",
+      "cancelled": "Cancelled",
+      "interrupted": "Interrupted",
+      "closed": "Closed"
+    }
+  },
+  "agent": {
+    "you": "You",
+    "fsrs": {
+      "queue_not_reset": "Interrupted by user; the review queue was not reset",
+      "enqueue_requires_session": "No applicable fsrs_enqueue (requires an active review session)",
+      "enqueued_cards": "Enqueued {{count}} cards",
+      "already_in_queue": "{{kind}} (all cards already in queue)",
+      "abort_queue_not_reset": "Flashcards enqueue aborted (queue was not reset)",
+      "abort_run_not_found": "Run {{runId}} aborted (flashcards queue was not reset)"
+    },
+    "pomodoro": {
+      "run_aborted": "Run aborted",
+      "pause_check_failed": "Pause check failed ({{error}})",
+      "start_noop": "{{label}} (nothing to start or resume in the current state)",
+      "pause_noop": "{{label}} (cannot pause in the current state)",
+      "resume_noop": "{{label}} (nothing to resume in the current state)",
+      "stop_noop": "{{label}} (no pomodoro is currently running)",
+      "unsupported_op": "Unsupported pomodoro op: {{kind}}",
+      "persist_failed": "Failed to save backend records: {{error}}",
+      "pacing_failed": "Pacing control failed: {{error}}"
+    }
+  }
+}

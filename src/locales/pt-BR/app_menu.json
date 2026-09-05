@@ -1,0 +1,100 @@
+{
+  "app_menu": {
+    "search": {
+      "placeholder": "Buscar ações..."
+    },
+    "actions": {
+      "add_to_favorites": "Adicionar aos favoritos",
+      "remove_from_favorites": "Remover dos favoritos",
+      "copy_link": "Copiar link",
+      "duplicate": "Duplicar",
+      "rename": "Renomear",
+      "move_to": "Mover para",
+      "move_to_trash": "Mover para a lixeira",
+      "convert_to": "Converter em",
+      "open_in_new_tab": "Abrir em nova aba",
+      "open_in_sidebar": "Abrir no painel lateral",
+      "undo": "Desfazer",
+      "redo": "Refazer",
+      "import": "Importar",
+      "export": "Exportar",
+      "edit_suggestions": "Editar sugestões",
+      "translate": "Traduzir",
+      "lock_page": "Bloquear página",
+      "unlock_page": "Desbloquear página",
+      "customize_page": "Personalizar página",
+      "view_history": "Todas as alterações e estatísticas",
+      "version_history": "Histórico de versões"
+    },
+    "groups": {
+      "page": "Página",
+      "view": "Exibir",
+      "edit": "Editar",
+      "advanced": "Avançado",
+      "danger": "Zona de risco"
+    },
+    "options": {
+      "font": {
+        "default": "Padrão",
+        "serif": "Serifada",
+        "mono": "Monoespaçada"
+      },
+      "size": {
+        "small": "Pequena",
+        "medium": "Média",
+        "large": "Grande"
+      }
+    },
+    "switch": {
+      "full_width": "Largura total",
+      "small_text": "Letra pequena",
+      "table_of_contents": "Sumário"
+    },
+    "footer": {
+      "last_edited_by": "Última edição por {{name}}",
+      "edited_time": "{{time}}"
+    },
+    "select_app": "Escolha uma opção",
+    "demo": {
+      "title": "Demonstração de menu moderno",
+      "description": "Este é um componente de menu moderno, que funciona tanto como lista suspensa quanto como menu de contexto.",
+      "dropdown_demo": "Demonstração de lista suspensa",
+      "context_demo": "Demonstração de menu de contexto",
+      "context_hint": "Clique com o botão direito nesta área",
+      "features": {
+        "title": "Recursos do componente",
+        "search": "Campo de busca opcional",
+        "icons": "Suporte a ícones",
+        "shortcuts": "Exibição de atalhos de teclado",
+        "groups": "Grupos e separadores",
+        "submenu": "Suporte a submenus",
+        "switch": "Controles de alternância",
+        "options": "Grupos de opções (como o seletor de fonte)",
+        "footer": "Área de informações no rodapé",
+        "dark_light": "Adapta-se ao tema claro e escuro"
+      }
+    }
+  },
+  "dstu_essay": {
+    "list_sessions": "Listar correções de redação",
+    "get_session_detail": "Obter detalhes da correção",
+    "delete_session": "Excluir correção",
+    "get_session": "Obter correção",
+    "toggle_favorite": "Alternar favorito",
+    "set_favorite": "Marcar como favorito",
+    "get_full_session": "Obter correção completa",
+    "create_session": "Criar correção",
+    "update_session_metadata": "Atualizar dados da correção"
+  },
+  "dstu_translation": {
+    "list_history": "Listar histórico de traduções",
+    "get_detail": "Obter detalhes da tradução",
+    "delete_translation": "Excluir tradução",
+    "get_translation": "Obter tradução",
+    "toggle_favorite": "Alternar favorito",
+    "set_favorite": "Marcar como favorito",
+    "create_record": "Criar registro de tradução",
+    "persist_settings": "Salvar configurações de tradução",
+    "update_record": "Atualizar registro de tradução"
+  }
+}

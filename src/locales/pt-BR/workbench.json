@@ -1,0 +1,1195 @@
+{
+  "appName": "Mesa de Estudos",
+  "agent": {
+    "core": {
+      "operating": "A IA está trabalhando: {{label}}",
+      "pausedLabel": "Pausado: {{label}}",
+      "pause": "Pausar",
+      "paused": "Pausado",
+      "stop": "Parar",
+      "stopped": "Parado",
+      "cancelled": "Cancelado",
+      "revert": "Desfazer",
+      "reverting": "Desfazendo",
+      "acting": "Trabalhando",
+      "reviewing": "Aguardando sua confirmação",
+      "done": "Concluído",
+      "stripRegion": "Controle da IA na mesa",
+      "actions": "Ações de controle",
+      "progressPaused": "Pausado: você começou a digitar",
+      "announceStarted": "A IA começou: {{label}}",
+      "announcePaused": "A IA pausou: {{label}}",
+      "announceDone": "A IA terminou",
+      "announceStopped": "A IA parou",
+      "resume": "Retomar",
+      "autoStopCountdown": "Para sozinho em {{seconds}}s",
+      "placementBackground": "(rodando em segundo plano)",
+      "placementStageFull": "(mesa cheia, aplicado direto)",
+      "placementFrozen": "(janela congelada, aplicado direto)",
+      "dockDoneBadge": "A IA terminou em segundo plano"
+    },
+    "errors": {
+      "controlOff": "O controle da IA na mesa está desligado (desktop.workbenchAgentControl=off)",
+      "controlOffHint": "Mude o controle do assistente para Segundo plano ou Acompanhar; as ferramentas de dados continuam funcionando",
+      "osDisabled": "A Mesa de Estudos está desligada",
+      "osDisabledHint": "Ligue a Mesa de Estudos primeiro; para gravar dados, use as ferramentas de dados",
+      "launchFailed": "Não foi possível abrir a janela do aplicativo",
+      "launchFailedHint": "A Mesa de Estudos não está pronta ou o aplicativo não está registrado",
+      "abortedByControlOff": "O controle foi desligado; a operação foi interrompida",
+      "abortedByOsOff": "A Mesa de Estudos foi desligada; a operação foi interrompida"
+    },
+    "apps": {
+      "reserved": "-",
+      "flashcards": {
+        "appended": "A IA adicionou {{count}} cartões"
+      },
+      "templates": {
+        "undoCreate": "Excluir o modelo recém-criado",
+        "undoRename": "Restaurar o nome do modelo",
+        "undoUpdateContent": "Restaurar o conteúdo do modelo"
+      }
+    }
+  },
+  "agentControlCenter": {
+    "title": "Controle da IA na mesa",
+    "description": "Permite que a conversa encontre conteúdo e execute ações autorizadas nos aplicativos de estudo.",
+    "tooltip": "Controle da IA na mesa",
+    "triggerLabel": "Controle da IA na mesa, modo atual: {{status}}",
+    "modeLabel": "Modo de execução",
+    "capabilitiesTitle": "O que ela pode fazer",
+    "appCount": "8 aplicativos",
+    "expandCapabilities": "Ver tudo",
+    "collapseCapabilities": "Recolher",
+    "saveFailed": "Não foi possível salvar o modo de controle. Tente de novo.",
+    "openChat": "Abrir a conversa",
+    "openSettings": "Configurações do controle",
+    "settingsTitle": "O que o assistente pode fazer",
+    "settingsDescription": "Estas capacidades são ações registradas de propósito por cada aplicativo de estudo, e não cliques às cegas em coordenadas da tela. As ações disponíveis mudam conforme a tela e a situação.",
+    "modeDescriptions": {
+      "off": "Só mostra a situação; não abre nem controla janelas.",
+      "background": "Trabalha em segundo plano, sem interromper você.",
+      "follow": "Abre e traz para a frente as janelas em que está trabalhando."
+    },
+    "groups": {
+      "organize": {
+        "title": "Organizar conteúdo",
+        "actions": "Encontrar e editar anotações, mapas mentais e tarefas"
+      },
+      "study": {
+        "title": "Fazer o estudo avançar",
+        "actions": "Navegar pelas questões, revisar cartões e cuidar do foco"
+      },
+      "browse": {
+        "title": "Encontrar materiais",
+        "actions": "Buscar materiais, trocar de pasta e navegar pelas páginas"
+      }
+    },
+    "safetyCompact": "Só rodam ações registradas. Responder, entregar e avaliar continua com você; ações destrutivas pedem confirmação.",
+    "safety": "Só são usadas ações registradas. O assistente não pode responder nem entregar provas por você, nem avaliar seus flashcards. Ações destrutivas exigem confirmação antes de rodar.",
+    "apps": {
+      "note": {
+        "name": "Anotações",
+        "actions": "Encontrar títulos e, junto com as ferramentas de anotação, preparar acréscimos, inserções e substituições à vista"
+      },
+      "mindmap": {
+        "name": "Mapas mentais",
+        "actions": "Focar nós, alternar entre estrutura e quadro, e preparar edições de nó à vista"
+      },
+      "todo": {
+        "name": "Tarefas",
+        "actions": "Abrir listas, focar itens, trocar de visualização, buscar e filtrar"
+      },
+      "files": {
+        "name": "Arquivos",
+        "actions": "Abrir pastas, mostrar ou selecionar materiais, navegar, buscar, mudar a exibição e ordenar"
+      },
+      "exam": {
+        "name": "Banco de questões",
+        "actions": "Focar ou passar de questão, filtrar, alternar entre os modos e abrir as configurações"
+      },
+      "flashcards": {
+        "name": "Flashcards",
+        "actions": "Abrir a biblioteca e a revisão, iniciar a revisão do dia, virar o cartão e encerrar; nunca avalia por você"
+      },
+      "pomodoro": {
+        "name": "Pomodoro",
+        "actions": "Iniciar, pausar ou retomar o foco; parar grava uma interrupção e pede confirmação à parte"
+      },
+      "browser": {
+        "name": "Navegador",
+        "actions": "Navegar, voltar, avançar, recarregar, focar o campo de endereço e mostrar a janela da página"
+      }
+    },
+    "killSwitch": {
+      "emergencyStop": "Parada de emergência",
+      "emergencyStopConfirm": "Parar todos os agentes e pausar as automações agora?",
+      "confirmStop": "Parar agora",
+      "cancelConfirm": "Cancelar",
+      "trippedBanner": "Agentes desligados",
+      "trippedReason": "Motivo: {{reason}}",
+      "automationsStillPaused": "As automações continuam pausadas",
+      "resumeAgents": "Religar os agentes",
+      "resumeAutomations": "Retomar as automações",
+      "resumeAutomationsConfirm": "Retomar as automações agendadas? Elas podem voltar a rodar.",
+      "confirmResumeAutomations": "Retomar as automações",
+      "stopFailed": "Não foi possível desligar os agentes. Tente de novo.",
+      "resumeFailed": "Não foi possível retomar. Tente de novo."
+    },
+    "automationCard": {
+      "title": "Automações",
+      "running": "Agendador rodando",
+      "tripped": "Parada de emergência acionada — automações pausadas",
+      "trippedHint": "Os agentes estão desligados. Religue os agentes primeiro e depois retome o agendamento.",
+      "paused": "O agendamento de automações está pausado",
+      "pausedHint": "As automações continuam pausadas depois da parada de emergência. As tarefas agendadas voltam a rodar quando você retomar.",
+      "resuming": "Retomando…"
+    }
+  },
+  "menubar": {
+    "label": "Barra de situação do estudo",
+    "appName": "Mesa de Estudos",
+    "desktopRename": "Renomear a mesa…",
+    "desktopNameInputLabel": "Nome da mesa",
+    "flashcardsDue": "{{count}} flashcards para hoje",
+    "tasksRunning": "{{count}} tarefas de cartões em andamento",
+    "automations": "Abrir as tarefas agendadas: {{enabled}} ativas, {{running}} em andamento, {{failed}} com falha recente",
+    "automationsTitle": "Tarefas agendadas",
+    "automationsEnabledShort": "{{count}} ativas",
+    "automationsNextRun": "próxima {{relative}}",
+    "automationsFailedShort": "{{count}} com falha recente",
+    "automationsRelativeSoon": "em instantes",
+    "automationsRelativeMinutes": "em {{count}} min",
+    "automationsRelativeHours": "em {{count}} h",
+    "automationsRelativeDays": "em {{count}} d",
+    "pomodoroFocus": "Faltam {{time}} de foco",
+    "pomodoroBreakRemaining": "Faltam {{time}} de pausa",
+    "pomodoroFocusElapsed": "{{time}} de foco",
+    "pomodoroPaused": "Pausado há {{time}}",
+    "pomodoroIdle": "Não iniciado",
+    "pomodoroWork": "Focando",
+    "pomodoroBreak": "Em pausa",
+    "openApps": "Abrir todos os aplicativos",
+    "brandMenu": "Menu da Mesa de Estudos",
+    "brandSettings": "Configurações do sistema…",
+    "brandExit": "Sair da Mesa de Estudos",
+    "openCommandPalette": "Abrir a paleta de comandos",
+    "openAppsPanel": "Buscar aplicativos e comandos",
+    "openSettings": "Abrir as configurações",
+    "openCenter": "Abrir o ritmo de hoje",
+    "centerShort": "Ritmo",
+    "centerTitle": "Ritmo de hoje",
+    "moduleFlashcards": "Revisão de hoje",
+    "moduleTasks": "Tarefas de cartões",
+    "moduleFocus": "Foco",
+    "moduleDesktop": "Mesa",
+    "desktopHint": "Todos os aplicativos e as janelas abertas",
+    "flashcardsDueShort": "{{count}} para hoje",
+    "tasksRunningShort": "{{count}} em andamento",
+    "rhythmFlashcards": "Flashcards para hoje",
+    "rhythmPomodoro": "Situação do pomodoro",
+    "rhythmAutomation": "Saúde das automações",
+    "rhythmAutomationDetail": "{{running}} em andamento · {{failed}} com falha · {{enabled}} ativas",
+    "rhythmTasks": "Tarefas",
+    "rhythmTasksDetail": "{{count}} tarefas de cartões",
+    "startReview": "Começar a revisar",
+    "openTasks": "Abrir",
+    "openPomodoro": "Abrir o Pomodoro",
+    "allApps": "Todos os aplicativos",
+    "expose": "Visão geral das janelas",
+    "appMenu": "Menu de {{name}}",
+    "windowMenu": "Janela",
+    "clockLabel": "Relógio e agenda de hoje",
+    "agendaTitle": "Agenda de hoje"
+  },
+  "apps": {
+    "chat": {
+      "name": "Chat",
+      "untitledSession": "Nova conversa",
+      "preparing": "Preparando a conversa…",
+      "createFailed": "Não foi possível criar a conversa",
+      "retry": "Tentar de novo",
+      "loading": "Carregando a conversa…",
+      "sessionNav": "Navegação das conversas"
+    },
+    "chatSession": {
+      "name": "Janela de conversa",
+      "missingSession": "Esta janela não está ligada a nenhuma conversa. Abra uma pela lista de conversas."
+    },
+    "system": {
+      "todoNav": "Navegação das tarefas",
+      "settingsNav": "Navegação das configurações",
+      "showNav": "Mostrar a navegação",
+      "hideNav": "Ocultar a navegação",
+      "tasksRunning": "{{count}} tarefas de cartões em andamento",
+      "paused": "Pausado",
+      "idleHint": "Comece uma sessão de foco abaixo"
+    },
+    "note": "Anotação",
+    "textbook": "Material",
+    "exam": "Banco de questões",
+    "translation": "Tradução",
+    "essay": "Correção de redação",
+    "image": "Imagem",
+    "file": "Arquivo",
+    "filePreview": "Prévia do arquivo",
+    "mindmap": "Mapa mental",
+    "files": "Arquivos",
+    "todo": "Tarefas",
+    "skills": "Habilidades",
+    "templates": "Modelos",
+    "taskDashboard": "Cartões Anki",
+    "flashcards": "Flashcards",
+    "settings": "Configurações",
+    "sandbox": "Ambiente isolado",
+    "pomodoro": "Pomodoro",
+    "browser": "Navegador",
+    "aiDashboard": "Painel da IA"
+  },
+  "legacyFallback": {
+    "desktopOnly": "{{name}} só funciona na versão para computador"
+  },
+  "dock": {
+    "label": "Barra de aplicativos",
+    "open": "Abrir",
+    "pin": "Fixar na barra",
+    "unpin": "Tirar da barra",
+    "closeAll": "Fechar todas as janelas",
+    "closeWindow": "Fechar janela",
+    "windows": "Janelas",
+    "minimized": "Minimizada",
+    "newWindow": "Nova janela",
+    "noWindows": "Nenhuma janela",
+    "running": "Em execução",
+    "apps": "Todos os aplicativos",
+    "showAllWindows": "Mostrar todas as janelas"
+  },
+  "resourceHome": {
+    "newExam": "Novo banco de questões",
+    "newEssay": "Nova correção de redação",
+    "newTranslation": "Nova tradução",
+    "search": "Buscar",
+    "loadFailed": "Não foi possível carregar o conteúdo",
+    "noMatches": "Nenhum conteúdo encontrado",
+    "tryAnotherSearch": "Tente outra busca",
+    "empty": "Nada aqui ainda",
+    "createHint": "Crie um e comece por aqui, sem precisar abrir os Arquivos antes.",
+    "open": "Abrir",
+    "library": "Biblioteca",
+    "all": "Todos",
+    "recent": "Recentes",
+    "essaySettings": "Configurações da correção",
+    "translationSettings": "Configurações da tradução",
+    "settingsNeedSelection": "Escolha ou crie um item primeiro",
+    "name": "Nome",
+    "details": "Situação",
+    "updated": "Data de alteração",
+    "questionCount": "{{count}} questões",
+    "emptyQuestionSet": "Nenhuma questão importada",
+    "roundCount": "{{count}} correções",
+    "notGraded": "Ainda não corrigida",
+    "itemCount": "{{count}} itens",
+    "openHint": "Clique duas vezes ou tecle Enter para abrir",
+    "retry": "Tentar de novo",
+    "untitled": "Sem título"
+  },
+  "resourceWorkspace": {
+    "selectTitle": "Escolha um item",
+    "selectHint": "Escolha um na barra lateral, ou crie um novo para começar.",
+    "hideSidebar": "Ocultar a barra lateral",
+    "showSidebar": "Mostrar a barra lateral",
+    "clearSearch": "Limpar busca",
+    "refresh": "Atualizar",
+    "discard": "Descartar",
+    "cancel": "Cancelar",
+    "reviewExitTitle": "Encerrar a revisão?",
+    "reviewExitDescription": "As avaliações já enviadas ficam salvas. Você pode retomar os cartões restantes depois.",
+    "reviewExitConfirm": "Encerrar revisão"
+  },
+  "appsPanel": {
+    "title": "Todos os aplicativos",
+    "searchPlaceholder": "Buscar aplicativos, comandos, materiais e conversas",
+    "empty": "Nenhum resultado",
+    "close": "Fechar",
+    "view": "Exibição",
+    "gridView": "Grade",
+    "listView": "Lista",
+    "hint": "↑↓ selecionam · Enter abre · Esc fecha",
+    "emptyHint": "Tente outra palavra, ou limpe a busca para ver todos os aplicativos",
+    "hintSelect": "Selecionar",
+    "hintOpen": "Abrir",
+    "hintClose": "Fechar",
+    "sectionApps": "Aplicativos",
+    "sectionCommands": "Comandos",
+    "sectionResources": "Materiais",
+    "sectionChat": "Conversas",
+    "searching": "Buscando…",
+    "resultCount": "{{count}} resultados"
+  },
+  "window": {
+    "close": "Fechar",
+    "minimize": "Minimizar",
+    "zoom": "Ajustar",
+    "maximize": "Maximizar",
+    "restore": "Restaurar",
+    "center": "Centralizar",
+    "tileMenu": "Opções de organização",
+    "loading": "Carregando…",
+    "frozenTitle": "Janela suspensa",
+    "frozenHint": "Esta janela foi pausada para economizar memória. Clique para reativá-la.",
+    "frozenWakeAria": "Clique para reativar a janela suspensa",
+    "unknownApp": "Tipo de aplicativo desconhecido: {{typeId}}",
+    "crashTitle": "Alguma coisa deu errado nesta janela",
+    "crashUnknown": "Erro desconhecido",
+    "reload": "Recarregar",
+    "reloadCooldown": "Tentar de novo em {{seconds}}s",
+    "crashLoopHint": "O aplicativo continua travando. A recarga foi pausada por um instante para quebrar o ciclo.",
+    "dozeTitle": "Janela em segundo plano",
+    "dozeHint": "A exibição está pausada. Selecione a janela para retomar."
+  },
+  "tile": {
+    "left": "Encaixar na metade esquerda",
+    "right": "Encaixar na metade direita",
+    "top": "Encaixar na metade de cima",
+    "bottom": "Encaixar na metade de baixo",
+    "topLeft": "Encaixar no canto superior esquerdo",
+    "topRight": "Encaixar no canto superior direito",
+    "bottomLeft": "Encaixar no canto inferior esquerdo",
+    "bottomRight": "Encaixar no canto inferior direito",
+    "fill": "Preencher",
+    "center": "Centralizar",
+    "restore": "Restaurar",
+    "immersive": "Entrar no modo imersivo",
+    "zone": {
+      "left": "metade esquerda",
+      "right": "metade direita",
+      "top": "metade de cima",
+      "bottom": "metade de baixo",
+      "topLeft": "canto superior esquerdo",
+      "topRight": "canto superior direito",
+      "bottomLeft": "canto inferior esquerdo",
+      "bottomRight": "canto inferior direito"
+    }
+  },
+  "expose": {
+    "title": "Visão geral das janelas",
+    "hint": "Clique numa janela para trazê-la à frente; tecle Esc para sair",
+    "empty": "Nenhuma janela aberta",
+    "untitled": "Janela sem título",
+    "closeWindow": "Fechar janela",
+    "emptyHint": "Tecle Esc ou clique em qualquer lugar para voltar à mesa",
+    "emptyApp": "Este aplicativo não tem janelas para exibir"
+  },
+  "snap": {
+    "altBadge": "Áreas de encaixe maiores"
+  },
+  "switcher": {
+    "title": "Alternador de janelas",
+    "hint": "Segure Ctrl para percorrer e solte para trocar",
+    "minimized": "Minimizada"
+  },
+  "emptyDesktop": {
+    "title": "Sua Mesa de Estudos",
+    "hint": "Abra aplicativos pela barra de baixo para começar — as janelas podem ser organizadas, encaixadas e comparadas lado a lado.",
+    "actionsLabel": "Início rápido",
+    "actionFiles": "Abrir os Arquivos",
+    "actionRestoreSession": "Restaurar a última mesa",
+    "actionRestoreSessionCount_one": "Restaurar a última mesa (1 janela)",
+    "actionRestoreSessionCount_other": "Restaurar a última mesa ({{count}} janelas)",
+    "actionFilesDesc": "Navegue por anotações, materiais e todos os seus arquivos",
+    "actionApps": "Todos os aplicativos",
+    "actionFlashcards": "Flashcards",
+    "actionChat": "Nova conversa",
+    "actionChatDesc": "Abre uma janela de conversa com a IA",
+    "actionTodo": "Ver tarefas",
+    "actionTodoDesc": "Planeje as tarefas de estudo de hoje",
+    "tipsTitle": "Dicas",
+    "tipsDismiss": "Entendi",
+    "tipTile": "Arraste uma janela até a borda da tela para encaixá-la",
+    "tipSwitch": "Alterne entre as janelas rapidamente",
+    "tipExpose": "Veja todas as janelas abertas de uma vez",
+    "tourTitle": "Tour rápido",
+    "tourSkip": "Pular",
+    "tourDontShow": "Não mostrar de novo",
+    "tourNext": "Avançar",
+    "tourDone": "Concluir",
+    "tourStep": "{{current}} / {{total}}",
+    "tourSteps": {
+      "dock": {
+        "title": "Barra de aplicativos",
+        "body": "Abra os aplicativos de estudo pela barra de baixo. As janelas podem ser organizadas, encaixadas e comparadas lado a lado."
+      },
+      "search": {
+        "title": "Busca rápida",
+        "body": "Tecle {{shortcut}} para buscar aplicativos e comandos sem sair da mesa."
+      },
+      "statusBar": {
+        "title": "O ritmo na barra de status",
+        "body": "A barra de cima mostra os flashcards do dia, o pomodoro e a saúde das automações — abra para ver o ritmo de hoje."
+      },
+      "agent": {
+        "title": "Controle da IA",
+        "body": "Quando você quiser, deixe a IA encontrar conteúdo e executar ações autorizadas dentro dos aplicativos de estudo."
+      }
+    }
+  },
+  "agenda": {
+    "label": "Calendário e agenda de estudos",
+    "backToToday": "Voltar para hoje",
+    "previousMonth": "Mês anterior",
+    "nextMonth": "Próximo mês",
+    "quickAdd": "Adicionar compromisso",
+    "pendingCount": "{{count}} para agendar",
+    "datePendingCount": "{{date}}, {{count}} tarefas",
+    "overdueCount": "{{count}} atrasadas",
+    "openTodo": "Tarefas",
+    "loading": "Organizando sua agenda…",
+    "clear": "Nada previsto para este dia",
+    "completeItem": "Concluir {{title}}",
+    "completeFailed": "Não foi possível concluir a tarefa",
+    "unknownList": "Tarefa",
+    "allDay": "Dia inteiro",
+    "more": "mais {{count}}",
+    "loadFailed": "A agenda está temporariamente indisponível"
+  },
+  "desktopMenu": {
+    "label": "Menu da mesa",
+    "newChat": "Nova conversa",
+    "openFiles": "Abrir os Arquivos",
+    "allApps": "Todos os aplicativos…",
+    "arrange": "Organizar as janelas",
+    "tileAll": "Encaixar todas as janelas",
+    "expose": "Visão geral das janelas",
+    "wallpaper": "Papel de parede",
+    "manageWallpaper": "Gerenciar papéis de parede…",
+    "customWallpaper": "Imagem personalizada",
+    "materialTier": "Efeito visual",
+    "showDesktop": "Mostrar a mesa",
+    "restoreWindows": "Restaurar as janelas",
+    "showWidgets": "Mostrar os widgets da mesa",
+    "shortcuts": "Atalhos de teclado",
+    "replayTour": "Refazer o tour rápido",
+    "settings": "Configurações da mesa…"
+  },
+  "immersive": {
+    "hint": "Modo imersivo — tecle Esc para sair",
+    "hintTouch": "Modo imersivo — toque em Sair, ou no botão verde da barra de título",
+    "exit": "Sair do modo imersivo"
+  },
+  "cheatsheet": {
+    "title": "Atalhos de teclado",
+    "close": "Fechar",
+    "hint": "Tecle ? ou Esc para fechar · Segure Ctrl+Alt para espiar",
+    "hintMac": "Tecle ? ou Esc para fechar · Segure ⌘⌥ para espiar",
+    "replayTour": "Refazer o tour rápido",
+    "groups": {
+      "layout": "Encaixe e organização",
+      "movement": "Mover e encaixar",
+      "navigation": "Alternar e navegar",
+      "management": "Gerenciar janelas",
+      "help": "Ajuda"
+    },
+    "tricks": {
+      "title": "Truques com teclas modificadoras",
+      "drag": "Arrastar uma janela: áreas de encaixe maiores; solte na borda de cima para ocupar a metade superior",
+      "dragGesture": "arrastar",
+      "tileMenu": "Menu do botão de ajuste: a coluna do meio vira metade de cima / preencher / metade de baixo",
+      "tileMenuGesture": "passar o mouse no ajuste",
+      "zoom": "Ajuste clássico: preencher a mesa / restaurar",
+      "zoomGesture": "clicar no ajuste",
+      "closeAll": "Fechar todas as janelas deste aplicativo",
+      "closeAllGesture": "clicar em fechar",
+      "minimizeAll": "Minimizar todas as janelas deste aplicativo",
+      "minimizeAllGesture": "clicar em minimizar"
+    }
+  },
+  "wallpaper": {
+    "mountainMist": "Névoa na montanha",
+    "forestMist": "Floresta com neblina",
+    "alpineLake": "Lago alpino",
+    "winterRidge": "Cume de inverno",
+    "aurora": "Aurora",
+    "horizon": "Horizonte",
+    "graphite": "Grafite",
+    "meadow": "Campina",
+    "lagoon": "Lagoa",
+    "dusk": "Anoitecer",
+    "sakura": "Cerejeira",
+    "sand": "Areia",
+    "nebula": "Nebulosa",
+    "auroraFlow": "Fluxo de aurora",
+    "duskFlow": "Fluxo do anoitecer"
+  },
+  "wallpaperManager": {
+    "title": "Gerenciar papéis de parede",
+    "presetsSection": "Papéis de parede do app",
+    "customSection": "Meus papéis de parede",
+    "import": "Importar imagem",
+    "importing": "Importando…",
+    "empty": "Nenhum papel de parede próprio ainda. Clique em \"Importar imagem\" para adicionar um.",
+    "remove": "Remover papel de parede",
+    "limitReached": "A biblioteca de papéis de parede está cheia ({{limit}} imagens). Remova alguns antes de importar.",
+    "importFailed": "Não foi possível importar. Tente de novo.",
+    "adjustTitle": "Ajustes da imagem",
+    "blur": "Desfoque",
+    "dim": "Escurecer",
+    "vignette": "Vinheta",
+    "close": "Fechar",
+    "selectTitle": "Escolha uma imagem de papel de parede"
+  },
+  "content": {
+    "loading": "Carregando o conteúdo…",
+    "missingResource": "Falta o identificador do material; esta janela não pode ser aberta",
+    "missingResourceHint": "Abra de novo pelos Arquivos, ou verifique se o material ainda existe.",
+    "confirmCloseUnsaved": "Este conteúdo tem alterações não salvas. Fechar a janela mesmo assim?",
+    "unsavedTitle": "Você tem alterações não salvas. Sair mesmo assim?",
+    "saveAndClose": "Salvar e fechar",
+    "saveAndCloseFailed": "Não foi possível salvar; a janela continua aberta. Verifique o erro e tente de novo."
+  },
+  "deactivation": {
+    "cancelled": "Desativação cancelada. A Mesa de Estudos continua ligada.",
+    "dirtyBlocked": "Algumas janelas têm alterações não salvas, então o fechamento da Mesa de Estudos foi cancelado. Salve ou feche essas janelas primeiro.",
+    "exitBlocked": "Há conteúdo não salvo, então a saída foi cancelada. Salve seu trabalho antes de sair."
+  },
+  "suspend": {
+    "keptBackground": "Esta janela tem alterações não salvas, então ela continuou rodando em segundo plano em vez de ser congelada."
+  },
+  "hub": {
+    "closeCancelled": "O fechamento da aba foi cancelado. Suas alterações não salvas foram mantidas."
+  },
+  "mindmap": {
+    "loading": "Carregando o mapa mental…",
+    "missingResourceHint": "Abra o mapa mental de novo pelos Arquivos, ou verifique se ele ainda existe."
+  },
+  "files": {
+    "dragOut": {
+      "openOnDesktop": "Solte na mesa para abrir"
+    },
+    "preview": {
+      "type": {
+        "note": "Anotação",
+        "textbook": "Material",
+        "exam": "Prova",
+        "translation": "Tradução",
+        "essay": "Redação",
+        "image": "Imagem",
+        "file": "Arquivo",
+        "mindmap": "Mapa mental",
+        "folder": "Pasta",
+        "generic": "Material"
+      }
+    }
+  },
+  "a11y": {
+    "desktop": "Mesa de trabalho",
+    "windowRole": "Janela",
+    "close": "Fechar janela",
+    "minimize": "Minimizar janela",
+    "zoom": "Ajustar janela",
+    "expose": "Visão geral das janelas",
+    "tilingDivider": "Divisória de encaixe",
+    "windowOpened": "{{title}} aberta",
+    "windowClosed": "{{title}} fechada",
+    "windowMinimized": "{{title}} minimizada",
+    "windowTiled": "{{title}} encaixada em {{zone}}",
+    "zoomed": "{{title}} maximizada",
+    "restored": "{{title}} restaurada",
+    "exposeOpened": "Visão geral aberta, {{count}} janelas",
+    "exposeClosed": "Visão geral fechada",
+    "exposeSelected": "{{title}} selecionada",
+    "dropOpened": "{{title}} aberta",
+    "appCrashed": "{{name}} travou e pode ser recarregado",
+    "showDesktop": "Mesa exibida",
+    "previewFailed": "Não foi possível abrir a visualização",
+    "pdfRefOpenFailed": "Não foi possível abrir a referência ao PDF: origem ausente",
+    "zoomRestore": "Restaurar janela",
+    "closeAll": "Fechar todas as janelas deste aplicativo",
+    "minimizeAll": "Minimizar todas as janelas deste aplicativo",
+    "immersiveEnter": "Entrar no modo imersivo",
+    "immersiveExit": "Sair do modo imersivo",
+    "immersiveEntered": "{{title}} entrou no modo imersivo",
+    "immersiveExited": "{{title}} saiu do modo imersivo"
+  },
+  "shortcuts": {
+    "title": "Atalhos de teclado",
+    "tileLeft": "Encaixar na metade esquerda",
+    "tileRight": "Encaixar na metade direita",
+    "tileTop": "Encaixar na metade de cima",
+    "tileBottom": "Encaixar na metade de baixo",
+    "tileTopLeft": "Encaixar no canto superior esquerdo",
+    "tileTopRight": "Encaixar no canto superior direito",
+    "tileBottomLeft": "Encaixar no canto inferior esquerdo",
+    "tileBottomRight": "Encaixar no canto inferior direito",
+    "moveLeft": "Encostar na borda esquerda (mantendo o tamanho)",
+    "moveRight": "Encostar na borda direita (mantendo o tamanho)",
+    "moveUp": "Encostar na borda de cima (mantendo o tamanho)",
+    "moveDown": "Encostar na borda de baixo (mantendo o tamanho)",
+    "maximize": "Maximizar (preencher a mesa)",
+    "restoreOrMinimize": "Restaurar / minimizar",
+    "center": "Centralizar a janela",
+    "cycleNext": "Ir para a próxima janela",
+    "cyclePrev": "Ir para a janela anterior",
+    "cycleAppNext": "Próxima janela do mesmo aplicativo",
+    "cycleAppPrev": "Janela anterior do mesmo aplicativo",
+    "minimize": "Minimizar a janela em foco",
+    "showDesktop": "Mostrar a mesa (minimiza tudo; tecle de novo para restaurar)",
+    "expose": "Visão geral das janelas",
+    "closeWindow": "Fechar a janela em foco",
+    "closeAll": "Fechar todas as janelas",
+    "cheatsheet": "Lista de atalhos",
+    "exposeApp": "Visão geral das janelas do aplicativo atual"
+  },
+  "settings": {
+    "sectionTitle": "Mesa de Estudos",
+    "sectionDesc": "A Mesa de Estudos é o padrão do app: uma área de trabalho com janelas para abrir e encaixar os aplicativos de estudo. Você pode desligá-la a qualquer momento e usar o modo clássico, por compatibilidade.",
+    "mode": {
+      "title": "Mesa de Estudos (padrão)",
+      "desc": "Quando ligada, você usa a Mesa de Estudos com janelas. Desligar volta ao layout clássico, como modo de compatibilidade; o estado da mesa fica guardado.",
+      "migratedNotice": "A Mesa de Estudos está ativada. Você pode voltar ao modo clássico nas Configurações."
+    },
+    "performanceProfile": {
+      "title": "Perfil de desempenho",
+      "desc": "Equilibre visual e fluidez de uma vez só. Os perfis ajustam o efeito visual junto; mudar só o efeito passa o perfil para Personalizado.",
+      "quality": "Qualidade",
+      "balanced": "Equilibrado",
+      "performance": "Desempenho",
+      "custom": "Personalizado"
+    },
+    "materialTier": {
+      "title": "Efeito visual",
+      "desc": "Nível do efeito de vidro. Também é definido pelo perfil de desempenho acima; mudar só aqui passa o perfil para Personalizado.",
+      "auto": "Automático",
+      "full": "Completo",
+      "reduced": "Reduzido",
+      "minimal": "Mínimo"
+    },
+    "dockSize": {
+      "title": "Tamanho da barra de aplicativos",
+      "desc": "Ajusta o tamanho da barra, dos ícones e dos espaçamentos."
+    },
+    "wallpaper": {
+      "title": "Papel de parede",
+      "desc": "Escolha uma paisagem ou um gradiente do app, ou use uma imagem sua.",
+      "kindTheme": "Do app",
+      "kindImage": "Imagem própria",
+      "selectTitle": "Escolha uma imagem de papel de parede",
+      "changeImage": "Trocar imagem",
+      "importing": "Importando…",
+      "manage": "Gerenciar papéis de parede"
+    },
+    "tileMargins": {
+      "title": "Espaçamento entre janelas encaixadas",
+      "desc": "Deixa um vão entre as janelas encaixadas. Desligado, elas ficam encostadas uma na outra.",
+      "px": "Espaçamento (px)"
+    },
+    "dockAutohide": {
+      "title": "Ocultar a barra de aplicativos automaticamente",
+      "desc": "Esconde a barra quando não está em uso. Leve o cursor até a borda de baixo para mostrá-la."
+    },
+    "restoreSession": {
+      "title": "Restaurar a última mesa ao abrir",
+      "desc": "Quando ligado, o app reabre todas as janelas anteriores a cada vez que você entra. Vem desligado para abrir mais rápido — o estado continua sendo salvo, e a mesa vazia oferece um botão para restaurar quando você quiser."
+    },
+    "desktopWidgets": {
+      "title": "Mostrar os widgets da mesa",
+      "desc": "Mostra o calendário e a agenda de hoje na mesa. Desligar libera espaço horizontal em janelas estreitas e telas pequenas (também dá para alternar pelo menu de contexto da mesa)."
+    },
+    "shortcuts": {
+      "title": "Atalhos de teclado",
+      "desc": "Atalhos para gerenciar as janelas da Mesa de Estudos. Na mesa, tecle ? ou use o menu de contexto para abrir a lista a qualquer momento.",
+      "show": "Ver todos os {{count}}",
+      "hide": "Ocultar a lista"
+    },
+    "menubarAutohide": {
+      "title": "Ocultar a barra de menu automaticamente",
+      "desc": "Esconde a barra de menu quando não está em uso. Leve o cursor até a borda de cima para mostrá-la."
+    },
+    "titleBarDoubleClick": {
+      "title": "Clique duplo na barra de título",
+      "desc": "O que acontece ao clicar duas vezes na área vazia da barra de título de uma janela.",
+      "zoom": "Ajustar",
+      "minimize": "Minimizar",
+      "none": "Não fazer nada"
+    },
+    "devPanel": {
+      "title": "Painel de diagnóstico",
+      "desc": "Mostra o diagnóstico do agendador na mesa: ciclo de vida das janelas, uso de memória e tempo de quadro. Vem desligado; ative com npm run dev:tauri:diag ou ?wbDiag=1."
+    },
+    "browserEnabled": {
+      "title": "Navegador interno",
+      "desc": "Abre uma janela de navegador na Mesa de Estudos (as páginas rodam em um WebView isolado). A Mesa de Estudos precisa estar ligada.",
+      "needWorkbench": "Ligue a Mesa de Estudos primeiro para mudar as opções do navegador interno."
+    },
+    "browserNetworkMode": {
+      "title": "Alcance HTTP do assistente",
+      "desc": "Define se o assistente pode usar HTTP público. Sua navegação manual não é afetada por esta opção.",
+      "local_whitelist": "Só HTTPS público",
+      "full": "Permitir HTTP público (com confirmação)",
+      "fullConfirmTitle": "Permitir que o assistente acesse HTTP público?",
+      "fullConfirm": "Permitir que o assistente use HTTP público cria uma conexão sem criptografia, cujas páginas e tráfego podem ser alterados por terceiros. Continuar?"
+    },
+    "browserAgentControl": {
+      "title": "Permitir que o assistente controle o navegador",
+      "desc": "O assistente pode navegar e agir na sessão compartilhada; ações sensíveis continuam pedindo confirmação."
+    },
+    "agentControl": {
+      "title": "Controle da IA na mesa",
+      "desc": "Define se a conversa pode abrir janelas, acompanhar o foco e preparar ações na Mesa de Estudos. Ações destrutivas continuam pedindo confirmação.",
+      "off": "Desligado",
+      "background": "Segundo plano",
+      "follow": "Acompanhar",
+      "offDesc": "Só consultas e listagens continuam permitidas; abrir, fechar, comandos e preparação de ações ficam bloqueados. A gravação de dados ainda pode ocorrer pelo servidor, sem abrir janelas.",
+      "backgroundDesc": "Permite o controle sem roubar o foco: prepara nas janelas abertas, ou aplica o resultado com um aviso na barra de aplicativos.",
+      "followDesc": "Abre e traz para a frente as janelas de destino, para você ver as ações do assistente acontecendo."
+    },
+    "agentPacing": {
+      "title": "Ritmo do controle",
+      "desc": "Velocidade com que o assistente aplica as operações nas janelas. Rápido = instantâneo, com destaque; Normal = padrão; Demonstração = mais devagar, para acompanhar.",
+      "fast": "Rápido",
+      "normal": "Normal",
+      "demo": "Demonstração"
+    },
+    "browserCdpWindows": {
+      "title": "Aceleração CDP no Windows (avançado)",
+      "desc": "Só no Windows. Abre uma porta de depuração remota para uma automação mais robusta; aumenta a superfície de ataque — vem desligado."
+    },
+    "browserAdvanced": "Avançado (navegador)",
+    "browserPolicyDisabled": "O navegador interno está desativado por política."
+  },
+  "browser": {
+    "addressPlaceholder": "Digite um endereço ou uma busca",
+    "back": "Voltar",
+    "forward": "Avançar",
+    "reload": "Recarregar",
+    "stop": "Parar",
+    "secureConnection": "Conexão segura",
+    "insecureConnection": "Conexão HTTP não segura",
+    "connectionUnknown": "Sem conexão ainda",
+    "agentActive": "O assistente está controlando esta página",
+    "userControl": "Você está no controle",
+    "takeOver": "Assumir o controle",
+    "detachedHint": "A página está aberta em outra janela",
+    "showContent": "Mostrar a página",
+    "emptyHint": "Digite um endereço para começar a navegar",
+    "blockedScheme": "Este link não pode ser aberto por questões de segurança",
+    "needWorkbench": "Ligue a Mesa de Estudos primeiro",
+    "needBrowserEnabled": "Ative o navegador interno nas configurações",
+    "contentCrashed": "O processo da página foi encerrado. Você pode tentar de novo.",
+    "approveNavigate": "Permitir que o assistente abra: {{url}}",
+    "approveClick": "Permitir que o assistente clique num elemento da página",
+    "approveType": "Permitir que o assistente digite na página",
+    "nav": "Navegação"
+  },
+  "devPanel": {
+    "title": "Diagnóstico da mesa",
+    "expand": "Expandir o painel",
+    "collapse": "Recolher o painel",
+    "windows": "Janelas",
+    "noWindows": "Nenhuma janela",
+    "lifecycle": {
+      "focused": "Em foco",
+      "visible": "Visível",
+      "background": "Em segundo plano",
+      "frozen": "Congelada"
+    },
+    "budget": "Uso de memória",
+    "focusStack": "Pilha de foco",
+    "emptyFocusStack": "(vazia)",
+    "lastSnapshot": "Último instantâneo",
+    "never": "Nunca salvo",
+    "frameTime": "Tempo de quadro",
+    "avg": "Média",
+    "max": "Máximo",
+    "sampling": "Coletando…",
+    "dropped": "Quadros perdidos",
+    "gestureDropped": "Perdas durante gestos",
+    "longTasks": "Tarefas longas",
+    "source": "Origem dos dados",
+    "interactions": "Interações recentes",
+    "interactionsEmpty": "Arraste ou redimensione uma janela para ver a latência",
+    "copyTrace": "Copiar JSON",
+    "clearTrace": "Limpar",
+    "distribution": "Distribuição do ciclo de vida",
+    "minimizedTag": "Minimizada",
+    "close": "Fechar o painel"
+  },
+  "notesWorkspace": {
+    "title": "Anotações",
+    "emptyPane": "Escolha uma anotação ou um mapa mental",
+    "empty": {
+      "paneTitle": "Escolha ou crie uma anotação",
+      "paneNewNote": "Nova anotação",
+      "paneOpenSearch": "Abrir a busca",
+      "hintQuickOpen": "Abertura rápida",
+      "hintNewNote": "Nova anotação",
+      "treeTitle": "Nenhuma anotação ainda",
+      "treeNewNote": "Nova anotação",
+      "treeNewFolder": "Nova pasta",
+      "paneImport": "Importar anotações",
+      "paneAskAgent": "Perguntar ao agente"
+    },
+    "untitledNote": "Anotação sem título",
+    "untitledMindmap": "Mapa mental sem título",
+    "confirmCloseUnsaved": "Esta aba tem alterações não salvas. Fechar mesmo assim?",
+    "confirmCloseSaving": "Esta aba ainda está salvando. Fechar mesmo assim?",
+    "ribbon": {
+      "aria": "Navegação das anotações",
+      "explorer": "Explorador de arquivos",
+      "search": "Buscar nas anotações",
+      "backlinks": "Propriedades e links",
+      "trash": "Lixeira"
+    },
+    "explorer": {
+      "title": "Arquivos",
+      "newNote": "Nova anotação",
+      "newFolder": "Nova pasta",
+      "newMindmap": "Novo mapa mental",
+      "refresh": "Atualizar",
+      "open": "Abrir o explorador",
+      "close": "Fechar o explorador",
+      "closeFiles": "Fechar os arquivos",
+      "moreActions": "Mais ações"
+    },
+    "navHistory": {
+      "aria": "Histórico de navegação",
+      "back": "Voltar ({{shortcut}})",
+      "forward": "Avançar ({{shortcut}})"
+    },
+    "navigation": {
+      "back": "Voltar",
+      "forward": "Avançar"
+    },
+    "library": {
+      "manage": "Importar ou exportar a biblioteca"
+    },
+    "import": {
+      "partial": "{{success}} importadas, {{failed}} com falha",
+      "success": "{{count}} anotações importadas"
+    },
+    "tagFilter": {
+      "label": "Filtrar por etiquetas",
+      "clear": "Limpar",
+      "loading": "Carregando as etiquetas…",
+      "retry": "Tentar de novo",
+      "empty": "Nenhuma etiqueta ainda",
+      "intersectionHint": "Filtro por interseção: só aparecem as anotações que têm todas as {{count}} etiquetas"
+    },
+    "favorites": {
+      "title": "Favoritos",
+      "empty": "Nenhum favorito ainda. Marque uma anotação ou mapa mental com estrela para adicionar.",
+      "unfavorite": "Remover {{name}} dos favoritos"
+    },
+    "search": {
+      "placeholder": "Buscar arquivos...",
+      "aria": "Buscar arquivos",
+      "clear": "Limpar busca"
+    },
+    "searchOverlay": {
+      "title": "Buscar nas anotações",
+      "quickOpen": "Abertura rápida",
+      "fullText": "Buscar no conteúdo",
+      "quickOpenPlaceholder": "Filtrar os arquivos que dá para abrir...",
+      "fullTextPlaceholder": "Buscar no conteúdo das anotações...",
+      "close": "Fechar a busca",
+      "clear": "Limpar busca",
+      "modeLabel": "Modo de busca",
+      "searching": "Buscando...",
+      "enterQuery": "Digite um texto para buscar no conteúdo das anotações.",
+      "searchFailed": "Não foi possível buscar nas anotações.",
+      "openFailed": "Não foi possível abrir este material.",
+      "retry": "Tentar de novo",
+      "mindmap": "Mapa mental",
+      "note": "Anotação",
+      "empty": "Nenhuma anotação ou mapa mental encontrado.",
+      "keyboardHint": "↑↓ selecionam, Enter abre, Esc fecha",
+      "activeTags": "Etiquetas ativas",
+      "removeTag": "Remover a etiqueta {{tag}}",
+      "emptyQuickOpenHint": "Experimente \"Buscar no conteúdo\" para procurar dentro dos textos.",
+      "tagHint": "Filtre com tag: path: ou chave:valor",
+      "resultCount": "{{count}} resultados",
+      "recentGroup": "Abertos recentemente",
+      "allGroup": "Todos os arquivos",
+      "loadMore": "Carregar mais resultados",
+      "loadingMore": "Carregando mais…",
+      "resultCountMore": "Mais de {{count}} resultados"
+    },
+    "backlinks": {
+      "title": "Links",
+      "panelAria": "Painel de informações da anotação",
+      "tabProperties": "Propriedades",
+      "tabLinks": "Links",
+      "refresh": "Atualizar os links",
+      "close": "Fechar os links",
+      "noActiveNote": "Escolha uma anotação para ver os links dela.",
+      "noActiveNoteProperties": "Escolha uma anotação para ver as propriedades dela.",
+      "loading": "Carregando os links...",
+      "loadFailed": "Não foi possível carregar os links da anotação.",
+      "retry": "Tentar de novo",
+      "outgoing": "Links que saem daqui",
+      "noOutgoing": "Esta anotação ainda não aponta para nenhuma outra. Digite [[ para criar um link.",
+      "incoming": "Links que apontam para cá",
+      "noIncoming": "Nenhuma outra anotação aponta para cá ainda",
+      "incomingLimited": "{{scanned}} anotações verificadas; o resultado pode estar incompleto.",
+      "moreContext": "Mostrar mais contexto",
+      "lessContext": "Mostrar menos contexto",
+      "unresolved": "Links sem destino",
+      "createFromUnresolved": "Criar a anotação \"{{title}}\"",
+      "createFailed": "Não foi possível criar a anotação.",
+      "openLinkedNote": "Abrir {{title}}",
+      "openFailed": "Não foi possível abrir a anotação ligada.",
+      "loadMore": "Carregar mais origens",
+      "mentions": "Menções sem link",
+      "mentionsLoading": "Procurando menções…",
+      "mentionsFailed": "Não foi possível procurar as menções sem link.",
+      "mentionsLimited": "Só as {{count}} anotações candidatas mais recentes foram verificadas.",
+      "noMentions": "Nenhuma menção sem link encontrada",
+      "convertMention": "Transformar em link a menção em \"{{title}}\"",
+      "convertDirty": "\"{{title}}\" tem alterações não salvas. Salve antes de converter.",
+      "convertMissing": "\"{{title}}\" mudou e a menção não foi encontrada.",
+      "convertFailed": "Não foi possível transformar a menção em link.",
+      "tabGraph": "Grafo"
+    },
+    "renameSync": {
+      "updated": "Links atualizados em {{count}} anotações",
+      "incomplete": "Os links de {{count}} anotações não foram atualizados (alterações não salvas ou falha na gravação). Confira essas anotações manualmente."
+    },
+    "tree": {
+      "aria": "Árvore de arquivos",
+      "root": "Raiz da biblioteca",
+      "folder": "Pasta: {{name}}",
+      "note": "Anotação: {{name}}",
+      "mindmap": "Mapa mental: {{name}}",
+      "renameInput": "Renomear",
+      "loading": "Carregando os arquivos",
+      "loadFailed": "Não foi possível carregar os arquivos",
+      "retry": "Tentar de novo",
+      "noMatches": "Nenhum arquivo corresponde a \"{{query}}\"",
+      "empty": "Nenhum arquivo nesta biblioteca ainda",
+      "showAll": "Mostrar todos os arquivos",
+      "dragLink": "Arraste o link para dentro da anotação",
+      "moreActions": "Mais ações",
+      "truncated": "A biblioteca tem mais de {{max}} arquivos. A árvore mostra só uma parte deles."
+    },
+    "tabs": {
+      "aria": "Arquivos abertos",
+      "close": "Fechar {{title}}",
+      "closeOthers": "Fechar as outras abas",
+      "closeTabsToRight": "Fechar as abas à direita",
+      "pin": "Fixar {{title}}",
+      "unpin": "Desafixar {{title}}",
+      "pinned": "Fixada",
+      "showAll": "Mostrar todos os arquivos abertos",
+      "openInRightSplit": "Abrir {{title}} na divisão da direita",
+      "closeRightSplit": "Tirar {{title}} da divisão da direita"
+    },
+    "panes": {
+      "main": "Editor principal",
+      "right": "Editor da direita",
+      "resize": "Redimensionar as divisões"
+    },
+    "saveState": {
+      "saved": "Salvo",
+      "saving": "Salvando",
+      "dirty": "Não salvo"
+    },
+    "status": {
+      "ready": "Pronto",
+      "fileCount": "{{count}} arquivos",
+      "creatingNote": "Criando a anotação...",
+      "creatingMindmap": "Criando o mapa mental...",
+      "splitNeedsAnotherTab": "Abra outra aba para dividir a área de trabalho.",
+      "movedToTrash": "{{name}} foi para a lixeira",
+      "movedManyToTrash": "{{count}} itens foram para a lixeira",
+      "restored": "{{name}} restaurado",
+      "noteType": "Markdown",
+      "mindmapType": "Mapa mental",
+      "library": "Biblioteca local"
+    },
+    "actions": {
+      "undo": "Desfazer"
+    },
+    "context": {
+      "open": "Abrir",
+      "openSplit": "Abrir na divisão da direita",
+      "rename": "Renomear",
+      "favorite": "Favoritar",
+      "unfavorite": "Desfavoritar",
+      "newNote": "Nova anotação",
+      "newFolder": "Nova pasta",
+      "newMindmap": "Novo mapa mental",
+      "delete": "Excluir"
+    },
+    "dialog": {
+      "renameTitle": "Renomear",
+      "createFolderTitle": "Nova pasta",
+      "deleteTitle": "Mover para a lixeira",
+      "deleteDescription": "Mover \"{{name}}\" para a lixeira?",
+      "deleteManyDescription": "Mover {{count}} itens selecionados para a lixeira?",
+      "nameLabel": "Nome",
+      "nameRequired": "Digite um nome.",
+      "cancel": "Cancelar",
+      "rename": "Renomear",
+      "create": "Criar",
+      "delete": "Excluir"
+    },
+    "validation": {
+      "nameTooLong": "O nome pode ter no máximo {{max}} caracteres",
+      "nameInvalidChars": "O nome não pode ter quebras de linha nem caracteres de controle",
+      "charCount": "{{count}} / {{max}}"
+    },
+    "trash": {
+      "title": "Lixeira",
+      "close": "Fechar a lixeira",
+      "loading": "Carregando a lixeira",
+      "empty": "A lixeira está vazia",
+      "emptyAll": "Esvaziar a lixeira ({{count}})",
+      "deletedAt": "Excluído {{time}}",
+      "restore": "Restaurar {{name}}",
+      "purge": "Excluir {{name}} permanentemente",
+      "selectAll": "Selecionar todos",
+      "selectItem": "Selecionar {{name}}",
+      "restoreSelected": "Restaurar os selecionados ({{count}})",
+      "restoreSelectedFailed": "Não foi possível restaurar {{count}} item(ns).",
+      "confirmEmptyTitle": "Esvaziar a lixeira?",
+      "confirmEmptyDesc": "{{count}} itens serão excluídos em definitivo. Não dá para desfazer.",
+      "confirmEmptyAction": "Esvaziar",
+      "confirmPurgeTitle": "Excluir permanentemente?",
+      "confirmPurgeDesc": "\"{{name}}\" será excluído em definitivo. Não dá para desfazer.",
+      "confirmPurgeAction": "Excluir permanentemente"
+    },
+    "graph": {
+      "canvasAria": "Grafo de links de \"{{title}}\"",
+      "clientFallback": "O serviço do grafo está indisponível; mostrando só os links que saem desta anotação.",
+      "depth1": "1 salto",
+      "depth2": "2 saltos",
+      "depthLabel": "Profundidade do grafo",
+      "empty": "Nenhum link ainda. Digite [[ para criar um link.",
+      "legendLabel": "Tipos de ligação",
+      "legendNoteref": "Referência",
+      "legendWikilink": "Link entre anotações",
+      "loadFailed": "Não foi possível carregar o grafo local.",
+      "loading": "Montando o grafo…",
+      "noActiveNote": "Escolha uma anotação para ver o grafo dela.",
+      "refresh": "Atualizar o grafo",
+      "truncated": "São conexões demais; mostrando só parte dos nós."
+    },
+    "props": {
+      "title": "Propriedades",
+      "add": "Adicionar propriedade",
+      "confirmAdd": "Adicionar propriedade",
+      "cancelAdd": "Cancelar",
+      "confirmEdit": "Salvar o valor",
+      "cancelEdit": "Cancelar a edição",
+      "editAria": "Editar a propriedade {{key}}",
+      "editValueAria": "Editar o valor da propriedade {{key}}",
+      "removeAria": "Excluir a propriedade {{key}}",
+      "keyPlaceholder": "Nome",
+      "valuePlaceholder": "Valor",
+      "emptyHint": "Adicione propriedades livres, no formato nome e valor, que ficam buscáveis por chave:valor.",
+      "emptyReadOnly": "Nenhuma propriedade.",
+      "emptyKey": "Digite o nome da propriedade.",
+      "reservedKey": "Este nome é reservado; escolha outro.",
+      "duplicateKey": "Já existe uma propriedade com este nome.",
+      "keyTooLong": "O nome da propriedade pode ter no máximo {{max}} caracteres.",
+      "valueTooLong": "O valor da propriedade pode ter no máximo {{max}} caracteres.",
+      "invalidChars": "As propriedades não podem ter caracteres de controle.",
+      "tooMany": "Você pode ter no máximo {{max}} propriedades.",
+      "saveFailed": "Não foi possível salvar as propriedades."
+    }
+  },
+  "sandbox": {
+    "title": "Ambiente isolado",
+    "refresh": "Atualizar",
+    "openInspector": "Abrir o inspetor",
+    "closeInspector": "Fechar o inspetor",
+    "close": "Fechar",
+    "preview": "Prévia",
+    "expand": "Expandir",
+    "collapse": "Recolher",
+    "inspector": "Inspetor",
+    "source": "Código-fonte",
+    "codeBlock": "Bloco de código",
+    "safePreview": "Prévia segura",
+    "running": "Executando",
+    "view": "Tamanho de tela",
+    "desktop": "Computador",
+    "tablet": "Tablet",
+    "mobile": "Celular",
+    "desktopShort": "PC",
+    "tabletShort": "Tab",
+    "mobileShort": "Cel",
+    "stats": "Estatísticas",
+    "language": "Linguagem",
+    "lines": "Linhas",
+    "characters": "Caracteres",
+    "iframeNotice": "Iframe restrito; os scripts estão desativados.",
+    "emptyHint": "Abra um bloco de código na conversa para visualizá-lo aqui.",
+    "mobileHint": "No celular só a prévia funciona; use o aplicativo para computador para ter o ambiente completo.",
+    "closed": "Fechado",
+    "open": "Abrir o ambiente isolado",
+    "clearSession": "Limpar a sessão"
+  },
+  "tagTreeMarkdownPlaceholder": "# Etiqueta raiz\n### Subtema A\n#### Conceito 1\n##### Método A\n###### Tipo de questão I",
+  "filePreview": {
+    "downloadUnavailable": "O arquivo original não está disponível",
+    "saveAs": "Salvar como",
+    "downloadSuccess": "Salvo",
+    "referenceNotSupported": "Este material não pode ser citado",
+    "search": "Buscar",
+    "openExternal": "Abrir com um programa do sistema",
+    "showInFolder": "Mostrar na pasta",
+    "print": "Imprimir",
+    "referenceToChat": "Enviar para a conversa",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "searchPlaceholder": "Buscar no documento…",
+    "noMatches": "Nenhum resultado",
+    "tooManyMatches": "Resultados demais; só os primeiros {{limit}} foram contados",
+    "highlightUnsupported": "Não dá para destacar os resultados aqui; tecle Enter para pular de um para o outro",
+    "printUnsupported": "Este tipo de arquivo não pode ser impresso pela prévia. Abra com um programa do sistema para imprimir.",
+    "searchUnavailable": "A busca por texto não funciona neste tipo de arquivo",
+    "moreActions": "Mais ações",
+    "closeSearch": "Fechar a busca",
+    "quickLook": "Espiada rápida",
+    "quickLookHint": "Espaço ou Esc para fechar",
+    "quickLookClose": "Fechar a espiada rápida"
+  },
+  "pomodoro": {
+    "modes": {
+      "focusing": "Focando",
+      "shortBreak": "Pausa curta",
+      "longBreak": "Pausa longa",
+      "idle": "Pomodoro"
+    },
+    "strictHint": "No modo rígido o foco não pode ser pausado",
+    "strictBadge": "Modo rígido",
+    "countUpLabel": "Contagem crescente",
+    "controls": {
+      "startFocus": "Iniciar o foco",
+      "pause": "Pausar",
+      "resume": "Retomar",
+      "stop": "Parar",
+      "finish": "Encerrar",
+      "skipBreak": "Pular a pausa",
+      "noiseOn": "Ligar o som ambiente",
+      "noiseOff": "Desligar o som ambiente",
+      "enterImmersive": "Entrar no modo de foco imersivo",
+      "extendMinutes": "+{{count}} min",
+      "extendTitle": "Estender a etapa atual em {{count}} min"
+    },
+    "settingsTitle": "Configurações do Pomodoro",
+    "statsTitle": "Evolução do foco",
+    "breakReview": "Revisar {{count}} cartões do dia",
+    "progressTitle": "{{done}}/{{total}} pomodoros concluídos",
+    "today": {
+      "label": "Hoje",
+      "unit": "pomodoros",
+      "focus": "Foco",
+      "minutes": "{{value}} min",
+      "hours": "{{value}} h",
+      "interrupted": "{{value}} interrompidos",
+      "goalReached": "Meta batida",
+      "streak": "{{count}} dias seguidos",
+      "statsButton": "Estatísticas"
+    }
+  }
+}

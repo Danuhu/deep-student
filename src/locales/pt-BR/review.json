@@ -1,0 +1,265 @@
+{
+  "title": "Plano de revisão",
+  "subtitle": "Repetição espaçada para fixar de vez",
+  "unknownQuestion": "Questão desconhecida",
+  "interval": "Intervalo",
+  "days": " dias",
+  "times": " vezes",
+  "accuracy": "Aproveitamento",
+  "totalReviews": "Revisadas",
+  "startReview": "Começar a revisar",
+  "status": {
+    "new": "Nova",
+    "learning": "Aprendendo",
+    "reviewing": "Revisando",
+    "graduated": "Dominada",
+    "suspended": "Suspensa",
+    "overdue": "Atrasada",
+    "difficult": "Difícil"
+  },
+  "stats": {
+    "dueToday": "Para hoje",
+    "totalDue": "Total pendente",
+    "mastered": "Dominadas",
+    "accuracy": "Aproveitamento médio",
+    "overdueHint": "{{count}} atrasadas",
+    "difficultHint": "{{count}} difíceis",
+    "ofTotal": "de domínio",
+    "totalReviews": " revisões"
+  },
+  "todayReview": {
+    "title": "Revisão de hoje",
+    "hasDue": "Você tem {{count}} itens para revisar",
+    "noDue": "Muito bem! Nada para revisar hoje",
+    "itemsUnit": "itens para revisar",
+    "estimatedTime": "cerca de {{count}} min"
+  },
+  "progress": {
+    "label": "Progresso do aprendizado"
+  },
+  "queue": {
+    "title": "Fila de revisão",
+    "sortedByDue": "Ordenada por data de vencimento",
+    "andMore": "mais {{count}}...",
+    "questionUnavailable": "O enunciado da questão não está disponível. Atualize e tente de novo.",
+    "otherSessionNotice": "Há uma revisão em andamento em outro banco de questões. Começar uma aqui encerra a outra (as avaliações já enviadas ficam salvas).",
+    "overdueDays": "{{count}}d de atraso",
+    "overdueGroup": "Atrasadas ({{count}})",
+    "todayGroup": "Para hoje"
+  },
+  "setup": {
+    "title": "Nenhum plano de revisão ainda",
+    "description": "Crie os planos de revisão deste banco de questões e a repetição espaçada agenda sozinha o que você revisa a cada dia.",
+    "createAll": "Criar plano para todas as questões"
+  },
+  "empty": {
+    "title": "Tudo em dia!",
+    "description": "Você terminou todas as revisões. Continue assim; amanhã tem mais.",
+    "masteredChip": "{{count}} dominadas",
+    "viewCalendar": "Ver histórico de revisões"
+  },
+  "estimate": {
+    "days": "{{count}}d",
+    "weeks": "{{count}}sem",
+    "months": "{{count}}m",
+    "years": "{{count}}a"
+  },
+  "session": {
+    "noItems": "Nada para revisar",
+    "submitFailed": "Não foi possível salvar a revisão. Tente de novo.",
+    "submitFailedTitle": "Não foi possível salvar a revisão",
+    "exitTitle": "Encerrar esta revisão?",
+    "exitDescription": "As avaliações já enviadas ficam salvas. Você pode retomar os itens restantes depois.",
+    "exitConfirm": "Encerrar revisão",
+    "otherExamTitle": "Esta revisão pertence a outro banco de questões",
+    "otherExamDescription": "Vá para a janela daquele banco para continuar, ou encerre a revisão por lá."
+  },
+  "card": {
+    "question": "Questão",
+    "answer": "Gabarito",
+    "explanation": "Comentário"
+  },
+  "action": {
+    "skip": "Pular",
+    "showAnswer": "Ver gabarito"
+  },
+  "keyboard": {
+    "space": "Espaço",
+    "ratingHint": "Tecle 1-4 para avaliar",
+    "spaceGood": "Espaço = Bom"
+  },
+  "questionType": {
+    "single_choice": "Múltipla escolha",
+    "multiple_choice": "Múltipla escolha (várias corretas)",
+    "indefinite_choice": "Múltipla escolha (quantas corretas não informado)",
+    "fill_blank": "Completar lacunas",
+    "short_answer": "Resposta curta",
+    "essay": "Dissertativa",
+    "calculation": "Cálculo",
+    "proof": "Demonstração",
+    "true_false": "Certo / Errado",
+    "matching": "Associação",
+    "ordering": "Ordenação",
+    "numeric": "Numérica",
+    "other": "Outro"
+  },
+  "structured": {
+    "trueLabel": "Certo",
+    "falseLabel": "Errado"
+  },
+  "rating": {
+    "prompt": "O quanto você sabia esta?",
+    "again": "De novo",
+    "againDesc": "<1 min",
+    "hard": "Difícil",
+    "hardDesc": "<6 min",
+    "good": "Bom",
+    "goodDesc": "<10 min",
+    "easy": "Fácil",
+    "easyDesc": ">4 dias"
+  },
+  "complete": {
+    "excellent": "Excelente!",
+    "excellentMsg": "Desempenho ótimo, continue assim!",
+    "good": "Muito bem!",
+    "goodMsg": "Continue, você está evoluindo!",
+    "keepGoing": "Siga em frente!",
+    "keepGoingMsg": "Mais algumas revisões e você melhora!",
+    "needsPractice": "Precisa treinar mais",
+    "needsPracticeMsg": "Não desista; é praticando que se aprende!",
+    "correct": "Acertos",
+    "accuracy": "Aproveitamento",
+    "time": "Tempo",
+    "reviewAgain": "Revisar de novo",
+    "finish": "Concluir"
+  },
+  "calendar": {
+    "title": "Calendário de revisões",
+    "subtitle": "Acompanhe seu histórico de revisões",
+    "today": "Hoje",
+    "totalReviews": "Total de revisões",
+    "passed": "Acertadas",
+    "accuracy": "Aproveitamento",
+    "history": "Histórico",
+    "noData": "Nenhuma revisão neste dia",
+    "emptyHint": "Faça algumas revisões e sua trajetória de estudo aparece aqui",
+    "less": "Menos",
+    "more": "Mais",
+    "currentStreak": "Sequência atual",
+    "longestStreak": "Maior sequência",
+    "totalDays": "Dias estudados",
+    "weekdaysShort": [
+      "Dom",
+      "Seg",
+      "Ter",
+      "Qua",
+      "Qui",
+      "Sex",
+      "Sáb"
+    ],
+    "monthsFull": [
+      "janeiro",
+      "fevereiro",
+      "março",
+      "abril",
+      "maio",
+      "junho",
+      "julho",
+      "agosto",
+      "setembro",
+      "outubro",
+      "novembro",
+      "dezembro"
+    ],
+    "monthYearFormat": "{{monthName}} de {{year}}",
+    "failed": "Erradas",
+    "closeDetail": "Recolher os detalhes do dia",
+    "prevMonth": "Mês anterior",
+    "nextMonth": "Próximo mês",
+    "dueQueue": "Para revisar nesse dia ({{count}})",
+    "dueMore": "mais {{count}}...",
+    "dueLegend": "Revisões previstas"
+  },
+  "questions": {
+    "difficulty": {
+      "easy": "Fácil",
+      "medium": "Média",
+      "hard": "Difícil",
+      "very_hard": "M. difícil"
+    },
+    "neverPracticed": "Nunca resolvida",
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "daysAgo": "{{count}}d atrás",
+    "weeksAgo": "{{count}}sem atrás",
+    "monthsAgo": "{{count}}m atrás",
+    "noContent": "Sem conteúdo",
+    "selectQuestion": "Selecionar {{label}}",
+    "selectAll": "Selecionar todas",
+    "cancel": "Cancelar",
+    "reset": "Zerar",
+    "delete": "Excluir",
+    "confirmReset": "Zerar {{count}}?",
+    "confirmDelete": "Excluir {{count}}?",
+    "toReview": "A revisar",
+    "mastered": "Dominadas",
+    "avgAttempts": "Média de <bold>{{count}}</bold> tentativas",
+    "masteryRate": "de domínio",
+    "startReview": "Começar a revisar ({{count}})",
+    "attemptCount": "{{count}}x",
+    "emptyTitle": "Ótimo! Nenhum erro",
+    "emptyDesc": "Você dominou todas as questões, continue assim!<br/>Que tal encarar questões mais difíceis.",
+    "masteryTip": "Marcada como dominada depois de <highlight>2 acertos</highlight> seguidos",
+    "myAnswer": "Minha resposta",
+    "correctAnswer": "Gabarito",
+    "noAnswerRecorded": "Nenhuma resposta registrada",
+    "redo": "Refazer",
+    "explanation": "Comentário",
+    "generateCards": "Gerar cartões ({{count}})",
+    "generateCardsRunning": "Enviando…",
+    "generateCardsNeedSelection": "Escolha as questões para as quais você quer cartões",
+    "generateCardsTooShort": "As questões escolhidas têm conteúdo curto demais para virar cartão útil",
+    "generateCardsFailed": "Não foi possível iniciar a geração de cartões",
+    "generateCardsStarted": "Geração de cartões iniciada. Acompanhe no painel de tarefas.",
+    "openTaskDashboard": "Abrir o painel de tarefas",
+    "cardSource": {
+      "question": "Questão",
+      "deckName": "Questões que errei",
+      "requirements": "Monte cartões de memorização a partir do enunciado, do gabarito e do comentário de cada questão. Foque no que o estudante errou e nunca use a resposta errada dele como gabarito do cartão."
+    },
+    "sortLabel": "Ordenar",
+    "sortDefault": "Padrão",
+    "sortByErrors": "Mais erradas",
+    "sortByRecent": "Erradas recentemente",
+    "errorCause": {
+      "neverCorrect": "Nunca acertou",
+      "repeatedErrors": "Erros repetidos",
+      "highErrorRate": "Taxa de erro alta",
+      "stale": "Sem revisar há tempo"
+    }
+  },
+  "actions": {
+    "createPlan": "Criar plano de revisão",
+    "createPlanDesc": "Cria planos de revisão para as questões selecionadas",
+    "createForAll": "Criar para todas",
+    "createForAllDesc": "Cria planos de revisão para todas as questões",
+    "suspend": "Suspender revisão",
+    "resume": "Retomar revisão",
+    "delete": "Excluir plano"
+  },
+  "toast": {
+    "createSuccess": "{{count}} planos de revisão criados",
+    "createFailed": "Não foi possível criar os planos de revisão",
+    "processSuccess": "Revisão salva",
+    "processFailed": "Não foi possível salvar a revisão",
+    "suspendSuccess": "Plano de revisão suspenso",
+    "resumeSuccess": "Plano de revisão retomado",
+    "deleteSuccess": "Plano de revisão excluído"
+  },
+  "tips": {
+    "sm2Title": "O que é repetição espaçada?",
+    "sm2Desc": "A repetição espaçada é uma técnica de estudo com respaldo científico: você revisa nos intervalos certos e o conteúdo fixa na memória de longo prazo. O app ajusta sozinho a próxima revisão conforme o seu desempenho.",
+    "ratingTitle": "Como avaliar?",
+    "ratingDesc": "Avalie pelo esforço que deu para lembrar: De novo (esqueci completamente), Difícil (lembrei a muito custo), Bom (lembrei com algum esforço), Fácil (veio na hora)."
+  }
+}

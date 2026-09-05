@@ -1,0 +1,1540 @@
+{
+  "canvas": {
+    "untitled": "Anotação sem título",
+    "error": {
+      "operation_failed": "Não foi possível concluir"
+    }
+  },
+  "sidebar": {
+    "title": "Barra lateral",
+    "expand": "Expandir a barra lateral",
+    "collapse": "Recolher a barra lateral",
+    "trash": "Lixeira",
+    "actions": {
+      "new_folder": "Nova pasta",
+      "new_note": "Nova anotação",
+      "refresh": "Atualizar",
+      "assistant": "Assistente flutuante",
+      "assistant_welcome": "Como posso ajudar com suas anotações?",
+      "assistant_placeholder": "Faça uma pergunta...",
+      "vector_manager": "Gerenciador de vetores",
+      "favorites_filter_on": "Mostrar só os favoritos",
+      "favorites_filter_off": "Mostrar todas as anotações",
+      "sort": "Ordenar",
+      "sort_manual": "Manual",
+      "sort_name_asc": "Nome ↑",
+      "sort_name_desc": "Nome ↓",
+      "sort_modified_desc": "Alteração ↓",
+      "sort_modified_asc": "Alteração ↑",
+      "sort_created_desc": "Criação ↓",
+      "sort_created_asc": "Criação ↑"
+    },
+    "search": {
+      "placeholder": "Buscar",
+      "search_placeholder": "Buscar...",
+      "mode_label": "Modo",
+      "mode_notes": "Modo anotações",
+      "mode_graph": "Modo grafo",
+      "modes": {
+        "keyword": "Palavra-chave",
+        "semantic": "Por significado",
+        "hybrid": "Combinada"
+      },
+      "filter_by_tag": "Filtrar por etiqueta",
+      "loading_tags": "Carregando as etiquetas...",
+      "no_tags": "Nenhuma etiqueta"
+    },
+    "vector_status": {
+      "heading": "Situação dos vetores",
+      "none": "Não gerado",
+      "pending": "Precisa atualizar",
+      "fresh": "Em dia",
+      "tooltip": {
+        "none": "O embedding ainda não foi gerado",
+        "pending": "O conteúdo mudou; o embedding será gerado de novo",
+        "fresh": "O embedding está sincronizado com a anotação"
+      }
+    },
+    "favorites": {
+      "title": "Anotações favoritas",
+      "empty": "Nenhuma anotação favorita",
+      "empty_hint": "Clique com o botão direito numa anotação para favoritar",
+      "filter_empty": "Nenhuma anotação favorita. Clique na estrela de novo para ver todas.",
+      "show_all": "Mostrar todas as anotações"
+    }
+  },
+  "summary": {
+    "code_block": "Bloco de código",
+    "image": "Imagem"
+  },
+  "aiDiff": {
+    "title": "Sugestões de edição da IA",
+    "operation_append": "Acrescentar conteúdo",
+    "operation_replace": "Substituir conteúdo",
+    "operation_set": "Definir conteúdo",
+    "accept": "Aceitar",
+    "reject": "Recusar",
+    "no_changes": "Nenhuma alteração encontrada",
+    "errors": {
+      "output_too_large": "A anotação sugerida passa do limite de {{maxBytes}} bytes",
+      "append_empty": "O conteúdo a acrescentar está vazio",
+      "search_empty": "O termo de busca está vazio",
+      "invalid_regex": "Expressão regular inválida: {{message}}",
+      "regex_syntax_error": "erro de sintaxe",
+      "replace_not_found": "Nenhum conteúdo correspondente para substituir",
+      "unknown_operation": "Tipo de operação desconhecido: {{operation}}",
+      "section_not_found": "Seção não encontrada: {{section}}",
+      "user_rejected": "Edição recusada por você"
+    },
+    "summary": {
+      "meta_title": "Resumo das alterações",
+      "meta_description": "Prévia gerada a partir das estatísticas do diff",
+      "stat_title": "Linhas alteradas",
+      "no_change_trend": "Nenhuma alteração relevante",
+      "added": "Adicionadas",
+      "removed": "Removidas",
+      "operation": "Operação",
+      "no_diff_title": "Nenhuma diferença visível",
+      "no_diff_description": "A sugestão da IA é igual ao conteúdo atual; aceitar não muda nada."
+    }
+  },
+  "aiCheckpoint": {
+    "applied": "Edição da IA aplicada",
+    "rollback": "Desfazer",
+    "keep": "Manter"
+  },
+  "errors": {
+    "noteNotFound": "Anotação não encontrada",
+    "search_notes": "Buscar nas anotações",
+    "load_notes_list": "Carregar a lista de anotações",
+    "load_note_content": "Carregar o conteúdo da anotação",
+    "save_note_content": "Salvar o conteúdo da anotação",
+    "update_note_title": "Atualizar o título da anotação",
+    "force_refresh_content": "Forçar a atualização do conteúdo",
+    "update_note_tags": "Atualizar as etiquetas da anotação",
+    "get_updated_note": "Obter a anotação atualizada",
+    "create_note": "Criar anotação",
+    "create_canvas_note": "Criar anotação em quadro",
+    "delete_notes": "Excluir anotações",
+    "rename_note": "Renomear anotação",
+    "get_renamed_note": "Obter a anotação renomeada",
+    "toggle_favorite": "Alternar favorito",
+    "list_directory": "Listar a pasta",
+    "get_resource": "Obter o material",
+    "create_resource": "Criar material",
+    "update_resource": "Atualizar material",
+    "delete_resource": "Excluir material",
+    "move_resource": "Mover material",
+    "copy_resource": "Copiar material",
+    "search_resource": "Buscar material",
+    "get_content": "Obter o conteúdo",
+    "set_metadata": "Definir os metadados",
+    "load_tags_failed": "Não foi possível carregar as etiquetas",
+    "title_save_failed": "Não foi possível salvar o título"
+  },
+  "error": {
+    "notFound": "Anotação não encontrada"
+  },
+  "learningHub": {
+    "share_success_title": "Compartilhado",
+    "share_success_message": "O caminho do material foi copiado; você pode enviá-lo a outras pessoas",
+    "share_failed_title": "Não foi possível compartilhar",
+    "share_failed_message": "Não foi possível copiar o link. Verifique as permissões da área de transferência.",
+    "delete_confirm_message": "Excluir este material? Você pode restaurá-lo pela lixeira."
+  },
+  "mistakeReferenceCard": {
+    "title": "Referência a erro",
+    "loading": "Carregando o enunciado...",
+    "empty": "Nenhum enunciado disponível",
+    "error": "Não foi possível carregar o enunciado. Tente mais tarde.",
+    "viewDetail": "Ver detalhes do erro",
+    "untitled": "Erro sem título"
+  },
+  "favorites": {
+    "toast_marked": "Adicionado aos favoritos",
+    "toast_unmarked": "Removido dos favoritos",
+    "toast_error_title": "Não foi possível favoritar",
+    "context_mark": "Adicionar aos favoritos",
+    "context_unmark": "Remover dos favoritos",
+    "toolbar_mark": "Favoritar esta anotação",
+    "toolbar_unmark": "Desfavoritar esta anotação",
+    "open_note": "Abrir \"{{title}}\""
+  },
+  "common": {
+    "no_selection": "Nenhuma anotação selecionada",
+    "select_or_create_intro": "Escolha uma anotação na barra lateral ou crie uma nova para começar.",
+    "untitled": "Sem título",
+    "untitledNote": "Anotação sem título",
+    "noSubject": "Nenhuma matéria escolhida",
+    "noteRoot": "Anotações",
+    "subjectFallback": "Geral",
+    "saving": "Salvando...",
+    "saved_at": "Salvo {{time}}",
+    "auto_save_enabled": "Salvamento automático ativado",
+    "deleted_at": "Excluída em",
+    "char_count": "{{count}} caracteres"
+  },
+  "versions": {
+    "title": "Histórico de versões",
+    "empty": "Nenhuma versão",
+    "revert": "Reverter",
+    "revert_as_new": "Reverter como nova",
+    "compare": "Comparar",
+    "load_failed": "Não foi possível carregar as versões",
+    "revert_success": "Revertido para a versão escolhida",
+    "revert_failed": "Não foi possível reverter"
+  },
+  "graph_notes": {
+    "mode_label": "Modo",
+    "mode_notes": "Anotações",
+    "mode_graph": "Anotações do grafo de conhecimento",
+    "switch_to_graph": "Mudar para o modo grafo de conhecimento",
+    "switch_to_notes": "Mudar para o modo anotações",
+    "load_error": "Não foi possível carregar os dados do grafo",
+    "created": "Anotação do grafo criada",
+    "create_error": "Não foi possível criar a anotação do grafo",
+    "renamed": "Anotação do grafo renomeada",
+    "rename_error": "Não foi possível renomear a anotação do grafo",
+    "deleted": "Anotação do grafo excluída",
+    "delete_error": "Não foi possível excluir a anotação do grafo",
+    "search_error": "Não foi possível buscar",
+    "tag_added": "Etiqueta acrescentada",
+    "tag_error": "Não foi possível atualizar a etiqueta",
+    "feature_disabled": "Este recurso não está disponível no modo Grafo de Conhecimento",
+    "root_title": "Raiz das anotações do grafo"
+  },
+  "notifications": {
+    "defaultSuccess": "Concluído",
+    "createFailed": "Não foi possível criar a anotação",
+    "preferenceSaveFailed": "Não foi possível salvar a preferência",
+    "noActiveNote": "Nenhuma anotação selecionada",
+    "editorUnavailable": "Editor indisponível",
+    "vectorCleared": "Índice vetorial apagado ({{title}} está sem conteúdo)",
+    "vectorQueued": "Reconstrução dos vetores na fila",
+    "vectorUpdated": "Vetores atualizados",
+    "vectorUpdateFailed": "Não foi possível atualizar os vetores",
+    "vectorRemoved": "Índice vetorial removido",
+    "vectorRemoveFailed": "Não foi possível remover os vetores",
+    "reindexingProgress": "Reconstruindo: {{title}}",
+    "noPendingVectors": "Nenhuma anotação aguardando sincronização de vetores",
+    "copySuccess": "Copiado",
+    "importSingle": "Arquivo importado: {{name}}",
+    "importMultiple": "{{count}} arquivos importados",
+    "importFailed": "Não foi possível importar: {{error}}",
+    "wordCountTitle": "Contagem de palavras",
+    "wordCountDescription": "O documento tem {{count}} caracteres",
+    "noteLocated": "Você foi levado até a anotação",
+    "noteNotFound": "Anotação relacionada não encontrada",
+    "jumpFailed": "Não foi possível abrir",
+    "tagStateSaveFailed": "Não foi possível salvar o estado das etiquetas",
+    "folderStateSaveFailed": "Não foi possível salvar a estrutura de pastas",
+    "renameFailed": "Não foi possível renomear o item",
+    "treeStateSaveFailed": "Não foi possível salvar o estado da árvore",
+    "ragConfigSaved": "Configuração salva",
+    "ragConfigSaveFailed": "Não foi possível salvar a configuração",
+    "reembedTriggered": "Recálculo dos vetores iniciado",
+    "reembedFailed": "Não foi possível recalcular os vetores",
+    "fontSaved": "Preferências de fonte salvas",
+    "fontSaveFailed": "Não foi possível salvar as preferências de fonte",
+    "treeStateReset": {
+      "title": "Estado da árvore restaurado",
+      "description": "As preferências da árvore estavam corrompidas. A expansão padrão foi restaurada."
+    },
+    "vectorStatusPersistFailed": "Não foi possível guardar a situação dos vetores.",
+    "reindexingRunning": "Atualizando o índice vetorial…",
+    "reindexingQueued": "Colocando a reconstrução dos vetores na fila…",
+    "unknownFile": "Arquivo sem nome",
+    "importFailedWithName": "Não foi possível importar {{name}}",
+    "importParseFailed": "Não foi possível interpretar: {{error}}",
+    "retryLater": "Tente de novo mais tarde.",
+    "localBackupFailed": "Não foi possível fazer a cópia local",
+    "storageInsufficient": "O armazenamento do navegador está cheio. Salve a anotação à mão.",
+    "backupRestored": "Cópia local restaurada",
+    "backupSaveFailed": "Não foi possível salvar depois de restaurar.",
+    "retryOrManualSave": "Tente de novo mais tarde ou salve à mão.",
+    "reembedStart": "Recálculo dos vetores iniciado",
+    "reindexingCompleted": "Índice vetorial atualizado ({{count}} anotações)",
+    "reindexingQueuedDone": "Reconstrução dos vetores na fila para {{count}} anotações",
+    "reindexingFailed": "Não foi possível atualizar os vetores",
+    "backfillSuccess": "Índices faltantes completados ({{count}})",
+    "backfillFailed": "Não foi possível completar os índices",
+    "backupRestoredDescription": "{{title}} foi salva.",
+    "exportPdfSuccess": "PDF exportado: {{name}}",
+    "exportPdfFailed": "Não foi possível exportar o PDF: {{error}}",
+    "exportSuccessTitle": "Exportação pronta",
+    "exportSuccess": "{{note_count}} anotações de {{subject_count}} matérias exportadas para {{path}}.",
+    "exportFailedTitle": "Não foi possível exportar",
+    "exportFailed": "Não foi possível exportar as anotações: {{error}}",
+    "exportNeedSelection": "Escolha pelo menos uma matéria antes de exportar.",
+    "conflictTitle": "Foram encontradas alterações conflitantes",
+    "conflictBody": "Esta anotação foi salva em outra janela ou dispositivo. Guardamos suas edições atuais numa cópia local — confira a versão mais recente antes de restaurar seu rascunho.",
+    "loadFailed": "Não foi possível carregar"
+  },
+  "find": {
+    "placeholder": "Localizar…"
+  },
+  "vector": {
+    "status": {
+      "none": "Nenhuma anotação selecionada",
+      "missing": "Índice não gerado",
+      "stale": "Precisa ser atualizado",
+      "fresh": "Atualizado"
+    }
+  },
+  "findReplace": {
+    "inputRequired": "Digite o que você quer localizar",
+    "editorNotReady": "O editor ainda não está pronto",
+    "findUnsupported": "Este editor não aceita localizar",
+    "noMatch": "Nenhuma ocorrência encontrada",
+    "replaceUnsupported": "Este editor não aceita substituir",
+    "replaceOne": "1 ocorrência substituída",
+    "replaceFailed": "Não foi possível substituir",
+    "editorUnavailable": "Editor indisponível",
+    "replaceMany": "{{count}} ocorrências substituídas",
+    "replaceNone": "Não há nada para substituir",
+    "findPlaceholder": "Localizar…",
+    "replacePlaceholder": "Substituir por…",
+    "replace": "Substituir",
+    "replaceAll": "Tudo",
+    "prev": "Anterior (Shift+Enter)",
+    "next": "Próxima (Enter)",
+    "showReplace": "Mostrar substituir",
+    "hideReplace": "Ocultar substituir",
+    "findLabel": "Localizar",
+    "panelLabel": "Localizar e substituir",
+    "replaceLabel": "Substituir por"
+  },
+  "editorV2": {
+    "use_regex": "Usar expressão regular",
+    "find_regex_placeholder": "Localizar (expressão regular)…",
+    "find_invalid_regex": "Expressão regular inválida",
+    "outline_expand": "Expandir a seção",
+    "outline_collapse": "Recolher a seção",
+    "conflict_compare": "Comparar",
+    "conflict_compare_hide": "Ocultar a comparação",
+    "conflict_diff_title": "Minha versão × versão remota",
+    "conflict_diff_legend": "+ minha · − remota",
+    "conflict_diff_identical": "As duas versões são iguais",
+    "conflict_diff_loading": "Carregando a versão remota…",
+    "conflict_diff_load_failed": "Não foi possível carregar a versão remota",
+    "conflict_diff_retry": "Tentar de novo",
+    "tag_too_long": "As etiquetas podem ter no máximo {{max}} caracteres",
+    "tag_invalid_chars": "As etiquetas não podem ter caracteres de controle",
+    "tags_limit_reached": "Você pode acrescentar no máximo {{max}} etiquetas"
+  },
+  "mentions": {
+    "loading": "Carregando...",
+    "result_title": "Referências encontradas",
+    "hint": "Digite palavras-chave para citar",
+    "empty": "Nenhuma correspondência",
+    "type_to_search": "Digite para buscar referências",
+    "irec_group": "Cartões do grafo de inspiração",
+    "untitled_card": "Cartão sem título",
+    "irec_prefix": "@Inspiração",
+    "no_insight": "Nenhuma inspiração ainda"
+  },
+  "toolbar": {
+    "ask_agent": "Perguntar ao agente",
+    "new_note": "Nova anotação",
+    "new_folder": "Nova pasta",
+    "refresh": "Atualizar",
+    "import": "Importar",
+    "import_md": "Importar Markdown",
+    "import_pdf": "Importar PDF",
+    "import_docx": "Importar documento do Word",
+    "export": "Exportar",
+    "export_md": "Exportar como Markdown",
+    "export_library": "Gerenciar biblioteca",
+    "export_all": "Exportar tudo",
+    "trash": "Lixeira",
+    "font_preferences": "Preferências de fonte",
+    "theme_preferences": "Preferências de tema",
+    "assistant": "Assistente flutuante",
+    "assistant_welcome": "Como posso ajudar com suas anotações?",
+    "assistant_placeholder": "Faça uma pergunta...",
+    "crepe_demo": "Abrir a demonstração do Crepe",
+    "upload": "Enviar",
+    "save": "Salvar",
+    "undo": "Desfazer",
+    "redo": "Refazer",
+    "copy": "Copiar",
+    "paste": "Colar",
+    "print": "Imprimir",
+    "fullscreen": "Tela cheia",
+    "bold": "Negrito",
+    "italic": "Itálico",
+    "strikethrough": "Tachado",
+    "code": "Código",
+    "heading1": "Título 1",
+    "heading2": "Título 2",
+    "heading3": "Título 3",
+    "bulletList": "Lista com marcadores",
+    "orderedList": "Lista numerada",
+    "taskList": "Lista de tarefas",
+    "quote": "Citação",
+    "horizontalRule": "Linha divisória",
+    "codeBlock": "Bloco de código",
+    "generateCards": "Gerar cartões",
+    "link": "Link",
+    "image": "Imagem",
+    "table": "Tabela",
+    "math": "Fórmula",
+    "reading_mode": "Modo leitura",
+    "editing_mode": "Modo edição",
+    "reading_mode_on": "Modo leitura ativado",
+    "reading_mode_off": "Modo edição ativado",
+    "find_replace": "Localizar e substituir",
+    "note_templates": "Modelos de anotação",
+    "focus_mode": "Modo foco",
+    "exit_focus_mode": "Sair do modo foco",
+    "label": "Formatação"
+  },
+  "templates": {
+    "lecture": "Anotações de aula",
+    "mistake": "Revisão de erros",
+    "exam": "Revisão para a prova"
+  },
+  "blockMenu": {
+    "label": "Ações do bloco",
+    "turnInto": "Transformar em",
+    "paragraph": "Texto",
+    "heading1": "Título 1",
+    "heading2": "Título 2",
+    "heading3": "Título 3",
+    "bulletList": "Lista com marcadores",
+    "orderedList": "Lista numerada",
+    "quote": "Citação",
+    "duplicate": "Duplicar",
+    "delete": "Excluir"
+  },
+  "search": {
+    "placeholder": "Buscar nas anotações...",
+    "semantic_search": "Busca por significado",
+    "search_current_only": "Buscar só nesta anotação",
+    "no_results": "Nenhuma anotação encontrada",
+    "searching": "Buscando...",
+    "search_button": "Buscar",
+    "clear_search": "Limpar a busca",
+    "advanced_search": "Busca avançada",
+    "results_count": "{{count}} resultados encontrados",
+    "show": "Mostrar:",
+    "auto_search_hint": "Busca automática ligada; os resultados aparecem abaixo do editor",
+    "fts": {
+      "heading": "Resultados por palavra-chave (clique para ir)",
+      "prev": "Anterior",
+      "next": "Próximo",
+      "shortcutHint": "↑/↓ para escolher · Enter para abrir · Esc para fechar · Tab para alternar"
+    },
+    "rag": {
+      "inspectTitle": "Inspeção do índice da matéria",
+      "inspectSummary": "Anotações: {{total}}; sem mapeamento: {{missing_mapping}}; biblioteca errada: {{wrong_library}}; sem vetores: {{no_vectors}}",
+      "inspectLoading": "Analisando…",
+      "inspectCopy": "Copiar o JSON",
+      "inspectEmpty": "Nenhum problema encontrado",
+      "problemsOnly": "Só os problemas",
+      "heading": "Resultados por significado (ligam a anotações relacionadas)",
+      "perDocument": "Por documento",
+      "prevChunk": "Trecho anterior",
+      "nextChunk": "Próximo trecho"
+    },
+    "collapse": "Recolher",
+    "expand": "Expandir"
+  },
+  "rag": {
+    "loading": "Carregando a configuração…",
+    "currentNote": "Anotação atual",
+    "vectorUpdatedAt": "Vetores atualizados em {{time}}",
+    "vectorNotIndexed": "O índice vetorial ainda não foi criado.",
+    "vectorLatest": "Mais recente: {{time}}",
+    "vectorLatestEmpty": "Mais recente: —",
+    "manualRefreshHint": "Mudar o conteúdo não atualiza os vetores sozinho; atualize quando precisar.",
+    "pendingHint": "Quando o conteúdo de uma anotação é mais novo que a data dos vetores dela, ela é marcada como pendente. Os vetores são atualizados em segundo plano.",
+    "pendingCount": "{{count}} anotações aguardando atualização",
+    "pendingMore": "… e mais {{count}} pendentes",
+    "statusLabel": "Situação:",
+    "actions": {
+      "backfillMissing": "Completar os que faltam",
+      "backfillSuccess": "Índices completados",
+      "reembedSubject": "Refazer os vetores da matéria",
+      "updateCurrent": "Atualizar os vetores desta anotação",
+      "clearCurrent": "Apagar os vetores desta anotação"
+    },
+    "backfillStart": "Completando os vetores que faltam…",
+    "backfillSuccess": "Índices completados",
+    "backfillFailed": "Não foi possível completar: {{error}}",
+    "backfillDone": "Completados: {{count}}",
+    "indexManager": {
+      "title": "Gerenciador de índices e vetores",
+      "description": "Salvar grava só o conteúdo da anotação. Atualize ou apague os índices vetoriais quando o conteúdo estiver estável."
+    },
+    "statusSummary": "{{documents}} documentos / {{chunks}} trechos",
+    "noteCount": "Anotações: {{count}}",
+    "concurrency": "Em paralelo",
+    "inspectTitle": "Inspeção do índice da matéria",
+    "inspectSummary": "Anotações: {{total}}; sem mapeamento: {{missing_mapping}}; biblioteca errada: {{wrong_library}}; sem vetores: {{no_vectors}}",
+    "inspectLoading": "Analisando…",
+    "inspectCopy": "Copiar o JSON",
+    "inspectEmpty": "Nenhum problema encontrado",
+    "problemsOnly": "Só os problemas",
+    "configDialog": {
+      "title": "Configurações do RAG ({{subject}})"
+    },
+    "config": {
+      "chunkSize": "Tamanho do trecho",
+      "chunkOverlap": "Sobreposição entre trechos",
+      "minChunkSize": "Tamanho mínimo do trecho",
+      "enableRerank": "Ativar a reordenação"
+    }
+  },
+  "editor": {
+    "toolbar": {
+      "bold": "Negrito",
+      "italic": "Itálico",
+      "underline": "Sublinhado",
+      "strikethrough": "Tachado",
+      "heading": "Título",
+      "code": "Código",
+      "code_block": "Bloco de código",
+      "link": "Link",
+      "image": "Imagem",
+      "table": "Tabela",
+      "list": "Lista",
+      "ordered_list": "Lista numerada",
+      "unordered_list": "Lista com marcadores",
+      "quote": "Citação",
+      "divider": "Linha divisória"
+    },
+    "windowing": {
+      "loading_note": "Carregando a anotação...",
+      "loading_more": "Carregando mais linhas...",
+      "load_more_failed": "Não foi possível carregar mais linhas. Tente carregar de novo.",
+      "retry": "Tentar de novo"
+    },
+    "table": {
+      "add_row_before": "Inserir linha acima",
+      "add_row_after": "Inserir linha abaixo",
+      "delete_row": "Excluir a linha",
+      "add_col_before": "Inserir coluna à esquerda",
+      "add_col_after": "Inserir coluna à direita",
+      "delete_col": "Excluir a coluna",
+      "toggle_header_row": "Ligar/desligar a linha de cabeçalho",
+      "toggle_header_col": "Ligar/desligar a coluna de cabeçalho",
+      "merge_cells": "Juntar as células",
+      "split_cell": "Dividir a célula",
+      "delete_table": "Excluir a tabela",
+      "cell_bg_label": "Fundo da célula",
+      "set_cell_bg": "Aplicar o fundo à célula"
+    },
+    "image_upload": {
+      "save_failed": "Não foi possível salvar a imagem nesta anotação: {{error}}",
+      "not_persisted": "Não foi possível salvar a imagem em definitivo; ela aparece só nesta sessão. Confira e insira de novo.",
+      "drop_failed": "Não foi possível inserir a imagem arrastada: {{error}}",
+      "paste_failed": "Não foi possível tratar a imagem colada: {{error}}",
+      "success": "Imagem inserida",
+      "command_failed": "Não foi possível enviar a imagem pelo comando de barra: {{error}}",
+      "too_large": "A imagem passa do limite de 50 MB",
+      "placeholder": "Clique ou arraste para enviar a imagem",
+      "placeholder_touch": "Toque para enviar a imagem",
+      "upload_button": "Enviar imagem",
+      "upload_button_inline": "Enviar",
+      "caption_placeholder": "Escreva a legenda da imagem...",
+      "inline_placeholder": "Cole o link da imagem ou envie um arquivo",
+      "drop_overlay_title": "Solte para inserir a imagem",
+      "drop_overlay_hint": "Aceita PNG, JPG, GIF, WebP e outros"
+    },
+    "conflict_refreshed": "Esta anotação foi alterada em outro lugar e foi atualizada para a versão mais recente",
+    "conflict_restore_mine": "Restaurar minha versão",
+    "conflict_keep_remote": "Manter a versão remota",
+    "save_status": {
+      "saved": "Salva",
+      "saving": "Salvando...",
+      "saved_at": "Salva às {{time}}",
+      "unsaved": "Não salva",
+      "save_failed": "Não foi possível salvar",
+      "conflict": "Conflito encontrado — atualizada para a versão mais recente (use \"Restaurar minha versão\" no aviso)",
+      "retry": "Tentar de novo",
+      "auto_save": "Salvamento automático"
+    },
+    "placeholder": {
+      "default": "Comece a escrever...",
+      "body": "Digite \"/\" para abrir o menu de comandos..."
+    },
+    "find_replace": "Localizar e substituir",
+    "find": "Localizar",
+    "replace": "Substituir",
+    "replace_all": "Substituir tudo",
+    "case_sensitive": "Diferenciar maiúsculas",
+    "whole_word": "Palavra inteira",
+    "regex": "Expressão regular",
+    "next": "Próxima",
+    "previous": "Anterior",
+    "no_matches": "Nenhuma ocorrência",
+    "matches_count": "{{current}}/{{total}}",
+    "importedNoteTitle": "Anotação importada",
+    "buttons": {},
+    "empty_state": {
+      "title": "Nenhuma anotação selecionada",
+      "description": "Escolha uma anotação na barra lateral ou crie uma nova para começar.",
+      "actions": {
+        "new_folder": "Nova pasta",
+        "search_note": "Buscar nas anotações",
+        "open_assistant": "Abrir o assistente de IA"
+      }
+    },
+    "font": {
+      "size_label": "Tamanho da letra",
+      "size_placeholder": "Tamanho da letra",
+      "family_label": "Fonte",
+      "family_placeholder": "Fonte",
+      "line_height_label": "Altura da linha",
+      "line_height_placeholder": "Altura da linha",
+      "reset": "Voltar ao padrão"
+    },
+    "bubble": {
+      "ask_ai": "Perguntar à IA",
+      "reset": "Voltar ao padrão",
+      "apply": "Aplicar"
+    },
+    "placeholder_hints": {
+      "heading": "Título {{level}}",
+      "body": "Aperte \"/\" para os comandos, ou \"++\" para a IA completar..."
+    },
+    "image": {
+      "alt_prompt": "Texto alternativo da imagem",
+      "title_prompt": "Legenda / título",
+      "menu_title": "Configurações da imagem",
+      "width": "Largura",
+      "align": "Alinhamento",
+      "align_left": "À esquerda",
+      "align_center": "Ao centro",
+      "align_right": "À direita",
+      "alt_text": "Texto alternativo",
+      "alt_placeholder": "Descreva a imagem...",
+      "caption": "Legenda",
+      "caption_placeholder": "Escreva uma legenda...",
+      "click_to_edit": "Clique para editar...",
+      "reset": "Voltar ao padrão",
+      "load_failed": "Não foi possível carregar a imagem",
+      "lightbox_label": "Visualização da imagem",
+      "lightbox_alt": "Prévia da imagem",
+      "lightbox_close": "Fechar",
+      "lightbox_original": "Tamanho original",
+      "lightbox_fit": "Ajustar à tela"
+    },
+    "slash": {
+      "link_title_prompt": "Título do link",
+      "youtube_url_prompt": "Endereço do YouTube",
+      "video_url_prompt": "Endereço do vídeo"
+    },
+    "math": {
+      "title_block": "Inserir fórmula em bloco",
+      "title_inline": "Inserir fórmula na linha",
+      "title_edit": "Editar a fórmula",
+      "insert": "Inserir",
+      "update": "Atualizar",
+      "code": "Código",
+      "preview": "Prévia",
+      "shortcut_hint": "Dica: Ctrl/⌘ + Enter insere na hora",
+      "invalid_latex": "Sintaxe LaTeX inválida",
+      "presets": {
+        "fraction": "Fração",
+        "sqrt": "Raiz quadrada",
+        "power": "Potência",
+        "subscript": "Índice",
+        "summation": "Somatório",
+        "product": "Produtório",
+        "integral": "Integral",
+        "limit": "Limite",
+        "derivative": "Derivada",
+        "partial": "Derivada parcial",
+        "matrix2x2": "Matriz 2×2",
+        "matrix3x3": "Matriz 3×3",
+        "vector": "Vetor",
+        "greek_alpha": "Grego α",
+        "greek_theta": "Grego θ",
+        "infinity": "Infinito",
+        "neq": "Desigualdades"
+      },
+      "presets_label": "Modelos",
+      "category": {
+        "basic": "Básico",
+        "calculus": "Cálculo",
+        "matrix": "Matrizes",
+        "symbols": "Símbolos"
+      }
+    },
+    "image_resizer": {
+      "title": "Redimensionar a imagem",
+      "width_label": "Largura",
+      "reset": "Voltar a largura ao padrão"
+    },
+    "node_selector": {
+      "placeholder": "Tipo de bloco",
+      "paragraph": "Parágrafo",
+      "heading1": "Título 1",
+      "heading2": "Título 2",
+      "heading3": "Título 3",
+      "bullet": "Lista com marcadores",
+      "ordered": "Lista numerada",
+      "task": "Lista de tarefas",
+      "quote": "Citação"
+    },
+    "generative": {
+      "label": "Modo IA",
+      "enabled": "Gerando · {{mode}}",
+      "disabled": "Geração desligada",
+      "profile_placeholder": "Escolha o estilo",
+      "badge": "IA · {{mode}}",
+      "modes": {
+        "balanced": "Equilibrado",
+        "precise": "Preciso",
+        "creative": "Criativo"
+      }
+    },
+    "link_selector": {
+      "title": "Ligar a outra anotação",
+      "matching": "Correspondências de \"{{query}}\"",
+      "hint": "Digite [[ para buscar anotações",
+      "loading": "Buscando...",
+      "empty": "Nenhuma anotação encontrada",
+      "instructions": "↑↓ para navegar · Enter para inserir · Esc para fechar",
+      "create": "Ligar a \"{{query}}\"",
+      "error": "Não foi possível buscar o link: {{message}}"
+    },
+    "annotation": {
+      "prompt_text": "Texto da anotação de margem",
+      "prompt_author": "Autor"
+    },
+    "ai_stop": "Parar a geração",
+    "portaled_to_canvas": "O editor está aberto no canvas",
+    "portaled_hint": "Edite esta anotação no canvas",
+    "deleted_with_unsaved_changes": "O material foi excluído. O conteúdo não salvo continua nesta janela; copie antes de fechar.",
+    "link": {
+      "href_required": "Digite o endereço do link primeiro"
+    }
+  },
+  "crepe": {
+    "link": {
+      "href_required": "Digite o endereço do link primeiro"
+    },
+    "image": {
+      "load_failed": "Não foi possível carregar a imagem"
+    }
+  },
+  "tree": {
+    "root": "Minhas anotações",
+    "all_notes": "Todas as anotações",
+    "context_menu": {
+      "rename": "Renomear",
+      "delete": "Excluir",
+      "new_note": "Nova anotação",
+      "new_folder": "Nova pasta",
+      "move": "Mover",
+      "duplicate": "Duplicar",
+      "add_to_favorites": "Adicionar aos favoritos",
+      "remove_from_favorites": "Remover dos favoritos",
+      "copy_path": "Copiar o caminho",
+      "properties": "Propriedades",
+      "open": "Abrir"
+    },
+    "rename_dialog": {
+      "title": "Renomear",
+      "title_note": "Renomear anotação",
+      "title_folder": "Renomear pasta",
+      "placeholder": "Digite o novo nome...",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar"
+    },
+    "delete_confirm": {
+      "title": "Confirmar exclusão",
+      "description": "O item vai para a lixeira",
+      "description_note": "Deseja mesmo excluir a anotação \"{{name}}\"?",
+      "description_folder": "Deseja mesmo excluir a pasta \"{{name}}\"? Todo o conteúdo dela será excluído junto.",
+      "confirm": "Excluir",
+      "cancel": "Cancelar"
+    },
+    "create_note": {
+      "title": "Nova anotação",
+      "placeholder": "Digite o nome da anotação..."
+    },
+    "create_folder": {
+      "title": "Nova pasta",
+      "placeholder": "Digite o nome da pasta..."
+    },
+    "aria": {
+      "expand": "Expandir pasta",
+      "collapse": "Recolher pasta",
+      "tree": "Árvore de anotações"
+    },
+    "filter": {
+      "placeholder": "Filtrar a árvore de anotações",
+      "empty": "Nenhum item corresponde ao filtro"
+    },
+    "vectorStatus": {
+      "fresh": "Vetor: em dia",
+      "pending": "Vetor: aguardando atualização",
+      "none": "Vetor: não gerado"
+    },
+    "empty": "Sem dados"
+  },
+  "trash": {
+    "title": "Lixeira",
+    "empty": "A lixeira está vazia",
+    "empty_message": "Nenhum item na lixeira",
+    "restore": "Restaurar",
+    "delete_permanently": "Excluir permanentemente",
+    "empty_trash": "Esvaziar lixeira",
+    "confirm_empty": "Deseja mesmo esvaziar a lixeira? Não dá para desfazer.",
+    "confirm_hard_delete": "Deseja mesmo excluir \"{{name}}\" em definitivo? Não dá para desfazer.",
+    "confirm_empty_title": "Confirmar esvaziamento",
+    "confirm_delete_title": "Confirmar exclusão",
+    "restored_success": "Restaurado",
+    "deleted_success": "Excluído permanentemente",
+    "emptied_success": "Lixeira esvaziada",
+    "items_count": "{{count}} itens",
+    "load_failed": "Não foi possível carregar a lixeira",
+    "restore_success": "Restaurado",
+    "restore_failed": "Não foi possível restaurar",
+    "empty_success": "Lixeira esvaziada",
+    "delete_success": "Excluído permanentemente",
+    "delete_failed": "Não foi possível excluir",
+    "empty_placeholder": "A lixeira está vazia",
+    "confirm_empty_desc": "Deseja mesmo esvaziar a lixeira? Não dá para desfazer.",
+    "confirm_delete_desc": "Deseja mesmo excluir este item em definitivo? Não dá para desfazer."
+  },
+  "assets": {
+    "title": "Gerenciar arquivos",
+    "upload": "Enviar arquivo",
+    "delete": "Excluir arquivo",
+    "orphan_scan": "Procurar arquivos órfãos",
+    "orphan_clean": "Limpar arquivos órfãos",
+    "total_size": "Tamanho total",
+    "orphan_count": "Arquivos órfãos",
+    "scanning": "Procurando...",
+    "cleaning": "Limpando...",
+    "scan_complete": "Busca concluída",
+    "clean_complete": "Limpeza concluída",
+    "no_orphans": "Nenhum arquivo órfão encontrado"
+  },
+  "preferences": {
+    "title": "Preferências",
+    "font_family": "Fonte",
+    "font_size": "Tamanho da letra",
+    "theme": "Tema",
+    "system_default": "Padrão do sistema",
+    "sans_serif": "Sem serifa",
+    "serif": "Com serifa",
+    "monospace": "Monoespaçada",
+    "theme_light": "Claro",
+    "theme_dark": "Escuro",
+    "theme_auto": "Automático",
+    "editor_settings": "Configurações do editor",
+    "line_height": "Altura da linha",
+    "indent_size": "Tamanho do recuo"
+  },
+  "tabs": {
+    "close": "Fechar a aba",
+    "scrollLeft": "Rolar as abas para a esquerda",
+    "scrollRight": "Rolar as abas para a direita",
+    "close_others": "Fechar as outras abas",
+    "close_right": "Fechar as abas à direita",
+    "close_all": "Fechar todas as abas",
+    "pin": "Fixar a aba",
+    "unpin": "Desafixar a aba"
+  },
+  "library_manager": {
+    "title": "Gerenciador da biblioteca de anotações",
+    "description": "Exporte suas anotações como um ZIP de Markdown ou como backup completo, ou importe uma biblioteca exportada antes",
+    "tabs": {
+      "export": "Exportar",
+      "import": "Importar"
+    }
+  },
+  "import": {
+    "title": "Importar anotações",
+    "errorTitle": "Erro na importação",
+    "select_file": "Escolher o arquivo",
+    "importing": "Importando...",
+    "success": "{{note_count}} anotações importadas ({{subject_count}} matérias); {{skipped}} já existentes foram puladas",
+    "success_with_overwrite": "{{note_count}} anotações importadas ({{subject_count}} matérias); {{skipped}} puladas e {{overwritten}} sobrescritas",
+    "successTitle": "Importação concluída",
+    "failed": "Não foi possível importar",
+    "unsupported_format": "Formato de arquivo não aceito",
+    "not_implemented": "A importação ainda está em desenvolvimento; aguarde",
+    "file": {
+      "label": "Escolha o arquivo a importar",
+      "placeholder": "Escolha o arquivo .zip do backup",
+      "choose": "Escolher arquivo",
+      "clear": "Limpar",
+      "help": "Aceita o formato ZIP unificado (Markdown + metadados) e também o formato antigo AIMN",
+      "dialog_title": "Escolha o arquivo de backup da biblioteca"
+    },
+    "conflict_strategy": {
+      "label": "Em caso de conflito",
+      "placeholder": "Escolha como tratar os conflitos",
+      "skip": "Pular as anotações que já existem",
+      "overwrite": "Sobrescrever as anotações que já existem",
+      "merge_keep_newer": "Ficar com a versão mais nova",
+      "help": "O que fazer quando uma anotação importada tem o mesmo ID de uma anotação daqui"
+    },
+    "progress": {
+      "stage": {
+        "parsing": "Interpretando o arquivo...",
+        "importing_notes": "Importando as anotações...",
+        "importing_attachments": "Importando os anexos...",
+        "importing_preferences": "Importando as preferências...",
+        "done": "Importação concluída"
+      },
+      "processed": "{{processed}} de {{total}} processadas"
+    },
+    "instructions": {
+      "title": "Como importar",
+      "step1": "Escolha um arquivo de backup exportado antes (.zip)",
+      "step2": "O sistema identifica o formato sozinho e importa as anotações, os anexos e as configurações",
+      "step3": "As anotações que já existem (mesmo ID) são tratadas conforme a regra de conflito"
+    },
+    "restore_warning": "Importar um backup também traz de volta anotações que foram excluídas e estão na lixeira. Elas vão sobrescrever as cópias da lixeira, então confira bem o backup antes de continuar.",
+    "filter_name": "Arquivo de anotações",
+    "actions": {
+      "import": "Importar",
+      "importing": "Importando..."
+    }
+  },
+  "export": {
+    "title": "Exportar a biblioteca de anotações",
+    "description": "Junta anotações, anexos e preferências num arquivo que você pode levar para outro lugar.",
+    "errorTitle": "Erro na exportação",
+    "exporting": "Exportando...",
+    "success": "Exportação concluída",
+    "success_desc": "{{count}} anotações exportadas para: {{path}}",
+    "failed": "Não foi possível exportar",
+    "no_active_resource": "Nenhum material aberto. Abra uma anotação ou um arquivo primeiro e depois exporte.",
+    "not_available_all": "\"Exportar todas as anotações\" ainda não está disponível. Use \"Exportar a anotação atual\", ou exporte um item pelo menu da barra lateral.",
+    "fallback_current": "Exportar tudo ainda não está disponível — exportando o material aberto no momento.",
+    "select_format": "Escolher o formato",
+    "format": {
+      "label": "Formato da exportação",
+      "markdown": "Formato ZIP unificado",
+      "markdown_desc": "Arquivos Markdown + metadados completos, compatível com outros aplicativos",
+      "markdown_help": "Cada anotação sai como um arquivo .md separado (com cabeçalho YAML), junto com anexos, histórico de versões e preferências. Dá para abrir em qualquer editor de Markdown."
+    },
+    "scope": {
+      "label": "O que exportar",
+      "placeholder": "Escolha as matérias",
+      "current": "Matéria atual",
+      "all": "Todas as matérias",
+      "custom": "Escolher matérias…",
+      "help": "Na exportação personalizada, você junta várias matérias num arquivo só."
+    },
+    "subjects": {
+      "label": "Matérias a exportar",
+      "help": "Só entram as matérias ativas que tenham anotações.",
+      "empty": "Nenhuma matéria disponível para exportar."
+    },
+    "versions": {
+      "label": "Incluir o histórico de versões",
+      "help": "Acrescenta as versões anteriores das anotações; o arquivo fica um pouco maior."
+    },
+    "destination": {
+      "label": "Onde salvar",
+      "placeholder": "Usar a pasta padrão de exportações",
+      "choose": "Escolher…",
+      "clear": "Limpar",
+      "help": "Se você não escolher um lugar, o arquivo fica na pasta de exportações do app."
+    },
+    "filter_name": "Backup de anotações",
+    "actions": {
+      "export": "Exportar",
+      "exporting": "Exportando…"
+    },
+    "all_notes_hint": "Todas as anotações e os anexos delas serão exportados"
+  },
+  "dialogs": {
+    "close": "Fechar",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "discard": "Descartar",
+    "apply": "Aplicar"
+  },
+  "upload": {
+    "uploading": "Enviando...",
+    "success": "Envio concluído",
+    "failed": "Não foi possível enviar",
+    "image_too_large": "A imagem é grande demais; passa de {{limit}} MB",
+    "unsupported_format": "Formato de imagem não aceito"
+  },
+  "fontPresets": {
+    "body": {
+      "systemSans": {
+        "label": "Padrão do sistema (sem serifa)",
+        "description": "Acompanha a fonte sem serifa do sistema, para o texto ficar consistente."
+      },
+      "roundedSans": {
+        "label": "Sem serifa arredondada (Nunito / PingFang)",
+        "description": "Combinação sem serifa arredondada e simpática, com boa cobertura de caracteres chineses, japoneses e coreanos."
+      },
+      "serifSong": {
+        "label": "Com serifa (Source Han Serif)",
+        "description": "Fonte com serifa tradicional, boa para leituras longas."
+      },
+      "kaiti": {
+        "label": "Estilo manuscrito (WenKai / KaiTi)",
+        "description": "Fonte inspirada em escrita à mão, que combina com anotações."
+      }
+    },
+    "code": {
+      "jetbrains": {
+        "label": "JetBrains Mono",
+        "description": "Fonte moderna para programação, com suporte a ligaduras."
+      },
+      "fira": {
+        "label": "Fira Code",
+        "description": "Fonte popular para programação, com ligaduras."
+      },
+      "consolas": {
+        "label": "Consolas",
+        "description": "Fonte monoespaçada clássica do Windows."
+      },
+      "menlo": {
+        "label": "Menlo",
+        "description": "Fonte monoespaçada comum no macOS."
+      }
+    }
+  },
+  "validation": {
+    "folder": {
+      "empty": "O nome não pode ficar vazio.",
+      "invalidChars": "O nome não pode ter os caracteres reservados {{chars}}.",
+      "tooLong": "O nome é longo demais (máximo de 120 caracteres)."
+    }
+  },
+  "confirmations": {
+    "leaveWithUnsaved": "Você tem alterações não salvas. Sair mesmo assim?",
+    "closeTabWithUnsaved": "Esta aba tem alterações não salvas. Fechar mesmo assim?",
+    "renameMayUpdateTitle": "As alterações não salvas podem mudar o título. Renomear assim mesmo?"
+  },
+  "actions": {
+    "restore": "Restaurar",
+    "dismiss": "Dispensar",
+    "saveConfig": "Salvar a configuração",
+    "exportMarkdown": "Exportar em Markdown",
+    "save": "Salvar",
+    "settings": "Configurações",
+    "delete_success": "Excluído",
+    "delete_failed": "Não foi possível excluir",
+    "create_failed": "Não foi possível criar",
+    "save_success": "Salvo",
+    "save_failed": "Não foi possível salvar",
+    "auto_save_failed": "O salvamento automático falhou. Tente salvar à mão (Ctrl+S) ou copie seu conteúdo para um lugar seguro.",
+    "content_too_large": "O conteúdo da anotação passa do limite de 1 MB e não pode ser salvo. Reduza o texto ou divida em várias anotações.",
+    "title_save_failed": "O conteúdo foi salvo, mas não foi possível atualizar o título",
+    "update_failed": "Não foi possível atualizar",
+    "rename_failed": "Não foi possível renomear",
+    "conflict": "O conteúdo foi alterado em outro lugar",
+    "conflict_hint": "Atualize e tente salvar de novo, ou volte a uma versão anterior"
+  },
+  "status": {
+    "wordCount": "{{count}} caracteres",
+    "saving": "Salvando…",
+    "error": "Não foi possível salvar",
+    "savedAt": "Salva {{time}}"
+  },
+  "tooltips": {
+    "save": "Salvar ({{shortcut}})",
+    "copyMarkdown": "Copiar o Markdown",
+    "print": "Imprimir ({{shortcut}})",
+    "exportPdf": "Exportar como PDF ({{shortcut}})",
+    "fullscreen": "Tela cheia ({{shortcut}})"
+  },
+  "font": {
+    "bodyPlaceholder": "por exemplo: 'LXGW WenKai', 'KaiTi', serif",
+    "codePlaceholder": "por exemplo: 'Fira Code', 'JetBrains Mono', monospace",
+    "bodyCustomHint": "A fonte que você escolher precisa estar instalada no seu computador.",
+    "codeCustomHint": "A fonte monoespaçada que você escolher precisa estar instalada.",
+    "codeExample": "const preview = \"Código de exemplo\"; // Confira se a fonte mostra o texto monoespaçado",
+    "customFallbackHint": "Se você deixar o campo em branco, volta a valer a fonte padrão.",
+    "customOption": "Personalizada (font-family do CSS)",
+    "previewSample": "Texto de exemplo / Amostra de texto",
+    "sizeHint": "Ajusta o tamanho base do texto (de {{min}} a {{max}} px). A mudança vale na hora nas anotações."
+  },
+  "contextPanel": {
+    "title": "Propriedades"
+  },
+  "context": {
+    "open": "Abrir",
+    "properties": "Propriedades",
+    "outline": "Estrutura",
+    "select_hint": "Escolha uma anotação para ver as propriedades",
+    "typography_title": "Tipografia",
+    "typography_description": "Ajuste o tamanho, a altura da linha e a fonte",
+    "typography_default": "Padrão",
+    "typography_markdown_hint": "O editor Markdown usa o estilo padrão. Formatação rica (fontes, tamanhos) não é aceita.",
+    "created": "Criada",
+    "updated": "Alterada",
+    "tags": "Etiquetas",
+    "tags_empty_hint": "Acrescente etiquetas para organizar",
+    "add_tag": "Acrescentar etiqueta",
+    "tag_add_failed": "Não foi possível acrescentar a etiqueta",
+    "tag_remove_failed": "Não foi possível remover a etiqueta",
+    "no_headings": "Nenhum título ainda",
+    "outline_empty_hint": "Use # ou a barra de ferramentas para criar títulos",
+    "outgoing": "LINKS QUE SAEM",
+    "no_outgoing": "Nenhum link saindo daqui",
+    "assets": "ANEXOS",
+    "no_assets": "Nenhum anexo",
+    "external_links": "Links externos",
+    "link_not_found": "Anotação ligada não encontrada",
+    "link_open_failed": "Não foi possível abrir o link",
+    "external_open_failed": "Não foi possível abrir o link externo",
+    "external_open_confirm": "Você vai abrir um link externo. Continuar?",
+    "unresolved_link": "Não resolvido",
+    "open_asset_failed": "Não foi possível abrir o anexo",
+    "delete_asset_failed": "Não foi possível excluir o anexo",
+    "load_failed": "Não foi possível carregar os links: {{message}}",
+    "retry": "Tentar de novo",
+    "truncated_outgoing": "Mostrando os 200 primeiros links que saem daqui",
+    "truncated_external": "Mostrando os 200 primeiros links externos",
+    "tag_remove": "Remover a etiqueta"
+  },
+  "outlineMindmap": {
+    "empty": "Nada aqui ainda",
+    "focusLabel": "Item atual",
+    "untitled": "Sem título",
+    "childrenCount": "{{count}} itens diretos",
+    "descCount": "{{count}} descendentes",
+    "depthLabel": "Nível {{depth}}",
+    "hasNote": "Tem anotação",
+    "search": {
+      "matches": "{{count}} correspondências",
+      "empty": "Nenhum item encontrado",
+      "listTitle": "Correspondências",
+      "jump": "Ir",
+      "more": "mais {{count}} resultados"
+    },
+    "stats": {
+      "title": "Panorama da estrutura",
+      "nodes": "Total de itens",
+      "maxDepth": "Profundidade máxima",
+      "collapsed": "{{count}} recolhidos",
+      "focusedDepth": "Profundidade em foco: {{depth}}"
+    },
+    "actions": {
+      "addChild": "Acrescentar item filho",
+      "addSibling": "Acrescentar item irmão",
+      "expand": "Expandir",
+      "collapse": "Recolher",
+      "focus": "Focar aqui",
+      "delete": "Excluir o item"
+    },
+    "zoom": {
+      "label": "Zoom",
+      "in": "Aumentar o zoom",
+      "out": "Diminuir o zoom",
+      "reset": "Voltar a visão ao padrão"
+    },
+    "hints": {
+      "title": "Dicas de uso",
+      "drag": "Arraste um espaço vazio para mover o quadro",
+      "wheel": "Use a roda do mouse para dar zoom ou deslocar na horizontal",
+      "doubleClick": "Clique duas vezes num item para editá-lo"
+    }
+  },
+  "outlineEditor": {
+    "title": "Minhas anotações",
+    "search_placeholder": "Buscar itens (Cmd+K)",
+    "view": {
+      "outline": "Estrutura",
+      "mindmap": "Mapa mental"
+    },
+    "undo": "Desfazer",
+    "redo": "Refazer",
+    "syncing": "Sincronizando...",
+    "refresh": "Atualizar",
+    "export": "Exportar",
+    "close": "Fechar",
+    "loading": "Carregando a árvore de etiquetas...",
+    "root_title_placeholder": "Estrutura do grafo de conhecimento",
+    "root_desc_placeholder": "Edite a descrição da raiz nas configurações da matéria",
+    "new_node": "Novo item",
+    "node_placeholder": "Digite o conteúdo...",
+    "note_placeholder": "Escreva uma anotação (aceita Markdown)",
+    "focus_mode": "Foco",
+    "complete": "Concluído",
+    "delete": "Excluir",
+    "delete_confirm_title": "Confirmar a exclusão",
+    "delete_confirm_desc": "Deseja mesmo excluir este item? Não tem como desfazer.",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "cannot_move_to_child": "Não dá para mover um item para dentro dele mesmo",
+    "delete_success": "Etiqueta excluída",
+    "delete_failed": "Não foi possível excluir: {{error}}",
+    "create_success": "Etiqueta criada",
+    "create_child_success": "Etiqueta filha criada",
+    "create_failed": "Não foi possível criar: {{error}}",
+    "indent_success": "Recuado",
+    "indent_failed": "Não foi possível recuar: {{error}}",
+    "outdent_success": "Recuo desfeito",
+    "outdent_failed": "Não foi possível desfazer o recuo: {{error}}",
+    "order_updated": "Ordem das etiquetas atualizada",
+    "drag_failed": "Não foi possível sincronizar o arrastar: {{error}}",
+    "sync_name_failed": "Não foi possível sincronizar: {{error}}",
+    "sync_desc_failed": "Não foi possível sincronizar a descrição: {{error}}",
+    "load_failed": "Não foi possível carregar a árvore de etiquetas: {{error}}",
+    "root_note": "Editor da árvore de etiquetas com ligação nos dois sentidos",
+    "create_default_name": "Nova etiqueta",
+    "create_child_name": "Nova etiqueta filha",
+    "export_title": "Exportar a estrutura",
+    "export_png": "Exportar como imagem (PNG)",
+    "export_png_desc": "Para compartilhar nas redes",
+    "export_md": "Exportar como Markdown",
+    "export_md_desc": "Formato de texto fácil de levar para outro lugar",
+    "export_json": "Backup (JSON)",
+    "export_json_desc": "Guarda a estrutura completa para restaurar depois",
+    "export_coming": "A exportação está em desenvolvimento; aguarde",
+    "shortcuts": {
+      "title": "Atalhos de teclado",
+      "sibling": "Acrescentar item irmão",
+      "indent": "Recuar / criar item filho",
+      "outdent": "Desfazer o recuo",
+      "move": "Mover / navegar",
+      "move_hint": "Arrastar ou usar as setas",
+      "edit": "Editar o conteúdo",
+      "edit_hint": "Clique duplo, ou Enter com o item selecionado",
+      "undo_redo": "Desfazer / Refazer",
+      "view": "Alternar a visualização",
+      "view_hint": "Use os botões do topo"
+    }
+  },
+  "assistant": {
+    "title": "Assistente de IA",
+    "reset_chat": "Recomeçar a conversa",
+    "welcome": "Como posso ajudar com suas anotações?",
+    "thinking": "Pensando...",
+    "placeholder": "Faça uma pergunta..."
+  },
+  "header": {
+    "add_tags": "Acrescentar etiquetas...",
+    "manage_tags": "Gerenciar as etiquetas",
+    "tags": "Etiquetas",
+    "no_tags": "Nenhuma etiqueta",
+    "tag_placeholder": "Digite a nova etiqueta...",
+    "suggestions": "Sugestões",
+    "load_tags_failed": "Não foi possível carregar as etiquetas",
+    "tag_exists": "Esta etiqueta já existe",
+    "rename_tag": "Renomear a etiqueta",
+    "rename_tag_success": "Etiqueta atualizada",
+    "rename_tag_count": "{{count}} anotações atualizadas",
+    "rename_failed": "Não foi possível renomear a etiqueta",
+    "remove_tag": "Remover a etiqueta",
+    "print_failed": "Não foi possível imprimir: não há conteúdo",
+    "close_details": "Fechar os detalhes",
+    "open_details": "Abrir os detalhes",
+    "versions": "Histórico de versões",
+    "export": "Exportar a matéria atual",
+    "exporting": "Exportando...",
+    "export_failed": "Não foi possível exportar",
+    "export_success": "Exportado para: {{path}}",
+    "export_single": "Exportar a anotação atual (com os anexos)",
+    "export_single_title": "Exportar uma anotação",
+    "export_single_success": "Exportado para: {{path}}",
+    "export_single_failed": "Não foi possível exportar: {{error}}",
+    "export_single_mobile_hint": "No celular, usamos a pasta padrão de exportações. Procure o arquivo pelo gerenciador de arquivos depois.",
+    "exporting_single": "Exportando a anotação atual...",
+    "export_filter_name": "Anotação em Markdown",
+    "confirm_rename": "Confirmar a renomeação",
+    "cancel_rename": "Cancelar a renomeação"
+  },
+  "slashMenu": {
+    "textGroup": {
+      "label": "Texto",
+      "text": "Texto",
+      "h1": "Título 1",
+      "h2": "Título 2",
+      "h3": "Título 3",
+      "h4": "Título 4",
+      "h5": "Título 5",
+      "h6": "Título 6",
+      "quote": "Citação",
+      "divider": "Linha divisória"
+    },
+    "listGroup": {
+      "label": "Lista",
+      "bulletList": "Lista com marcadores",
+      "orderedList": "Lista numerada",
+      "taskList": "Lista de tarefas"
+    },
+    "advancedGroup": {
+      "label": "Avançado",
+      "image": "Imagem",
+      "codeBlock": "Bloco de código",
+      "table": "Tabela",
+      "math": "Fórmula",
+      "callout": "Destaque"
+    }
+  },
+  "callout": {
+    "type": {
+      "note": "Nota",
+      "tip": "Dica",
+      "warning": "Atenção",
+      "danger": "Perigo",
+      "info": "Informação"
+    },
+    "cycleType": "Trocar o tipo de destaque"
+  },
+  "wikilink": {
+    "create": "Criar \"{{title}}\"",
+    "empty": "Nenhuma anotação encontrada"
+  },
+  "wikilinkV2": {
+    "createConfirm": "Criar a anotação \"{{title}}\"?",
+    "createConfirmAction": "Criar",
+    "createConfirmCancel": "Cancelar",
+    "imageResetZoom": "Voltar o zoom ao padrão",
+    "imageViewerHint": "Role para dar zoom · arraste para mover · clique duas vezes para voltar ao padrão",
+    "previewRetry": "Tentar de novo",
+    "recentGroup": "Usadas há pouco",
+    "allGroup": "Todas"
+  },
+  "mention": {
+    "loading": "Buscando…",
+    "empty": "Nenhuma anotação encontrada"
+  },
+  "toggle": {
+    "arrowLabel": "Expandir ou recolher",
+    "titlePlaceholder": "Sem título",
+    "slashLabel": "Bloco recolhível",
+    "slashDescription": "Título com corpo que abre e fecha"
+  },
+  "mobileToolbar": {
+    "label": "Barra de ferramentas do editor no celular",
+    "slash": "Menu de blocos",
+    "outdent": "Diminuir o recuo",
+    "indent": "Aumentar o recuo",
+    "bold": "Negrito",
+    "italic": "Itálico",
+    "heading1": "Título 1",
+    "heading2": "Título 2",
+    "heading3": "Título 3",
+    "bulletList": "Lista com marcadores",
+    "taskList": "Lista de tarefas",
+    "image": "Imagem",
+    "undo": "Desfazer",
+    "redo": "Refazer",
+    "generateCards": "Gerar cartões"
+  },
+  "generateCards": {
+    "deckName": "Cartões da anotação",
+    "requirements": "Monte cartões a partir dos pontos principais desta anotação, mantendo a terminologia e a redação originais, e ignore o que for só formatação.",
+    "tooShort": "Esta anotação é curta demais — escreva mais um pouco antes de gerar cartões",
+    "started": "A geração dos cartões desta anotação começou",
+    "failed": "Não foi possível gerar os cartões",
+    "openTaskDashboard": "Ver as tarefas"
+  },
+  "menu": {
+    "page_actions": "Ações da página",
+    "copy_link": "Copiar o link",
+    "link_copied": "Link copiado",
+    "reveal_in_sidebar": "Mostrar na barra lateral",
+    "move_to_trash": "Mover para a lixeira",
+    "export_import": "Exportar/Importar",
+    "history": "Histórico",
+    "itemCount": "{{count}} itens",
+    "referencedCount": "{{count}} já citados",
+    "confirm": "Confirmar",
+    "alreadyReferenced": "Já citado",
+    "addTextbook": "Citar um material",
+    "addMistake": "Citar um erro"
+  },
+  "reference": {
+    "selectTextbook": "Escolher o material",
+    "selectMistake": "Escolher o erro",
+    "selectExamSession": "Escolher o banco de questões",
+    "searchPlaceholder": "Buscar materiais...",
+    "noTextbooks": "Nenhum material disponível",
+    "noMistakes": "Nenhum erro disponível",
+    "noExamSessions": "Nenhum banco de questões disponível",
+    "examSessionFallbackTitle": "Banco de questões",
+    "noSubjectForMistakes": "Escolha uma matéria primeiro",
+    "itemCount": "{{count}} itens",
+    "referencedCount": "{{count}} já citados",
+    "confirm": "Confirmar",
+    "alreadyReferenced": "Já citado",
+    "addTextbook": "Citar um material",
+    "addMistake": "Citar um erro",
+    "time": {
+      "just_now": "Agora mesmo",
+      "minutes_ago": "{{count}} min atrás",
+      "hours_ago": "{{count}} h atrás",
+      "days_ago": "{{count}} dias atrás"
+    },
+    "invalid": "O material original foi excluído",
+    "validating": "Conferindo...",
+    "remove": "Remover a citação",
+    "refreshTitle": "Atualizar o título",
+    "cleanupInvalid": "Limpar as citações quebradas",
+    "cleanupSuccess": "{{count}} citações quebradas removidas",
+    "cleanupNone": "Nenhuma citação quebrada",
+    "refreshSuccess": "Título atualizado",
+    "refreshFailed": "Não foi possível atualizar: {{error}}",
+    "cannotPreview": "Não dá para visualizar uma citação quebrada",
+    "cannotAddToChat": "Não dá para mandar uma citação quebrada para a conversa",
+    "source_db": {
+      "textbooks": "Material",
+      "mistakes": "Erro",
+      "chat_v2": "Anexo",
+      "exam_sessions": "Banco de questões"
+    },
+    "preview_type": {
+      "markdown": "Markdown",
+      "pdf": "Documento PDF",
+      "card": "Cartão",
+      "image": "Imagem",
+      "exam": "Prévia do banco de questões",
+      "none": "Sem prévia"
+    },
+    "context_menu": {
+      "open": "Abrir a citação",
+      "open_source": "Abrir o material original",
+      "copy_link": "Copiar o link da citação",
+      "remove": "Remover a citação",
+      "move": "Mover para",
+      "properties": "Propriedades"
+    },
+    "tooltip": {
+      "source": "Origem: {{source}}",
+      "created_at": "Citado em: {{time}}",
+      "invalid_hint": "O material original foi excluído. Clique com o botão direito para remover esta citação."
+    },
+    "aria": {
+      "reference_icon": "Ícone de citação",
+      "reference_badge": "Selo de citação"
+    },
+    "empty_id": "Digite um ID válido",
+    "add_failed": "Não foi possível acrescentar a citação",
+    "add_reference": "Acrescentar citação",
+    "add_textbook": "Citar um material",
+    "add_mistake": "Citar um erro",
+    "already_exists": "Esta citação já existe",
+    "add_success": "Citação acrescentada",
+    "remove_success": "Citação removida",
+    "add_to_folder": "Vai ser acrescentado à pasta atual",
+    "add_to_root": "Vai ser acrescentado à raiz",
+    "enter_textbook_id": "Digite o ID do material (o seletor está a caminho)",
+    "enter_mistake_id": "Digite o ID do erro (o seletor está a caminho)",
+    "to_chat_pending": "Recurso em desenvolvimento",
+    "open_source": "Abrir o conteúdo original",
+    "send_to_chat": "Mandar para a conversa",
+    "textbook": "Material",
+    "mistake": "Erro",
+    "no_active_session": "Nenhuma conversa aberta",
+    "no_active_session_desc": "Abra uma janela de conversa primeiro",
+    "session_not_found": "Conversa não encontrada",
+    "node_not_found": "Item não encontrado",
+    "to_chat_success": "Acrescentado à conversa",
+    "to_chat_created_new": "Nova referência de contexto criada",
+    "to_chat_reused": "Reaproveitada uma referência de contexto que já existia",
+    "to_chat_failed": "Não foi possível acrescentar à conversa",
+    "resource_not_found": "Material não encontrado",
+    "textbook_ref_fallback": "Citação de material {{id}}",
+    "mistake_ref_fallback": "Citação de erro {{id}}",
+    "invalid_cannot_refresh": "A citação está quebrada; não dá para atualizar o título"
+  },
+  "previewPanel": {
+    "emptyContent": "Sem conteúdo",
+    "empty": {
+      "title": "Nada selecionado",
+      "description": "Escolha uma anotação ou citação na barra lateral para ver aqui"
+    },
+    "folder": {
+      "title": "Pasta",
+      "description": "Não dá para visualizar pastas. Expanda para escolher um conteúdo."
+    },
+    "note": {
+      "title": "Anotação",
+      "description": "As anotações abrem no editor. Clique duas vezes na barra lateral para abrir."
+    },
+    "unsupported": {
+      "title": "Sem visualização",
+      "description": "Não dá para visualizar este tipo de conteúdo"
+    },
+    "error": {
+      "title": "Não foi possível carregar",
+      "unknownError": "Erro desconhecido; tente de novo mais tarde",
+      "resourceNotFound": "Material não encontrado",
+      "noReferenceData": "Dados da citação não encontrados",
+      "noMistakeData": "Dados do erro não encontrados"
+    },
+    "pdf": {
+      "type": "Documento PDF",
+      "unknownFile": "Arquivo desconhecido",
+      "noFile": "Nenhum arquivo PDF indicado",
+      "opening": "Abrindo...",
+      "openButton": "Abrir o PDF",
+      "openInline": "Ver aqui no app",
+      "openSystem": "Abrir no programa do sistema",
+      "hint": "Clique para abrir o PDF no programa padrão do seu sistema",
+      "inlineHint": "Veja aqui no app ou abra no programa padrão do sistema",
+      "tooLarge": "O arquivo é grande demais para visualizar"
+    },
+    "mistake": {
+      "noData": "Nenhum dado do erro disponível",
+      "defaultType": "Erro",
+      "statusCompleted": "Concluído",
+      "statusPending": "Pendente",
+      "userQuestion": "Pergunta do usuário",
+      "questionContent": "Enunciado",
+      "questionImage": "Imagem da questão",
+      "summary": "Resumo",
+      "viewDetail": "Ver os detalhes"
+    },
+    "video": {
+      "noVideo": "Não foi possível carregar o vídeo",
+      "loadError": "Não foi possível carregar o vídeo"
+    },
+    "audio": {
+      "noAudio": "Não foi possível carregar o áudio",
+      "loadError": "Não foi possível carregar o áudio",
+      "skipBack": "Voltar 10 s",
+      "pause": "Pausar",
+      "play": "Tocar",
+      "skipForward": "Avançar 10 s",
+      "unmute": "Tirar o mudo",
+      "mute": "Mudo"
+    },
+    "image": {
+      "preview": "Prévia da imagem",
+      "noImage": "Nenhuma imagem disponível",
+      "loadError": "Não foi possível carregar a imagem",
+      "zoomIn": "Aumentar o zoom",
+      "zoomOut": "Diminuir o zoom",
+      "fullscreen": "Tela cheia"
+    },
+    "exam": {
+      "noData": "Nenhum dado do banco de questões disponível",
+      "untitled": "Banco de questões sem título",
+      "pageLabel": "Página {{index}}",
+      "pageImage": "Imagem da página {{index}} do banco de questões",
+      "pageCount": "{{count}} páginas",
+      "totalQuestions": "{{count}} questões",
+      "questionCount": "{{count}} questões",
+      "unknownQuestion": "Questão desconhecida",
+      "ocrText": "Texto reconhecido",
+      "noOcrText": "Nenhum texto reconhecido",
+      "linked": "Ligada",
+      "viewCardDetail": "Ver os detalhes da questão",
+      "viewDetail": "Ver os detalhes do banco de questões"
+    }
+  },
+  "tips": {
+    "versionHistory": "O histórico de versões fica no painel de Anotações"
+  },
+  "ai": {
+    "continue_not_available": "A continuação por IA não está disponível. Use o painel de conversa para começar uma edição."
+  },
+  "a11y": {
+    "close": "Fechar",
+    "clear": "Limpar"
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "sections": {
+    "flat_analysis": "Análise Simples",
+    "stereoscopic_analysis": "Análise Aprofundada",
+    "anki_tools": "Ferramentas do Anki",
+    "system_tools": "Ferramentas do Sistema",
+    "pinned": "Fixados",
+    "topics": "Tópicos",
+    "conversations": "Conversas",
+    "emptyGroup": "Nenhuma conversa ainda"
+  },
+  "theme": "Tema",
+  "mobile_drawer": {
+    "section_app": "Aplicativo",
+    "section_chat": "Conversas",
+    "section_learning": "Materiais",
+    "section_study": "Estudo",
+    "section_manage": "Gerenciar"
+  },
+  "navigation": {
+    "batch": "Análise em Lote",
+    "textbook_library": "Materiais",
+    "rag_query": "Buscar nos Meus Materiais",
+    "anki_generation": "Cartões Anki",
+    "sessions": "Conversas",
+    "template_management": "Modelos",
+    "notes": "Anotações",
+    "pdf_reader": "Leitor de PDF",
+    "pdf_ocr": "PDF para Texto (OCR)",
+    "textbook_study_mode": "Estudo Guiado",
+    "chat_style_test": "Teste de Estilo de Conversa",
+    "dashboard": "Estatísticas",
+    "data_management": "Meus Dados",
+    "gemini_adapter_test": "Teste do Adaptador Gemini",
+    "settings": "Configurações",
+    "exam_sheet": "Banco de Questões",
+    "translation": "Tradução",
+    "essay_grading": "Correção de Redação",
+    "canvas_board": "Quadro",
+    "learning_hub": "Central de Estudos",
+    "extensions": "Extensões",
+    "chat_v2": "Chat",
+    "skills_management": "Habilidades da IA",
+    "todo": "Tarefas",
+    "ui_lab": "Laboratório de Interface",
+    "command_palette": "Buscar e Comandos",
+    "workbench_mode": "Mesa de Estudos",
+    "show_workbench_mode": "Mostrar Mesa de Estudos",
+    "hide_workbench_mode": "Ocultar Mesa de Estudos",
+    "launcher": {
+      "chat_v2": "Chat",
+      "learning_hub": "Central",
+      "todo": "Tarefas",
+      "skills_management": "Habilidades",
+      "task_dashboard": "Cartões",
+      "data_management": "Dados"
+    }
+  },
+  "aria": {
+    "sidebar_navigation": "Navegação principal",
+    "workspace_primary_entry": "Entrada principal da área de trabalho",
+    "pinned_sessions": "Conversas fixadas",
+    "topic_sessions": "Tópicos",
+    "conversation_sessions": "Conversas",
+    "pin_session": "Fixar conversa",
+    "unpin_session": "Desafixar conversa",
+    "archive_session": "Arquivar conversa",
+    "confirm_archive_session": "Confirmar arquivamento"
+  },
+  "actions": {
+    "collapse_all_topics": "Recolher todos os tópicos",
+    "expand_all_topics": "Expandir todos os tópicos",
+    "create_topic": "Novo tópico",
+    "create_conversation": "Nova conversa",
+    "expand_group_sessions": "Mostrar mais",
+    "collapse_group_sessions": "Mostrar menos",
+    "rename_session": "Renomear conversa",
+    "delete_session": "Excluir conversa"
+  },
+  "rename": {
+    "title": "Renomear conversa",
+    "label": "Nome da conversa"
+  },
+  "delete": {
+    "confirm_hint": "Excluir permanentemente? Não dá para desfazer"
+  },
+  "notes_import": {
+    "markdown": "Importar anotação em Markdown",
+    "markdown_batch": "Importar anotações em Markdown em lote"
+  },
+  "search": {
+    "placeholder": "Buscar conversas...",
+    "clear": "Limpar busca",
+    "no_results": "Nenhuma conversa encontrada"
+  },
+  "update": {
+    "short": "Atualizar",
+    "available": "Atualização disponível",
+    "downloading": "Baixando...",
+    "restart": "Reiniciar"
+  },
+  "expand": "Expandir barra lateral",
+  "collapse": "Recolher barra lateral",
+  "theme_toggle": {
+    "toggle": "Alternar tema",
+    "switch_to_light": "Mudar para tema claro",
+    "switch_to_dark": "Mudar para tema escuro",
+    "switch_to_auto": "Mudar para tema automático",
+    "light": "Tema claro",
+    "dark": "Tema escuro",
+    "auto": "Tema automático"
+  }
+}

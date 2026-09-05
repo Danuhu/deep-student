@@ -1,0 +1,26 @@
+{
+  "labels": {
+    "configured": "Configurado",
+    "not_configured": "Não configurado",
+    "to_be_configured": "Configuração pendente"
+  },
+  "system_validation": {
+    "language": "O idioma precisa ser zh-CN, en-US ou pt-BR",
+    "markdown_renderer_mode": "O modo do renderizador de Markdown precisa ser legacy ou enhanced",
+    "max_chat_history": "O máximo do histórico de conversa precisa ficar entre 10 e 1000",
+    "theme": "O tema precisa ser claro, escuro ou automático"
+  },
+  "note_driver": {
+    "empty_search_pattern": "O termo de busca está vazio",
+    "replacement_not_found": "Nenhum conteúdo correspondente para substituir",
+    "invalid_regex": "Expressão regular inválida: {{message}}",
+    "regex_syntax_error": "erro de sintaxe",
+    "unsupported_destructive_op": "Operação destrutiva não suportada: {{kind}}",
+    "windowed_offset_unsupported": "Anotações longas em janelas não aceitam âncoras de deslocamento do ProseMirror; use end ou afterHeading",
+    "after_heading_missing_title": "A âncora afterHeading está sem o título",
+    "heading_not_found": "Título \"{{heading}}\" não encontrado"
+  },
+  "ocr": {
+    "system_engine_description": "Usa o motor de reconhecimento de texto do próprio sistema operacional"
+  }
+}
