@@ -53,7 +53,7 @@ export interface DependencyResolver {
   /** 获取当前主题 */
   isDarkMode: () => boolean;
   /** 切换语言 */
-  switchLanguage: (lang: 'zh-CN' | 'en-US') => void;
+  switchLanguage: (lang: 'zh-CN' | 'en-US' | 'pt-BR') => void;
   /** 获取当前语言 */
   getCurrentLanguage: () => string;
   /** 打开命令面板 */
