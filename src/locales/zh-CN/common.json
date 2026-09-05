@@ -3469,7 +3469,8 @@
     "ai_setup_title": "连接一个 AI 服务后即可开始",
     "ai_setup_desc": "支持 SiliconFlow 一键配置全部模型，也可接入 OpenAI、Claude、Gemini、Ollama 等任意兼容服务。",
     "cta_configure": "去配置 AI 服务",
-    "cta_skip": "先随便看看"
+    "cta_skip": "先随便看看",
+    "lang_pt": "葡萄牙语"
   },
   "onboarding": {
     "analysis_intro": "点击左侧的【学习工作台】图标进入首页，这里汇集题目分析的全部功能。建议先用示例题体验完整流程，并记得保存结果。",

@@ -1043,7 +1043,8 @@
     "switch_language": "切换语言",
     "chinese": "中文",
     "english": "English",
-    "select_label": "选择语言"
+    "select_label": "选择语言",
+    "portuguese": "葡萄牙语（巴西）"
   },
   "system_notification": {
     "title": "系统通知",
