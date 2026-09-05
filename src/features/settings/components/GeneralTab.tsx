@@ -41,6 +41,7 @@ import {
   chooseAndExportDiagnostics,
   revealDiagnostics,
 } from '@/logging/exportDiagnostics';
+import { normalizeSupportedLanguage } from '@/types/i18n';
 
 const SENTRY_CONSENT_KEY = 'sentry_error_reporting_enabled';
 
@@ -168,6 +169,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
   const languageOptions = React.useMemo(() => [
     { value: 'zh-CN', label: t('settings:language.chinese') },
     { value: 'en-US', label: t('settings:language.english', 'English') },
+    { value: 'pt-BR', label: t('settings:language.portuguese', 'Português (BR)') },
   ], [t]);
 
   return (
@@ -236,7 +238,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
             >
               <SegmentedControl
                 ariaLabel={t('settings:language.select_label')}
-                value={i18n.language === 'zh-CN' ? 'zh-CN' : 'en-US'}
+                value={normalizeSupportedLanguage(i18n.language)}
                 onValueChange={(nextValue) => {
                   void i18n.changeLanguage(nextValue);
                 }}
